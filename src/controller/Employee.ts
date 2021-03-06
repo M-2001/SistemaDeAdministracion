@@ -18,7 +18,7 @@ export class EmpleadoController{
             empl.map(empl =>{
                 delete empl.password;
                 delete empl.hashPassword;
-                return empl
+                return empl;
             });
             if(empl.length>0){
             res.send(empl);
@@ -134,7 +134,7 @@ export class EmpleadoController{
             return res.status(409).json({message:'Algo ha salido mal!'});
         }
 
-        res.json({messge:'Este id: ' + id + ' servira para actualizar el registro!'});
+        res.json({messge:'El registro de ha actualizado'});
         console.log(id);
     }
     //subir imagen perfil

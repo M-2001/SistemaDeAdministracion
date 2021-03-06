@@ -5,6 +5,12 @@ import routesEmpleado from '../router/empleado';
 import RoutesCliente from '../router/cliente';
 import authemp from '../router/authempleado';
 import authclt from '../router/authCliente';
+import routesCtria from '../router/categoria';
+import routesMarca from '../router/marca';
+import routesProd from '../router/producto';
+import routesProveedor from '../router/proveedor';
+import routesUsuario from '../router/user';
+import routesRating from '../router/rating';
 import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
 
@@ -15,6 +21,12 @@ class Server{
     private cliente = {cliente: '/user'}
     private authEmpleado = {auth: '/auth'}
     private authCliente = {auth: '/authU'}
+    private categoria = { categoria : '/categoria'}
+    private marca = { marca :'/marca'}
+    private proveedor = { proveedor : '/proveedor'}
+    private producto = { producto : '/producto'}
+    private usuario = { usuario : '/usuario'}
+    private rating = { rating : '/producto-rating'}
 
 
     //se encarga de ejecutar todos los metodos que sean llamados
@@ -54,6 +66,12 @@ class Server{
         this.app.use(this.cliente.cliente, RoutesCliente)
         this.app.use(this.authEmpleado.auth, authemp)
         this.app.use(this.authCliente.auth, authclt)
+        this.app.use(this.categoria.categoria, routesCtria)
+        this.app.use(this.marca.marca, routesMarca)
+        this.app.use(this.proveedor.proveedor, routesProveedor)
+        this.app.use(this.producto.producto, routesProd)
+        this.app.use(this.usuario.usuario, routesUsuario)
+        this.app.use(this.rating.rating, routesRating)
     }
 }
 export default Server;

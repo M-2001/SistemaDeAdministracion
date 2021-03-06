@@ -6,6 +6,7 @@ import { validate } from "class-validator";
 import { transporter } from "../middleware/mailer";
 
 class AuthEmployeeController{
+    
     static Login = async(req: Request, res: Response)=>{
         const{email, password}= req.body;
         if(!(email && password)){

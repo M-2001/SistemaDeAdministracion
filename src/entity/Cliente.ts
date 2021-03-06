@@ -1,8 +1,9 @@
 
-import {Entity, PrimaryGeneratedColumn, Column, Unique} from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany } from 'typeorm';
 
 import * as bcrypt from 'bcryptjs'
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { Rating } from './Rating';
 
 @Entity("cliente")
 @Unique(['email'])
@@ -38,10 +39,14 @@ export class Cliente {
     @Column()
     estado: boolean;
 
-    @Column()
+    @Column({select : false})
     @IsOptional()
     @IsNotEmpty()
     resetPassword : string = 'token to reset password';
+
+    //relacion entre Producto y rating
+    @OneToMany(() => Rating, (rating : Rating) => rating.cliente)
+    rating ?: Rating;
 
     hashPassword():void{
         const salt = bcrypt.genSaltSync(10);

@@ -25,7 +25,7 @@ class AuthClienteController {
         if (!cliente.checkPassword(password)){
             return res.status(400).json({message:'Username or password incorrect'});
         }
-        const token =  jwt.sign({id: cliente.id, email: cliente.email}, process.env.JWTSECRET,{
+        const token =  jwt.sign({clienteid: cliente.id, email: cliente.email}, process.env.JWTSECRET,{
             expiresIn : '48h'
         });
         //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
