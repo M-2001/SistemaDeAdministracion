@@ -4,6 +4,7 @@ import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany } from 'typeo
 import * as bcrypt from 'bcryptjs'
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Rating } from './Rating';
+import { Order } from './Order';
 
 @Entity("cliente")
 @Unique(['email'])
@@ -33,10 +34,13 @@ export class Cliente {
     @Column({default : "usuario.png"})
     imagen: string;
 
-    @Column()
+    @Column({default: 'user'})
     role: string;
 
-    @Column()
+    @Column({default: ""})
+    confirmacionCode: string
+
+    @Column({default : 0})
     estado: boolean;
 
     @Column({select : false})
@@ -47,6 +51,9 @@ export class Cliente {
     //relacion entre Producto y rating
     @OneToMany(() => Rating, (rating : Rating) => rating.cliente)
     rating ?: Rating;
+
+    @OneToMany(() => Order, (order : Order) => order.cliente)
+    order ?: Order[];
 
     hashPassword():void{
         const salt = bcrypt.genSaltSync(10);

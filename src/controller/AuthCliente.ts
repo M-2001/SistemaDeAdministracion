@@ -8,8 +8,8 @@ import { validate } from 'class-validator';
 class AuthClienteController {
 
     //login cliente
-    static Login = async(req: Request, res: Response)=>{
-        const{email, password}= req.body;
+    static Login = async(req: Request, res: Response) => {
+        const{email, password }= req.body;
         if(!(email && password)){
             return res.status(400).json({message:'username & password are required'});
         }
@@ -25,9 +25,15 @@ class AuthClienteController {
         if (!cliente.checkPassword(password)){
             return res.status(400).json({message:'Username or password incorrect'});
         }
-        const token =  jwt.sign({clienteid: cliente.id, email: cliente.email}, process.env.JWTSECRET,{
+        if(cliente.estado == false){
+            res.json({ok:false, message:' Acceso Denegado'});
+        }else{
+            const token =  jwt.sign({clienteid: cliente.id, email: cliente.email}, process.env.JWTSECRET,{
             expiresIn : '48h'
         });
+        res.json({message:'Ok', token : token, /*refreshToken,*/});
+        }
+        
         //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
 
         // user.refreshToken = refreshToken;
@@ -36,7 +42,7 @@ class AuthClienteController {
         // } catch (error) {
         //     return res.status(400).json({message: 'somthing goes wrong!'})
         // }
-        res.json({message:'Ok', token : token, /*refreshToken,*/ role: cliente.role});
+        
     };
     //passwordChange
     static passwordChange = async(req : Request, res :Response)=>{
@@ -144,6 +150,38 @@ class AuthClienteController {
         }
         res.json({message:'password changed!'})
     }
+
+
+    //activar usuario
+    static ActivarCuenta = async(req: Request, res: Response)=>{
+        const confirmacionCode = req.headers.confirm as string;
+        if(!(confirmacionCode)){
+            res.status(400).json({message:'all the fields are require'});
+        }
+        const clienteRepo = getRepository(Cliente);
+        let cliente: Cliente;
+        try{
+            cliente = await clienteRepo.findOneOrFail({where: {confirmacionCode}});
+
+        }catch(error){
+            return res.status(401).json({message: 'error'})
+        }
+
+        const validationsOps = {validationError:{target: false, value: false}};
+        const errors = await validate(cliente, validationsOps);
+
+        if(errors.length > 0){
+            return res.status(400).json({error:errors})
+        }
+        try{
+            cliente.estado = true
+            await clienteRepo.save(cliente);
+            
+        }catch(error){
+            return res.status(400).json({message:error});
+        }
+        res.json({message:'Usuario Activado!'})
+    };
 }
 
 export default AuthClienteController;

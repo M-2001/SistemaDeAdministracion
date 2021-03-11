@@ -5,14 +5,24 @@ import { validate } from 'class-validator';
 import * as path from 'path';
 import * as fs from 'fs';
 import { UploadedFile } from 'express-fileupload';
+import * as jwt from 'jsonwebtoken';
+import { transporter } from '../config/nodemailer.config';
 
 class ClienteController{
     //create new cliente
     static RegistroCliente = async ( req : Request, res : Response) =>{
 
-    const{apellido, nombre, email, password, role, estado} = req.body;
+    const{apellido, nombre, email, password} = req.body;
+    const token = jwt.sign({ email: req.body.email }, process.env.JWTSECRET,{
+        expiresIn : '1h'
+    });
 
     const clienteRepo = getRepository(Cliente);
+    let cliente;
+    const message = 'User was registered successfully! Please check your email';
+    let verifycationLink;
+    let emailStatus = 'Ok';
+
     //buscar en base de datos si no existen registros con el mismo email
     const emailExist = await clienteRepo.findOne({
         where: {email: email}
@@ -22,13 +32,12 @@ class ClienteController{
         return res.status(400).json({msj:'Ya existe un usuario con el email' + email})
     }
     //Si no existe un resultado devuelto procede a crearlo
-    const cliente = new Cliente();
+    cliente = new Cliente();
     cliente.apellido = apellido;
     cliente.nombre = nombre;
     cliente.email = email;
     cliente.password = password;
-    cliente.role = role;
-    cliente.estado = estado;
+    cliente.confirmacionCode = token;
 
     //validations
     const ValidateOps = {validationError:{target: false, value: false}};
@@ -36,6 +45,27 @@ class ClienteController{
     if (errors.length > 0){
         return res.status(400).json({errors});
     }
+    try{
+        verifycationLink = `http://localhost:9000/confirmUser/${token}`;
+
+    }catch(e){
+        return res.json({error: 'something goes wrong!'});
+    }
+
+    //TODO: sendEmail
+    try{
+        await transporter.sendMail({
+        from : '"Confirmacion de Cuenta " <castlem791@gmail.com>', //sender address
+        to: cliente.email,
+        subject: "Confirmacion de cuenta",
+        html: `<b>Please check on the following link , or paste this into your browser to complete the process:</b> 
+        <a href="${verifycationLink}">${verifycationLink}</a>`,
+    });
+    }catch(error){
+    emailStatus = error;
+    return res.status(401).json({message:'Something goes wrong!'});
+    }
+    //all ok
     //TODO: HASH PASSWORD
     try{
         cliente.hashPassword();
@@ -44,9 +74,11 @@ class ClienteController{
     catch(e){
         res.status(409).json({message: 'something goes wrong'});
     }
-    //all ok
-    res.json({mjs: 'Registro creado con exito!'})
+    //res.json({mjs: 'Registro creado con exito!'})
+    res.send({ message});
+    
     };
+
     //Obtener todos los empleados
     static getClientes = async ( req : Request, res : Response) =>{
 
@@ -158,7 +190,7 @@ class ClienteController{
         const ValidateOps = {validationError:{target: false, value: false}};
         const errors = await validate(cliente, ValidateOps);
 
-        //try to save employee
+        //try to save cliente
         try {
             await emplRepo.save(cliente)
         } catch (error) {

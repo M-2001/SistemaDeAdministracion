@@ -31,10 +31,10 @@ export class Employee {
     @Column({default : "usuario.png"})
     imagen: string;
 
-    @Column()
+    @Column({default: ""})
     role: string;
 
-    @Column()
+    @Column({default : 0})
     estado: boolean;
 
     @Column()

@@ -73,8 +73,9 @@ class ProductoController{
         try {
             const productoRepo = getRepository(Producto)
             const producto = await productoRepo.query(` select p.*, pp.nombre_proveedor, pm.marca, pc.categoria 
-            from Producto p inner join proveedor pp, marca pm, categoria pc
-            where pp.id = p.proveedorId and pm.id = p.marcaId and pc.id = p.categoriaId and pc.categoria = '${categoria}' limit ${take} offset ${pagina} `);
+            from Producto p 
+            inner join proveedor pp on p.proveedorId = pp.id inner join marca pm on p.marcaId = pm.id inner join categoria pc on p.categoriaId = pc.id
+            where pc.categoria = '${categoria}' limit ${take} offset ${pagina} `);
 
             // .leftJoin('producto.proveedor', 'prov', )
             // .addSelect(['prov.nombre_proveedor'])
@@ -331,6 +332,13 @@ class ProductoController{
             res.status(409).json({message:'Algo ha salido mal!'});
         }
         res.json({message : 'imagen de producto eliminada'})
+    }
+
+    //getProductoById
+    static getProductoById = async (id : string) =>  {
+        const ordenRepo = getRepository(Producto); 
+        const producto = await ordenRepo.findOneOrFail(id);
+        return producto
     }
 
 }

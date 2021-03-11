@@ -5,7 +5,7 @@ class RatingController {
 
     //Agregar rating a producto
     static AgregarRating = async (req : Request, res : Response) =>{
-        const {id} = res.locals.jwtPayload;
+        const {clienteid} = res.locals.jwtPayload;
         const {productoId, ratingNumber, titulo, comentario} = req.body;
         const ratingRepo = getRepository(Rating)
 
@@ -15,7 +15,7 @@ class RatingController {
         rating.titulo = titulo;
         rating.comentario = comentario;
         rating.producto = productoId;
-        rating.cliente = id;
+        rating.cliente = clienteid;
 
 
         //try so save rating
@@ -37,8 +37,7 @@ class RatingController {
         try {
             const ratingRepo = getRepository(Rating)
             const rating = await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre 
-            from rating r inner join producto p, cliente c 
-            where p.id = r.productoId and c.id = r.clienteId limit ${take} offset ${pagina} `);
+            from rating r inner join producto p on r.productoId = p.id inner join cliente c on r.clienteId = c.id limit ${take} offset ${pagina} `);
             // producto.map(prod =>{
             //     delete prod.proveedor.email;
             //     delete prod.proveedor.telefono;
@@ -129,8 +128,9 @@ class RatingController {
         try {
             const ratingRepo = getRepository(Rating)
             rating = await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre 
-            from rating r inner join producto p, cliente c 
-            where p.id = r.productoId and c.id = r.clienteId and r.id = '${id}'`)
+            from rating r 
+            inner join producto p on r.productoId = p.id inner join cliente c on r.clienteId = c.id 
+            where r.id = '${id}'`)
 
             if (rating.length > 0) {
                 res.json({ rating})
