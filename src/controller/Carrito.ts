@@ -29,15 +29,15 @@ class CarritoController{
                 console.log(parseAmount);
                 //return parseAmount;
                 //res.json({total: parseAmount})
+            }
+            catch(err){
                 res.json({message:'something goes wrong!'})
             }
-
             //console.log(pro[index].id);
-            //console.log(productoItem);
+            console.log(productoItem);
             //all ok
             
         }
-        
     };
 }
 export default CarritoController;

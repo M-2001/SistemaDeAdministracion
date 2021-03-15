@@ -13,6 +13,7 @@ import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
+import routescarrito from '../router/carrito';
 import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
 
@@ -31,6 +32,7 @@ class Server{
     private rating = { rating : '/producto-rating'}
     private orden = {orden : '/orden'}
     private ordenDte = {ordenDte : '/orden-detalle'}
+    private carrito = {carrito : '/carrito'}
 
 
     //se encarga de ejecutar todos los metodos que sean llamados
@@ -78,6 +80,7 @@ class Server{
         this.app.use(this.rating.rating, routesRating)
         this.app.use(this.orden.orden , routesOrden)
         this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
+        this.app.use(this.carrito.carrito, routescarrito)
     }
 }
 export default Server;
