@@ -15,4 +15,7 @@ router.put('/forgot-password', auth.forgotPassword);
 //create new password
 router.put('/new-password', auth.createNewPassword);
 
+//activar registro
+router.put('/confirmRegister', auth.ActivarCuenta);
+
 export default router

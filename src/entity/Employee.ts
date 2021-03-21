@@ -1,10 +1,10 @@
 import {Entity, PrimaryGeneratedColumn, Column, Unique} from "typeorm";
 
 import * as bcrypt from 'bcryptjs'
-import { IsEmail, IsNotEmpty, IsOptional } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional} from "class-validator";
 
 @Entity("empleado")
-@Unique(['email'])
+@Unique(['codeAccess'])
 export class Employee {
     @PrimaryGeneratedColumn()
     id: number;
@@ -15,12 +15,11 @@ export class Employee {
     @Column()
     nombre: string;
 
-    @IsEmail()
     @Column()
-    email: string;
+    codeAccess : string;
 
-    @Column()
-    password: string;
+    @Column({select : false})
+    password : string;
 
     @Column({default : ""})
     telefono: string;
@@ -37,10 +36,13 @@ export class Employee {
     @Column({default : 0})
     estado: boolean;
 
-    @Column()
+    @Column({default: "", select : false})
+    confirmacionCode: string
+
+    @Column({default : "", select : false})
     @IsOptional()
     @IsNotEmpty()
-    resetPassword : string = 'token to reset password';
+    resetPassword : string;
 
     hashPassword():void{
         const salt = bcrypt.genSaltSync(10);

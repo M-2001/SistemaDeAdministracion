@@ -14,6 +14,7 @@ import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
+import routesCupon from '../router/cupon';
 import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
 
@@ -30,9 +31,10 @@ class Server{
     private producto = { producto : '/producto'}
     private usuario = { usuario : '/usuario'}
     private rating = { rating : '/producto-rating'}
-    private orden = {orden : '/orden'}
+    private orden = { orden : '/orden'}
     private ordenDte = {ordenDte : '/orden-detalle'}
     private carrito = {carrito : '/carrito'}
+    private cupon = {cupon : '/cupon'}
 
 
     //se encarga de ejecutar todos los metodos que sean llamados
@@ -81,6 +83,7 @@ class Server{
         this.app.use(this.orden.orden , routesOrden)
         this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
         this.app.use(this.carrito.carrito, routescarrito)
+        this.app.use(this.cupon.cupon, routesCupon)
     }
 }
 export default Server;

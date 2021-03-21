@@ -4,7 +4,7 @@ import { DetalleOrden } from './Detalles_Orden';
 import { Producto } from './Producto';
 
 
-@Entity("order")
+@Entity("orden")
 export class Order {
     @PrimaryGeneratedColumn()
     id ?: number; 
@@ -12,19 +12,13 @@ export class Order {
     @ManyToOne(type => Cliente, cliente => cliente.order)
     cliente : Cliente[]
 
-    @ManyToOne(() => Producto, (producto : Producto) => producto.orden)
-    @JoinColumn()
-    producto : Producto; 
-
     @Column()
     @CreateDateColumn()
     fecha_Orden : Date;
 
-
-
     @Column({default : 1})
     status: boolean
     
-    // @OneToOne(type => DetalleOrden, detalle => detalle.orden)
-    // detalle_orden : DetalleOrden[];
+    @OneToMany(type => DetalleOrden, detalle => detalle.orden)
+    detalleOrden : DetalleOrden[];
 }

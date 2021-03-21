@@ -18,7 +18,6 @@ class ProductoController{
         try {
             const productoRepo = getRepository(Producto)
             const producto = await productoRepo.createQueryBuilder('producto')
-            //.query(' select p.*, pp.nombre_proveedor, pm.marca, pc.categoria  from Producto p inner join proveedor pp, marca pm, categoria pc where pp.id = p.proveedorId and pm.id = p.marcaId and pc.id = p.categoriaId').
             .leftJoin('producto.proveedor', 'prov', )
             .addSelect(['prov.nombre_proveedor'])
             .leftJoin('producto.marca', 'marca',)
@@ -41,19 +40,32 @@ class ProductoController{
 
     //mostrar productos paginados
     static ProductosPaginados = async ( req : Request, res : Response) => {
-        let pagina = req.query.pagina || 0;
+        let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
-        let take = req.query.limit || 10;
+        let take = req.query.limit || 5;
         take = Number(take)
         try {
             const productoRepo = getRepository(Producto)
-            const producto = await productoRepo.createQueryBuilder('producto')
-            .skip(pagina)
+            const [producto, totalItems] = await productoRepo.createQueryBuilder('producto')
+            .innerJoin('producto.marca','marca')
+            .innerJoin('producto.categoria', 'categoria')
+            .innerJoin('producto.proveedor','proveedor')
+            .addSelect(['proveedor.nombre_proveedor'])
+            .addSelect(['categoria.categoria'])
+            .addSelect(['marca.marca'])
+            .skip((pagina - 1) * take)
             .take(take)
+            .getManyAndCount()
             //.orderBy('codigo_producto', 'DESC')
-            .execute()
+            
             if (producto.length > 0) {
-                res.json({productos : producto})
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, producto, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
             } else {
                 res.json({message : 'No se encontraron resultados'})
             }
@@ -66,39 +78,34 @@ class ProductoController{
     //mostrar productos por categorias
     static MostrarProductosCategoria = async ( req : Request, res : Response) => {
         const {categoria} = req.body;
-        let pagina = req.query.pagina || 0;
+        let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
-        let take = req.query.limit || 10;
+        let take = req.query.limit || 5;
         take = Number(take)
         try {
             const productoRepo = getRepository(Producto)
-            const producto = await productoRepo.query(` select p.*, pp.nombre_proveedor, pm.marca, pc.categoria 
-            from Producto p 
-            inner join proveedor pp on p.proveedorId = pp.id inner join marca pm on p.marcaId = pm.id inner join categoria pc on p.categoriaId = pc.id
-            where pc.categoria = '${categoria}' limit ${take} offset ${pagina} `);
-
-            // .leftJoin('producto.proveedor', 'prov', )
-            // .addSelect(['prov.nombre_proveedor'])
-            // .leftJoin('producto.marca', 'marca',)
-            // .addSelect(['marca.marca'])
-            // .leftJoin('producto.categoria', 'cat')
-            // .addSelect(['cat.categoria']).where({ categoria })
-            // .getMany();
-
-            // producto.map(prod =>{
-            //     delete prod.proveedor.email;
-            //     delete prod.proveedor.telefono;
-            //     delete prod.proveedor.direccion;
-            //     delete prod.proveedor.status;
-            //     delete prod.marca.status;
-            //     delete prod.categoria.status;
-            //     return producto
-            // });
+            const [producto, totalItems] = await productoRepo.createQueryBuilder('producto')
+            .leftJoin('producto.proveedor', 'prov', )
+            .addSelect(['prov.nombre_proveedor'])
+            .leftJoin('producto.marca', 'marca',)
+            .addSelect(['marca.marca'])
+            .leftJoin('producto.categoria', 'cat')
+            .addSelect(['cat.categoria'])
+            .skip((pagina - 1) * take)
+            .take(take)
+            .where({ categoria })
+            .getManyAndCount();
 
             if (producto.length > 0) {
-                res.json({productos : producto})
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, producto, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
             } else {
-                res.json({message : 'No se encontraron resultados con categoria: '+ categoria})
+                res.json({message : 'No se encontraron resultados con categoria: ' + categoria})
             }
         } catch (error) {
             res.json({message:'Algo ha salido mal'})
@@ -108,25 +115,32 @@ class ProductoController{
     //mostrar por marca
     static MostrarProductosMarca = async ( req : Request, res : Response) => {
         const {marca} = req.body;
-        let pagina = req.query.pagina || 0;
+        let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
-        let take = req.query.limit || 10;
+        let take = req.query.limit || 5;
         take = Number(take)
         try {
             const productoRepo = getRepository(Producto)
-            const producto = await productoRepo.createQueryBuilder('producto')
+            const [producto, totalItems] = await productoRepo.createQueryBuilder('producto')
             .leftJoin('producto.proveedor', 'prov', )
             .addSelect(['prov.nombre_proveedor'])
             .leftJoin('producto.categoria', 'cat')
             .addSelect(['cat.categoria'])
             .leftJoin('producto.marca', 'marca',)
-            .addSelect(['marca.marca']).where({ marca })
-            .skip(pagina)
+            .addSelect(['marca.marca'])
+            .skip((pagina - 1) * take)
             .take(take)
+            .where({ marca })
             .getManyAndCount();
 
             if (producto.length > 0) {
-                res.json({productos : producto})
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, producto, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
             } else {
                 res.json({message : 'No se encontraron resultados'})
             }
@@ -166,7 +180,7 @@ class ProductoController{
     //create new product
     static AgregarProducto = async(req: Request, res:Response) => {
 
-        const{codigo_producto, nombre_producto, descripcion, costo_standar, list_price, cantidad_unidad, descuento, proveedor, marca, categoria} = req.body;
+        const{codigo_producto, nombre_producto, descripcion, costo_standar, cantidad_unidad, descuento, proveedor, marca, categoria} = req.body;
 
         const prodRepo = getRepository(Producto);
         const codeProductExist = await prodRepo.findOne({
@@ -181,7 +195,6 @@ class ProductoController{
         producto.nombreProducto = nombre_producto;
         producto.descripcion = descripcion;
         producto.costo_standar = costo_standar;
-        producto.list_price = list_price;
         producto.catidad_por_unidad = cantidad_unidad;
         producto.descuento = descuento;
         producto.proveedor = proveedor;
@@ -209,7 +222,7 @@ class ProductoController{
     static EditarProducto = async (req : Request, res : Response) => {
         let producto;
         const {id} = req.params;
-        const {nombre_producto, descripcion, costo_standar, list_price, cantidad_unidad, descuento, proveedor, marca, categoria} = req.body;
+        const {nombre_producto, descripcion, costo_standar, cantidad_unidad, descuento, proveedor, marca, categoria} = req.body;
         const prodRepo = getRepository(Producto);
 
         try {
@@ -217,7 +230,6 @@ class ProductoController{
             producto.nombreProducto = nombre_producto;
             producto.descripcion = descripcion;
             producto.costo_standar = costo_standar;
-            producto.list_price = list_price;
             producto.catidad_por_unidad = cantidad_unidad;
             producto.descuento = descuento;
             producto.proveedor = proveedor;
@@ -340,6 +352,26 @@ class ProductoController{
         const producto = await ordenRepo.findOneOrFail(id);
         return producto
     }
+    //estado producto
+    static EstadoProducto = async ( req : Request, res : Response) => {
+        let producto;
+        const id = req.body;
+        const proRepo = getRepository(Producto);
+        try {
+            producto = await proRepo.findOneOrFail(id)
 
+            if(producto.status == true){
+                producto.status = false
+            }else{
+                producto.status = true
+            }
+            
+            const productoStatus = await proRepo.save(producto)
+            res.json({ok : true, cupon : productoStatus.status })
+        
+        } catch (error) {
+            console.log(error);
+        }
+    };
 }
 export default ProductoController;

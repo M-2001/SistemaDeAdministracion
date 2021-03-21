@@ -4,8 +4,8 @@ import { getRepository } from "typeorm";
 import { Employee } from '../entity/Employee';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as fileUpload from 'express-fileupload';
 import { UploadedFile } from 'express-fileupload';
+import * as jwt from 'jsonwebtoken';
 
 
 export class EmpleadoController{
@@ -31,14 +31,41 @@ export class EmpleadoController{
             res.status(404).json({message:'Not results!'});
         }
     };
+    //empleados Paginados
+    static MostrarEmpleadosPaginados = async ( req : Request, res : Response ) => {
+        let pagina  = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take);
+        try {
+            const empleadosRepo = getRepository(Employee);
+            const [empleados, totalItems] = await empleadosRepo.createQueryBuilder('empleado')
+            .skip((pagina - 1 ) * take)
+            .take(take)
+            .getManyAndCount()
+
+            if (empleados.length > 0) {
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, empleados, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+            } else {
+                res.json({message : 'No se encontraron resultados!'})
+            }
+        } catch (error) {
+            res.json({message : 'Algo ha salido mal!'})
+        }
+    }
     //getEmployeeByID
     static getEmpleadoByID = async (req: Request, res: Response)=>{
         const{id} = req.params;
         const employeeRepo = getRepository(Employee);
         try{
-            const employee = await employeeRepo.findOneOrFail({select :[`id`, `apellido`, `nombre`, `email`,`telefono`,`direccion`,`imagen`, 'role',`estado`],
-        where:{id}});
-        const imgdir = path.resolve(__dirname, `../../src/uploads/employee/${employee.imagen}`);
+            const employee = await employeeRepo.findOneOrFail({select :[`id`, `apellido`, `nombre`, `codeAccess`,`telefono`,`direccion`,`imagen`, 'role',`estado`], where:{id}});
+            const imgdir = path.resolve(__dirname, `../../src/uploads/employee/${employee.imagen}`);
             if(fs.existsSync(imgdir)){
                 res.sendFile(imgdir);
             }else{
@@ -50,43 +77,60 @@ export class EmpleadoController{
             res.status(404).json({message:'No hay registros con este id: ' + id });
         }
     };
-    //create new employee
-    static AgregarEmpleado = async(req: Request, res:Response)=>{
+    //create new employee de tipo Admin
+    static AgregarEmpleadoA = async(req: Request, res:Response)=>{
 
-        const{apellido, nombre, email, password, role, estado} = req.body;
+        const{apellido, nombre, code, password} = req.body;
+        const token = jwt.sign({ codeAccess: req.body.code}, process.env.JWTSECRET, { expiresIn : '1h'});
 
         const empRepo = getRepository(Employee);
+        let employee
+        const message = 'Se ha registrado con exito!';
+        let verifycationLink;
+        let emailStatus = 'Ok';
+        const codigo  = 'SYSTEM-PC_ADMIN-' + code;
+
+        //buscar e la base de datos si no existen regiatro con el mismo codigo
         const emailExist = await empRepo.findOne({
-            where: {email: email}
+            where: {codeAccess: codigo}
         });
         if(emailExist){
-            return res.status(400).json({msj:'Ya existe un usuario con el email' + email})
+            return res.status(400).json({msj:'Ya existe un regitro con el codigo: ' + codigo})
         }
-        
-        const employee = new Employee();
+        //el registro es creado si no existe
+        employee = new Employee();
         employee.apellido = apellido;
         employee.nombre = nombre;
-        employee.email = email;
+        employee.codeAccess = codigo;
         employee.password = password;
-        employee.role = role;
-        employee.estado = estado;
+        employee.role = 'admin';
+        employee.confirmacionCode = token;
 
         //validations
         const ValidateOps = {validationError:{target: false, value: false}};
         const errors = await validate(employee, ValidateOps);
+
         if (errors.length > 0){
-            return res.status(400).json({errors});
+            return res.status(400).json({message : 'Algo salio mal!'});
         }
+        //verificar si el token existe
+        try{
+            verifycationLink = `http://localhost:9000/confirmRegister/${token}`;
+    
+        }catch(e){
+            console.log(e);
+        }
+
         //TODO: HASH PASSWORD
         try{
             employee.hashPassword();
             await empRepo.save(employee);
         }
         catch(e){
-            res.status(409).json({message: 'something goes wrong'});
+            console.log(e);
         }
         //all ok
-        res.json({mjs: 'Empleado se creo con exito'})
+        res.json({mjs: 'Registro creado con exito', verifycationLink});
     };
     //delete employee
     static EliminarEmpleado = async (req: Request, res:Response)=>{
@@ -164,7 +208,7 @@ export class EmpleadoController{
                         } 
                     });
                     try{
-                        const employee = await employeeRepo.findOneOrFail({select :[`id`, `apellido`, `nombre`, `email`,`telefono`,`direccion`,`imagen`, 'role',`estado`],
+                        const employee = await employeeRepo.findOneOrFail({select :[`id`, `apellido`, `nombre`, `codeAccess`,`telefono`,`direccion`,`imagen`, 'role',`estado`],
                     where:{id}});
                     const imgdir = path.resolve(__dirname, `../../src/uploads/employee/${employee.imagen}`);
                         if(fs.existsSync(imgdir)){
@@ -185,4 +229,44 @@ export class EmpleadoController{
                 res.json({message:'La imagen se ha guardado.'});
         }
     }
+    //create new employeeE 
+    static AgregarEmpleadoE = async(req: Request, res:Response)=>{
+
+        const{apellido, nombre, code, password} = req.body;
+
+        const codigo = 'SYSTEM-PC-'+ code 
+
+        const empRepo = getRepository(Employee);
+        const codeExist = await empRepo.findOne({
+            where: {codeAccess: codigo}
+        });
+        if(codeExist){
+            return res.status(400).json({msj:'Ya existe un empleado con el codigo : ' + codigo})
+        }
+        
+        const employee = new Employee();
+        employee.apellido = apellido;
+        employee.nombre = nombre;
+        employee.codeAccess = codigo ;
+        employee.password = password;
+        employee.role = 'empleado';
+        employee.estado = true;
+
+        //validations
+        const ValidateOps = {validationError:{target: false, value: false}};
+        const errors = await validate(employee, ValidateOps);
+        if (errors.length > 0){
+            return res.status(400).json({errors});
+        }
+        //TODO: HASH PASSWORD
+        try{
+            employee.hashPassword();
+            await empRepo.save(employee);
+        }
+        catch(e){
+            res.status(409).json({message: 'Algo salio mal Intenta nuevamente!'});
+        }
+        //all ok
+        res.json({mjs: 'Empleado se creo con exito'})
+    };
 }

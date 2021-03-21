@@ -19,6 +19,30 @@ class CategoriaController{
         }
     };
 
+    static MostrarCategoriasPaginadas = async ( req : Request, res : Response ) => {
+        let pagina  = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take);
+        try {
+            const categoriasRepo = getRepository(Categoria);
+            const [categorias, totalItems] = await categoriasRepo.findAndCount({take, skip : (pagina -1) * take});
+            if (categorias.length > 0) {
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, categorias, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+            } else {
+                res.json({message : 'No se encontraron resultados!'})
+            }
+        } catch (error) {
+            res.json({message : 'Algo ha salido mal!'})
+        }
+    }
+
     static AgregarCategoria = async (req: Request, res : Response)=>{
         const {categoria} = req.body;
         try {
@@ -94,6 +118,28 @@ class CategoriaController{
             return res.status(409).json({message:'Algo ha salido mal!'});
         }
         res.json({messge:'Categoria ha sido eliminada!'});
+    };
+
+     //estado categoria
+    static EstadoCategoria = async ( req : Request, res : Response) => {
+        let categoria;
+        const id = req.body;
+        const categoriaRepo = getRepository(Categoria);
+        try {
+            categoria = await categoriaRepo.findOneOrFail(id)
+
+            if(categoria.status == true){
+                categoria.status = false
+            }else{
+                categoria.status = true
+            }
+            
+            const categoriaStatus = await categoriaRepo.save(categoria)
+            res.json({ok : true, categoria : categoriaStatus.status })
+        
+        } catch (error) {
+            console.log(error);
+        }
     };
 
 }
