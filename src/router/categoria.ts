@@ -7,7 +7,8 @@ const router = Router();
 const categoria = CategoriaController;
 
 router.get('/', categoria.MostrarCategorias);
-router.post('/',[CheckJwt, checkRole(['admin'])], categoria.AgregarCategoria);
+router.get('/all',categoria.MostrarCategoriasPaginadas)
+router.post('/',categoria.AgregarCategoria);
 router.get('/:id', categoria.ObtenerCategoriaPorID);
 router.put('/:id', categoria.ActualizarCategoria);
 router.delete('/:id', categoria.EliminarCategoria);

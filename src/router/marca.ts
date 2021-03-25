@@ -7,6 +7,7 @@ const router = Router();
 const marca = MarcaController;
 
 router.get('/', marca.MostrarMarcas);
+router.get('/all', marca.MostrarMarcasPaginadas);
 router.post('/', marca.AgregarMarca);
 router.get('/:id', marca.ObtenerMarcaPorID);
 router.put('/:id', marca.ActualizarMarca);

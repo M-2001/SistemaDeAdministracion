@@ -1,6 +1,6 @@
 import { Application } from "express";
 import * as express from 'express';
-import cors = require ('cors');
+import cors = require('cors');
 import routesEmpleado from '../router/empleado';
 import RoutesCliente from '../router/cliente';
 import authemp from '../router/authempleado';
@@ -13,42 +13,44 @@ import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
-import * as bodyParser from "body-parser";
+import routesCart from '../router/carrito'; 
 import * as fileUpload from 'express-fileupload'
 
-class Server{
-    private app : Application;
-    private port : string;
-    private empleado = { empleado: '/empleado'}
-    private cliente = {cliente: '/user'}
-    private authEmpleado = {auth: '/auth'}
-    private authCliente = {auth: '/authU'}
-    private categoria = { categoria : '/categoria'}
-    private marca = { marca :'/marca'}
-    private proveedor = { proveedor : '/proveedor'}
-    private producto = { producto : '/producto'}
-    private usuario = { usuario : '/usuario'}
-    private rating = { rating : '/producto-rating'}
-    private orden = {orden : '/orden'}
-    private ordenDte = {ordenDte : '/orden-detalle'}
-
+class Server {
+    private app: Application;
+    private port: string;
+    private routes_name = {
+        carrito: '/cart',
+        empleado: '/empleado',
+        cliente: '/user',
+        authE: '/auth',
+        authC: '/authU',
+        categoria: '/categoria',
+        marca: '/marca',
+        proveedor: '/proveedor',
+        producto: '/producto',
+        usuario: '/usuario',
+        rating: '/producto-rating',
+        orden: '/orden',
+        ordenDte: '/orden-detalle',
+    }
 
     //se encarga de ejecutar todos los metodos que sean llamados
-    constructor(){
+    constructor() {
         this.app = express();
-        this.port = process.env.PORT || '3000';
+        this.port = process.env.PORT || '3001';
         this.middleware();
         this.routes();
-        
+
     }
     //funcion principal para levantar un servido en el puerto especificado
-    listen(){
-        this.app.listen(this.port,()=>{
+    listen() {
+        this.app.listen(this.port, () => {
             console.log(`Server is running in http://localhost:${this.port}`);
         });
     }
     //middlewares necesarios para la aplicacion
-    middleware(){
+    middleware() {
 
         //fileupload
         this.app.use(fileUpload());
@@ -60,24 +62,24 @@ class Server{
         this.app.use(express.json());
 
         //Parseo de body
-        this.app.use(bodyParser.urlencoded({extended:true}))
+        this.app.use(express.urlencoded({ extended: true }))
 
     }
-
     //Declaracion de rutas de la aplicacion
-    routes(){
-        this.app.use(this.empleado.empleado, routesEmpleado)
-        this.app.use(this.cliente.cliente, RoutesCliente)
-        this.app.use(this.authEmpleado.auth, authemp)
-        this.app.use(this.authCliente.auth, authclt)
-        this.app.use(this.categoria.categoria, routesCtria)
-        this.app.use(this.marca.marca, routesMarca)
-        this.app.use(this.proveedor.proveedor, routesProveedor)
-        this.app.use(this.producto.producto, routesProd)
-        this.app.use(this.usuario.usuario, routesUsuario)
-        this.app.use(this.rating.rating, routesRating)
-        this.app.use(this.orden.orden , routesOrden)
-        this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
+    routes() {
+        this.app.use(this.routes_name.empleado, routesEmpleado)
+        this.app.use(this.routes_name.cliente, RoutesCliente)
+        this.app.use(this.routes_name.authE, authemp)
+        this.app.use(this.routes_name.authC, authclt)
+        this.app.use(this.routes_name.categoria, routesCtria)
+        this.app.use(this.routes_name.marca, routesMarca)
+        this.app.use(this.routes_name.proveedor, routesProveedor)
+        this.app.use(this.routes_name.producto, routesProd)
+        this.app.use(this.routes_name.usuario, routesUsuario)
+        this.app.use(this.routes_name.rating, routesRating)
+        this.app.use(this.routes_name.orden, routesOrden)
+        this.app.use(this.routes_name.ordenDte, routesOrdenDte)
+        this.app.use(this.routes_name.carrito,routesCart)
     }
 }
 export default Server;

@@ -3,41 +3,35 @@ import { Producto } from '../entity/Producto';
 import { getRepository, Index } from 'typeorm';
 
 interface Product {
-    id ?: string,
+    id: number,
     qty: number
 }
 
-class CarritoController{
+class CarritoController {
 
-    static AgregarProductoCarrito = async (req: Request, res : Response) => {
-        const  [id, qty]  = req.body;
-        let productoItem;
-        const proRepo = getRepository(Producto)
-        let amount = 0;
-        let pro : Product[] = req.body;
-
-        //peticion a la base de datos
-        
-        for (let index = 0; index < pro.length; index++) {
-            let item = pro[index]
-            try {
-                productoItem = await proRepo.findOneOrFail(item.id);
-                let operacion =  productoItem.costo_standar * item.qty;
-                amount += operacion
-                const OnlyTwoDecimals = amount.toFixed(2);
-                const parseAmount = parseInt(OnlyTwoDecimals.replace('.', ''),10);
-                console.log(parseAmount);
-                //return parseAmount;
-                //res.json({total: parseAmount})
-                res.json({message:'something goes wrong!'})
-            }
-
-            //console.log(pro[index].id);
-            //console.log(productoItem);
-            //all ok
-            
+    static AgregarProductoCarrito = async (req: Request, res: Response) => {
+        try {
+            const proRepo = getRepository(Producto)
+            req.body.map(async (p: Product, _) => {
+                const { id, qty } = p
+                const productoItem = await proRepo.findOneOrFail(id);
+                let amount: number = 0
+                try {
+                    let operacion = productoItem.costo_standar * qty;
+                    amount += operacion
+                    const OnlyTwoDecimals = amount.toFixed(2);
+                    const parseAmount = parseInt(OnlyTwoDecimals.replace('.', ''), 10);
+                    console.log(OnlyTwoDecimals);
+                } catch (error) {
+                    console.log(error)
+                }
+                console.log(productoItem)
+            })
+            res.json({ message: "Exito" })
+        } catch {
+            res.json({ message: "Ocurrio un error" })
         }
-        
+
     };
 }
 export default CarritoController;
