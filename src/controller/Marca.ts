@@ -18,32 +18,37 @@ class MarcaController {
         }
     };
 
-    static MostrarMarcasPaginadas = async ( req : Request, res : Response ) => {
-        let pagina  = req.query.pagina || 1;
+    static MostrarMarcasPaginadas = async (req: Request, res: Response) => {
+        let pagina = req.query.pagina || 1;
+        let mark = req.query.marca || '';
         pagina = Number(pagina);
         let take = req.query.limit || 5;
         take = Number(take);
         try {
             const marcasRepo = getRepository(Marca);
-            const [marcas, totalItems] = await marcasRepo.findAndCount({take, skip : (pagina -1) * take});
+            // const [marcas, totalItems] = await marcasRepo.findAndCount({take, skip : (pagina -1) * take});
+            const [marcas, totalItems] = await marcasRepo.createQueryBuilder('marca').skip((pagina - 1) * take)
+                .take(take)
+                .where("marca.marca like :name", { name:`%${mark}%` })
+                .getManyAndCount()
             if (marcas.length > 0) {
-                let totalPages : number = totalItems / take;
-                if(totalPages % 1 == 0 ){
+                let totalPages: number = totalItems / take;
+                if (totalPages % 1 !== 0) {
                     totalPages = Math.trunc(totalPages) + 1;
                 }
-                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
-                let prevPage : number = pagina <= 1 ? pagina : pagina -1
-                res.json({ok: true, marcas, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+                let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage: number = pagina <= 1 ? pagina : pagina - 1
+                res.json({ ok: true, marcas, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({message : 'No se encontraron resultados!'})
+                res.json({ message: 'No se encontraron resultados!' })
             }
         } catch (error) {
-            res.json({message : 'Algo ha salido mal!'})
+            res.json({ message: 'Algo ha salido mal!' })
         }
     }
 
-    static AgregarMarca = async (req: Request, res : Response)=>{
-        const {marca} = req.body;
+    static AgregarMarca = async (req: Request, res: Response) => {
+        const { marca } = req.body;
         try {
             const marcaRepo = getRepository(Marca);
             const marcaExist = await marcaRepo.findOne({ where: { marca: marca } });
@@ -118,23 +123,23 @@ class MarcaController {
         res.json({ messge: 'Marca ha sido eliminada!' });
     };
 
-     //estado marca
-    static EstadoMarca = async ( req : Request, res : Response) => {
+    //estado marca
+    static EstadoMarca = async (req: Request, res: Response) => {
         let marca;
         const id = req.body;
         const marcaRepo = getRepository(Marca);
         try {
             marca = await marcaRepo.findOneOrFail(id)
 
-            if(marca.status == true){
+            if (marca.status == true) {
                 marca.status = false
-            }else{
+            } else {
                 marca.status = true
             }
-            
+
             const marcaStatus = await marcaRepo.save(marca)
-            res.json({ok : true, marca : marcaStatus.status })
-        
+            res.json({ ok: true, marca: marcaStatus.status })
+
         } catch (error) {
             console.log(error);
         }

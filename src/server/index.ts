@@ -17,9 +17,11 @@ import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import * as bodyParser from "body-parser";
+import * as path from 'path';
 import * as fileUpload from 'express-fileupload'
 
 class Server{
+    private path;
     private app : Application;
     private port : string;
     private empleado = { empleado: '/empleado'}
@@ -41,7 +43,8 @@ class Server{
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor() {
         this.app = express();
-        this.port = process.env.PORT || '3001';
+        this.path = path
+        this.port = process.env.PORT || '3000';
         this.middleware();
         this.routes();
 
@@ -66,7 +69,6 @@ class Server{
 
         //Parseo de body
         this.app.use(express.urlencoded({ extended: true }))
-
     }
     //Declaracion de rutas de la aplicacion
     routes(){
