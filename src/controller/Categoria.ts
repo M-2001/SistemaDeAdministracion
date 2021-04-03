@@ -18,7 +18,6 @@ class CategoriaController{
             res.json({message:'Algo ha salido mal'})
         }
     };
-
     static MostrarCategoriasPaginadas = async ( req : Request, res : Response ) => {
         let pagina  = req.query.pagina || 1;
         pagina = Number(pagina);
@@ -99,7 +98,6 @@ class CategoriaController{
             return res.status(409).json({message:'Algo ha salido mal!'});
         }
         res.json({messge:'Se actualizo el registro!'});
-        console.log(id);
     };
 
     static EliminarCategoria = async ( req : Request, res : Response) =>{

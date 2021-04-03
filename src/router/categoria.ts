@@ -15,4 +15,5 @@ router.post('/categorias-paginated',[CheckJwt, checkRole(['admin'])], categoria.
 //estado del producto
 router.put('/status',[CheckJwt, checkRole(['admin'])], categoria.EstadoCategoria);
 
+
 export default router;
