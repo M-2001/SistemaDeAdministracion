@@ -1,10 +1,11 @@
-import { Router } from "express";
-// import { CheckJwt } from '../middleware/jwt';
-import CarritoController from "../controller/Carrito";
+
+import { Router } from 'express';
+import CarritoController from '../controller/Carrito';
 
 const router = Router();
+
 const carrito = CarritoController;
 
-router.post('/new', carrito.AgregarProductoCarrito);
+router.post('/add', carrito.AgregarProductoCarrito)
 
-export default router
+export default router;

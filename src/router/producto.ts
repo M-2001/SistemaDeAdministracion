@@ -11,13 +11,16 @@ router.get('/', producto.MostrarProductos);
 router.get('/products-paginate', producto.ProductosPaginados);
 router.post('/product-categoria', producto.MostrarProductosCategoria);
 router.post('/product-marca', producto.MostrarProductosMarca);
-router.post('/', producto.AgregarProducto);
+router.post('/', [CheckJwt, checkRole(['admin'])], producto.AgregarProducto);
 router.get('/:id', producto.ObtenerProductoPorID);
 router.put('/:id', producto.EditarProducto);
-router.delete('/:id', producto.EliminarProducto);
+router.delete('/:id', [CheckJwt, checkRole(['admin'])], producto.EliminarProducto);
 router.post('/file-product/:id', producto.ImagenProducto);
 //eliminar image de producto
 
 router.put('/file-product/:id', producto.EliminarImagenProducto);
+
+//estado del producto
+router.put('/status', [CheckJwt, checkRole(['admin'])], producto.EstadoProducto);
 
 export default router;

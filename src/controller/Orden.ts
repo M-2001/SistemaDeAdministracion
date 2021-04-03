@@ -8,49 +8,35 @@ const product = ProductoController;
 
 class OrdenController {
 
-    
-
-    static AgregarOrden = async (req: Request, res : Response)=>{
-        const { clienteid } = res.locals.jwtPayload;
-        const productos = req.body;
-        const ordenRepo = getRepository(Order); 
-        const orden = new Order()
-        orden.cliente = clienteid;
-        orden.producto = productos;
+    static MostrarOrdenPaginadas = async ( req : Request, res : Response ) => {
+        let pagina  = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take);
         try {
-            console.log(clienteid);
-            const newOrder = await ordenRepo.save(orden);
+            const ordenesRepo = getRepository(Order);
+            const [ordenes, totalItems] = await ordenesRepo.createQueryBuilder('orden')
+            .innerJoin('orden.cliente', 'cliente')
+            .addSelect(['cliente.nombre', 'cliente.apellido', 'cliente.direccion'])
+            .skip((pagina - 1 ) * take)
+            .take(take)
+            .getManyAndCount()
+
+            if (ordenes.length > 0) {
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, ordenes, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+            } else {
+                res.json({message : 'No se encontraron resultados!'})
+            }
         } catch (error) {
-            res.status(400).json({message : 'Algo ha salio mal!'});
+            res.json({message : 'Algo ha salido mal!'})
         }
-        //all ok 
-        res.json({message : 'Orden agregada!'});
-    };
-
-
-    static AgregarProductoCarrito = async (req: Request, res : Response /*productos : Producto[]*/) => {
-
-        const {id, catidad_por_unidad} = req.body;
-        let amount = 0;
-
-        // for (let i = 0; i < productos.length; i++ ) {
-        //     const producto = productos[i];
-
-            //peticion a la base de datos
-        try {
-            const productoItem = await product.getProductoById(id);
-            let operacion =  productoItem.costo_standar * catidad_por_unidad;
-            amount += operacion
-        } catch (error) {
-            res.json({message:'something goes wrong!'})
-        }
-        //all ok
-        const OnlyTwoDecimals = amount.toFixed(2);
-        const parseAmount = parseInt(OnlyTwoDecimals.replace('.', ''),10);
-        res.json({total: parseAmount})
-        }
-        // return parseAmount;
-    //};
+    }
 }
 
 export default OrdenController;

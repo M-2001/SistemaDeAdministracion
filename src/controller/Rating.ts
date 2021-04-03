@@ -58,6 +58,74 @@ class RatingController {
         
     };
 
+    //Mostrar rating pajinado
+    static MostrarRatingPaginados = async ( req : Request, res : Response ) => {
+        let pagina  = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take);
+        try {
+            const ratingsRepo = getRepository(Rating);
+            const [ratings, totalItems] = await ratingsRepo.createQueryBuilder('rating')
+            .innerJoin('rating.cliente', 'cliente')
+            .innerJoin('rating.producto', 'producto')
+            .addSelect(['cliente.nombre', 'cliente.apellido'])
+            .addSelect(['producto.nombreProducto'])
+            .skip((pagina - 1 ) * take)
+            .take(take)
+            .getManyAndCount()
+
+            if (ratings.length > 0) {
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, ratings, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+            } else {
+                res.json({message : 'No se encontraron resultados!'})
+            }
+        } catch (error) {
+            res.json({message : 'Algo ha salido mal!'})
+        }
+    };
+
+    //Mostrar rating por producto
+    static MostrarRatingPorProducto = async ( req : Request, res : Response ) => {
+        const {producto} = req.body;
+        let pagina  = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take);
+        try {
+            const ratingsRepo = getRepository(Rating);
+            const [ratings, totalItems] = await ratingsRepo.createQueryBuilder('rating')
+            .innerJoin('rating.cliente', 'cliente')
+            .innerJoin('rating.producto', 'producto')
+            .addSelect(['cliente.nombre', 'cliente.apellido'])
+            .addSelect(['producto.nombreProducto'])
+            .skip((pagina - 1 ) * take)
+            .take(take)
+            .where({producto})
+            .getManyAndCount()
+
+            if (ratings.length > 0) {
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, ratings, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+            } else {
+                res.json({message : 'No se encontraron resultados!'})
+            }
+        } catch (error) {
+            res.json({message : 'Algo ha salido mal!'})
+        }
+    }
+
     //Actualizar rating realizados por el usuario logado
     static ActualizarRating = async (req : Request, res : Response) =>{
         let rating;

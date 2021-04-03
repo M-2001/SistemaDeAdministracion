@@ -1,16 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
-import { Cliente } from './Cliente';
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany, ManyToOne, OneToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { Order } from './Order';
 import { Producto } from './Producto';
 
 
 @Entity("detalle_orden")
 export class DetalleOrden {
+
     @PrimaryGeneratedColumn()
     id ?: number; 
 
-    @OneToOne(() => Order)
-    @JoinColumn()
+    @ManyToOne(() => Order , (order : Order ) => order.detalleOrden)
     orden : Order;
 
     @OneToOne(() => Producto)
@@ -20,13 +19,14 @@ export class DetalleOrden {
     @Column()
     cantidad : number;
 
-    @Column({type: 'decimal', precision: 19 , scale: 4})
-    precio_unidad : number;
+    @Column({type: 'decimal', precision: 19 , scale: 2})
+    totalUnidad : number;
 
-    @Column({type: 'double'})
+    @Column({type: 'double', default: 0})
     descuento : number;
 
     @Column()
+    @CreateDateColumn()
     fecha : Date;
 
     @Column({default : 1})

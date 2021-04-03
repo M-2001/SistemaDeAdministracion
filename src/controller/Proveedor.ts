@@ -19,6 +19,31 @@ class ProveedorController{
         }
     };
 
+    static MostrarProveedoresPaginados = async ( req : Request, res : Response ) => {
+        let pagina  = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take);
+        try {
+            const proveedoresRepo = getRepository(Proveedor);
+            const [proveedores, totalItems] = await proveedoresRepo.findAndCount({take, skip : (pagina -1) * take});
+            if (proveedores.length > 0) {
+                let totalPages : number = totalItems / take;
+                if(totalPages % 1 == 0 ){
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                let nextPage : number = pagina >= totalPages ? pagina : pagina + 1
+                let prevPage : number = pagina <= 1 ? pagina : pagina -1
+                res.json({ok: true, proveedores, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
+                console.log(proveedores.length);
+            } else {
+                res.json({message : 'No se encontraron resultados!'})
+            }
+        } catch (error) {
+            res.json({message : 'Algo ha salido mal!'})
+        }
+    }
+
     static AgregarProveedor = async (req: Request, res : Response)=>{
         const {nombre, email, telefono, direccion} = req.body;
         try {
@@ -102,6 +127,27 @@ class ProveedorController{
             return res.status(409).json({message:'Algo ha salido mal!'});
         }
         res.json({messge:'Proveedor ha sido eliminada!'});
+    };
+     //estado proveedor
+    static EstadoProveedor = async ( req : Request, res : Response) => {
+        let proveedor;
+        const id = req.body;
+        const proveedorRepo = getRepository(Proveedor);
+        try {
+            proveedor = await proveedorRepo.findOneOrFail(id)
+
+            if(proveedor.status == true){
+                proveedor.status = false
+            }else{
+                proveedor.status = true
+            }
+            
+            const proveedorStatus = await proveedorRepo.save(proveedor)
+            res.json({ok : true, proveedor : proveedorStatus.status })
+        
+        } catch (error) {
+            console.log(error);
+        }
     };
 }
 export default ProveedorController;

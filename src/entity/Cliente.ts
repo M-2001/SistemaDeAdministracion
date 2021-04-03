@@ -22,7 +22,7 @@ export class Cliente {
     @Column()
     email: string;
 
-    @Column()
+    @Column({select: false})
     password: string;
 
     @Column({default : ""})
@@ -37,16 +37,14 @@ export class Cliente {
     @Column({default: 'user'})
     role: string;
 
-    @Column({default: ""})
+    @Column({default: "", select :false})
     confirmacionCode: string
 
     @Column({default : 0})
     estado: boolean;
 
-    @Column({select : false})
-    @IsOptional()
-    @IsNotEmpty()
-    resetPassword : string = 'token to reset password';
+    @Column({default : "", select : false})
+    resetPassword : string ;
 
     //relacion entre Producto y rating
     @OneToMany(() => Rating, (rating : Rating) => rating.cliente)

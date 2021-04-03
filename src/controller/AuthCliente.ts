@@ -9,7 +9,7 @@ class AuthClienteController {
 
     //login cliente
     static Login = async(req: Request, res: Response) => {
-        const{email, password }= req.body;
+        const { email, password } = req.body;
         if(!(email && password)){
             return res.status(400).json({message:'username & password are required'});
         }
@@ -25,6 +25,7 @@ class AuthClienteController {
         if (!cliente.checkPassword(password)){
             return res.status(400).json({message:'Username or password incorrect'});
         }
+
         if(cliente.estado == false){
             res.json({ok:false, message:' Acceso Denegado'});
         }else{
@@ -42,8 +43,8 @@ class AuthClienteController {
         // } catch (error) {
         //     return res.status(400).json({message: 'somthing goes wrong!'})
         // }
-        
     };
+    
     //passwordChange
     static passwordChange = async(req : Request, res :Response)=>{
         const {id} = res.locals.jwtPayload;

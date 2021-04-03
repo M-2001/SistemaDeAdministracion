@@ -10,6 +10,7 @@ import { Order } from './Order';
 @Entity('producto')
 @Unique(['codigo_Producto'])
 export class Producto {
+    
     @PrimaryGeneratedColumn()
     id : string;
 
@@ -37,9 +38,6 @@ export class Producto {
     @Column({type: 'decimal', precision: 19 , scale: 2})
     costo_standar : number;
 
-    @Column({type: 'decimal', precision: 19 , scale: 2})
-    list_price : number;
-
     @Column()
     catidad_por_unidad : number;
 
@@ -53,6 +51,6 @@ export class Producto {
     @OneToMany(() => Rating, (rating : Rating) => rating.producto)
     rating ?: Rating[];
 
-    @OneToMany(() => Order, (order : Order) => order.producto)
-    orden ?: Order[]
+    // @OneToMany(() => Order, (order : Order) => order.producto)
+    // orden ?: Order[]
 }

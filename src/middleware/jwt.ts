@@ -24,6 +24,6 @@ export const CheckJwt = (req : Request, res : Response, next : NextFunction)=>{
         next();
     } else{
         //Forbidden
-        res.status(403).json({message:'No se ha proporcionado un token!'});
+        res.status(403).json({message:'No Authorized!'});
     }
 }
