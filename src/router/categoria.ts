@@ -15,4 +15,5 @@ router.put('/:id',/*[CheckJwt, checkRole(['admin'])],*/categoria.ActualizarCateg
 router.delete('/:id',/*[CheckJwt, checkRole(['admin'])],*/ categoria.EliminarCategoria);
 //estado del producto
 
+
 export default router;

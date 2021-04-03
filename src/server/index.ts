@@ -1,6 +1,6 @@
 import { Application } from "express";
 import * as express from 'express';
-import cors = require ('cors');
+import cors = require('cors');
 import routesEmpleado from '../router/empleado';
 import RoutesCliente from '../router/cliente';
 import authemp from '../router/authempleado';
@@ -13,6 +13,7 @@ import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
+
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import * as bodyParser from "body-parser";
@@ -40,22 +41,22 @@ class Server{
 
 
     //se encarga de ejecutar todos los metodos que sean llamados
-    constructor(){
+    constructor() {
         this.app = express();
         this.path = path
         this.port = process.env.PORT || '3000';
         this.middleware();
         this.routes();
-        
+
     }
     //funcion principal para levantar un servido en el puerto especificado
-    listen(){
-        this.app.listen(this.port,()=>{
+    listen() {
+        this.app.listen(this.port, () => {
             console.log(`Server is running in http://localhost:${this.port}`);
         });
     }
     //middlewares necesarios para la aplicacion
-    middleware(){
+    middleware() {
 
         //fileupload
         this.app.use(fileUpload());
@@ -67,11 +68,8 @@ class Server{
         this.app.use(express.json());
 
         //Parseo de body
-        this.app.use(bodyParser.urlencoded({extended:true}))
-        this.app.use(express.static('src'))
-
+        this.app.use(express.urlencoded({ extended: true }))
     }
-
     //Declaracion de rutas de la aplicacion
     routes(){
         this.app.use(this.empleado.empleado, routesEmpleado)
