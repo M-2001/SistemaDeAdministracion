@@ -19,7 +19,6 @@ class CategoriaController {
     };
 
     static MostrarCategoriasPaginadas = async (req: Request, res: Response) => {
-        console.log(req.query)
         let pagina = req.query.pagina || 1;
         let category = req.query.categoria || "";
         pagina = Number(pagina);

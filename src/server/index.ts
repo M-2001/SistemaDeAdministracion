@@ -1,6 +1,6 @@
 import { Application } from "express";
 import * as express from 'express';
-import cors = require ('cors');
+import cors = require('cors');
 import routesEmpleado from '../router/empleado';
 import RoutesCliente from '../router/cliente';
 import authemp from '../router/authempleado';
@@ -15,47 +15,45 @@ import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
-import * as bodyParser from "body-parser";
-import * as path from 'path';
 import * as fileUpload from 'express-fileupload'
 
-class Server{
-    private path;
-    private app : Application;
-    private port : string;
-    private empleado = { empleado: '/empleado'}
-    private cliente = {cliente: '/user'}
-    private authEmpleado = {auth: '/auth'}
-    private authCliente = {auth: '/authU'}
-    private categoria = { categoria : '/categoria'}
-    private marca = { marca :'/marca'}
-    private proveedor = { proveedor : '/proveedor'}
-    private producto = { producto : '/producto'}
-    private usuario = { usuario : '/usuario'}
-    private rating = { rating : '/producto-rating'}
-    private orden = { orden : '/orden'}
-    private ordenDte = {ordenDte : '/orden-detalle'}
-    private carrito = {carrito : '/carrito'}
-    private cupon = {cupon : '/cupon'}
+class Server {
+    private routenames = {
+        empleado: '/api/empleado',
+        cliente: '/api/user',
+        authEmpleado: '/api/auth',
+        authCliente: '/api/authU',
+        categoria: '/api/categoria',
+        marca: '/api/marca',
+        proveedor: '/api/proveedor',
+        producto: '/api/producto',
+        usuario: '/api/usuario',
+        rating: '/api/producto-rating',
+        orden: '/api/orden',
+        ordenDte: '/api/orden-detalle',
+        carrito: '/api/carrito',
+        cupon: '/api/cupon'
+    }
+    private app: Application;
+    private port: string;
 
 
     //se encarga de ejecutar todos los metodos que sean llamados
-    constructor(){
+    constructor() {
         this.app = express();
-        this.path = path
         this.port = process.env.PORT || '3000';
         this.middleware();
         this.routes();
-        
+
     }
     //funcion principal para levantar un servido en el puerto especificado
-    listen(){
-        this.app.listen(this.port,()=>{
+    listen() {
+        this.app.listen(this.port, () => {
             console.log(`Server is running in http://localhost:${this.port}`);
         });
     }
     //middlewares necesarios para la aplicacion
-    middleware(){
+    middleware() {
 
         //fileupload
         this.app.use(fileUpload());
@@ -67,27 +65,27 @@ class Server{
         this.app.use(express.json());
 
         //Parseo de body
-        this.app.use(bodyParser.urlencoded({extended:true}))
+        this.app.use(express.urlencoded({ extended: true }))
         this.app.use(express.static('src'))
 
     }
 
     //Declaracion de rutas de la aplicacion
-    routes(){
-        this.app.use(this.empleado.empleado, routesEmpleado)
-        this.app.use(this.cliente.cliente, RoutesCliente)
-        this.app.use(this.authEmpleado.auth, authemp)
-        this.app.use(this.authCliente.auth, authclt)
-        this.app.use(this.categoria.categoria, routesCtria)
-        this.app.use(this.marca.marca, routesMarca)
-        this.app.use(this.proveedor.proveedor, routesProveedor)
-        this.app.use(this.producto.producto, routesProd)
-        this.app.use(this.usuario.usuario, routesUsuario)
-        this.app.use(this.rating.rating, routesRating)
-        this.app.use(this.orden.orden , routesOrden)
-        this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
-        this.app.use(this.carrito.carrito, routescarrito)
-        this.app.use(this.cupon.cupon, routesCupon)
+    routes() {
+        this.app.use(this.routenames.authEmpleado, routesEmpleado)
+        this.app.use(this.routenames.cliente, RoutesCliente)
+        this.app.use(this.routenames.authEmpleado, authemp)
+        this.app.use(this.routenames.authCliente, authclt)
+        this.app.use(this.routenames.categoria, routesCtria)
+        this.app.use(this.routenames.marca, routesMarca)
+        this.app.use(this.routenames.proveedor, routesProveedor)
+        this.app.use(this.routenames.producto, routesProd)
+        this.app.use(this.routenames.usuario, routesUsuario)
+        this.app.use(this.routenames.rating, routesRating)
+        this.app.use(this.routenames.orden, routesOrden)
+        this.app.use(this.routenames.ordenDte, routesOrdenDte)
+        this.app.use(this.routenames.carrito, routescarrito)
+        this.app.use(this.routenames.cupon, routesCupon)
     }
 }
 export default Server;
