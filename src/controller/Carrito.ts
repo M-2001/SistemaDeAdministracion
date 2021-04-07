@@ -6,12 +6,11 @@ import OrdenDetalle from './OrdenDetalle';
 import { DetalleOrden } from '../entity/Detalles_Orden';
 
 interface Product {
-    id ?: string,
+    id: number,
     qty: number
 }
 
-class CarritoController{
-
+class CarritoController {
     static AgregarProductoCarrito = async (req: Request, res : Response) => {
         try {
             const proRepo = getRepository(Producto)

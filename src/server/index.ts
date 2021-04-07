@@ -13,6 +13,7 @@ import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
+
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import * as fileUpload from 'express-fileupload'
@@ -69,7 +70,6 @@ class Server {
         this.app.use(express.static('src'))
 
     }
-
     //Declaracion de rutas de la aplicacion
     routes() {
         this.app.use(this.routenames.authEmpleado, routesEmpleado)
