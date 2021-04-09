@@ -12,8 +12,7 @@ export class DetalleOrden {
     @ManyToOne(() => Order , (order : Order ) => order.detalleOrden)
     orden : Order;
 
-    @OneToOne(() => Producto)
-    @JoinColumn()
+    @ManyToOne(() => Producto, (producto: Producto)=> producto.detalleO)
     producto : Producto;
 
     @Column()

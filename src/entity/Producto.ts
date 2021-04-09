@@ -51,6 +51,10 @@ export class Producto {
     @OneToMany(() => Rating, (rating : Rating) => rating.producto)
     rating ?: Rating[];
 
+    //relacion de producto con producto detalle
+    @OneToMany(() => DetalleOrden, (detalleO : DetalleOrden) => detalleO.producto)
+    detalleO ?: DetalleOrden[]
+
     // @OneToMany(() => Order, (order : Order) => order.producto)
     // orden ?: Order[]
 }

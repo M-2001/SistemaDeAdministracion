@@ -25,9 +25,9 @@ class AuthEmployeeController{
             return res.status(400).json({message:'Code or password incorrect'});
         }
 
-        if(emp.estado == false){
-            res.json({ok : false, message :'Access denied'});
-        }
+        // if(emp.estado == false){
+        //     res.json({ok : false, message :'Access denied'});
+        // }   
         else{
             const token =  jwt.sign({id: emp.id, code: emp.codeAccess}, process.env.JWTSECRET,{
             expiresIn : '48h'

@@ -23,4 +23,7 @@ router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto
 router.put('/status', [CheckJwt, checkRole(['admin'])], producto.EstadoProducto);
 
+//productos mas vendidos
+router.post('/bestSellers', producto.ProductosMasVendidos)
+
 export default router;

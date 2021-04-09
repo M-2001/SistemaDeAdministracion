@@ -44,6 +44,13 @@ export class EmpleadoController{
             .take(take)
             .getManyAndCount()
 
+            empleados.map(emp =>{
+                delete emp.password;
+                delete emp.confirmacionCode;
+                delete emp.resetPassword;
+                return empleados
+            });
+
             if (empleados.length > 0) {
                 let totalPages : number = totalItems / take;
                 if(totalPages % 1 == 0 ){

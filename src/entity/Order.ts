@@ -1,7 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany, ManyToOne, OneToOne, CreateDateColumn, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Cliente } from './Cliente';
 import { DetalleOrden } from './Detalles_Orden';
-import { Producto } from './Producto';
 
 
 @Entity("orden")
@@ -16,9 +15,15 @@ export class Order {
     @CreateDateColumn()
     fecha_Orden : Date;
 
-    @Column({default : 1})
-    status: boolean
+    @Column({type: 'decimal', precision: 19 , scale: 2, default : 0.00})
+    PrecioTotal: number;
+
+    @Column({type: 'decimal', precision: 19 , scale: 2, default : 0.00})
+    TotalDesc: number;
+
+    @Column()
+    status: number
     
     @OneToMany(type => DetalleOrden, detalle => detalle.orden)
-    detalleOrden : DetalleOrden[];
+    detalleOrden ?: DetalleOrden[];
 }

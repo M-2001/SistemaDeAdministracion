@@ -15,8 +15,11 @@ import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
+import routesPay from '../router/pay';
 import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
+import * as path from 'path';
+import  ejs = require('ejs')
 
 class Server{
     private app : Application;
@@ -35,12 +38,13 @@ class Server{
     private ordenDte = {ordenDte : '/orden-detalle'}
     private carrito = {carrito : '/carrito'}
     private cupon = {cupon : '/cupon'}
+    private pay = {pay:'/pay-checkout'}
 
 
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor(){
         this.app = express();
-        this.port = process.env.PORT || '3000';
+        this.port = process.env.PORT || '8081';
         this.middleware();
         this.routes();
         
@@ -54,6 +58,8 @@ class Server{
     //middlewares necesarios para la aplicacion
     middleware(){
 
+        //this.app.set('view engine', 'ejs')
+
         //fileupload
         this.app.use(fileUpload());
 
@@ -65,6 +71,13 @@ class Server{
 
         //Parseo de body
         this.app.use(bodyParser.urlencoded({extended:true}))
+
+        this.app.use('/', express.static(path.join(__dirname, '../views')))
+
+        this.app.get('/', (req, res)=> res.redirect('../views/index.html'))
+        
+        //this.app.get('/', (req, res) => res.render('index'));
+    
 
     }
 
@@ -84,6 +97,7 @@ class Server{
         this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
         this.app.use(this.carrito.carrito, routescarrito)
         this.app.use(this.cupon.cupon, routesCupon)
+        this.app.use(this.pay.pay, routesPay)
     }
 }
 export default Server;

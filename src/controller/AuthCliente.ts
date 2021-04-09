@@ -152,7 +152,6 @@ class AuthClienteController {
         res.json({message:'password changed!'})
     }
 
-
     //activar usuario
     static ActivarCuenta = async(req: Request, res: Response)=>{
         const confirmacionCode = req.headers.confirm as string;

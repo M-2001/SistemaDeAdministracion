@@ -2,6 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, Unique} from "typeorm";
 
 import * as bcrypt from 'bcryptjs'
 import { IsEmail, IsNotEmpty, IsOptional} from "class-validator";
+import { METHODS } from "http";
 
 @Entity("empleado")
 @Unique(['codeAccess'])
@@ -18,7 +19,7 @@ export class Employee {
     @Column()
     codeAccess : string;
 
-    @Column({select : false})
+    @Column()
     password : string;
 
     @Column({default : ""})
@@ -36,10 +37,10 @@ export class Employee {
     @Column({default : 0})
     estado: boolean;
 
-    @Column({default: "", select : false})
+    @Column({default: ""})
     confirmacionCode: string
 
-    @Column({default : "", select : false})
+    @Column({default : ""})
     @IsOptional()
     @IsNotEmpty()
     resetPassword : string;
@@ -51,5 +52,5 @@ export class Employee {
     checkPassword(password:string): boolean{
         return bcrypt.compareSync(password, this.password)
     }
-
 }
+
