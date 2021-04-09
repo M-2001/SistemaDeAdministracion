@@ -22,4 +22,7 @@ router.get('/:id', producto.ObtenerProductoPorID);
 router.put('/:id', producto.EditarProducto);
 router.delete('/:id', /*[CheckJwt, checkRole(['admin'])],*/ producto.EliminarProducto);
 
+//productos mas vendidos
+router.post('/bestSellers', producto.ProductosMasVendidos)
+
 export default router;

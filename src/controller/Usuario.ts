@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm";
-import { User } from "../entity/User";
+import { User } from "../entity/Reservaciones";
 import { Request, Response } from 'express';
 
 class UserController{

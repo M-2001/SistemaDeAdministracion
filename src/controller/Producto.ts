@@ -1,10 +1,11 @@
 import { validate } from 'class-validator';
 import { Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { createQueryBuilder, getRepository } from 'typeorm';
 import { Producto } from '../entity/Producto';
 import { UploadedFile } from 'express-fileupload';
 import * as path from 'path';
 import * as fs from 'fs';
+import { DetalleOrden } from '../entity/Detalles_Orden';
 
 class ProductoController {
 
@@ -370,12 +371,21 @@ class ProductoController {
             console.log(error);
         }
     };
-    static getImage = (req: Request, res: Response) => {
-        const name = req.query.image
-        const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${name}`);
-        if (fs.existsSync(imgdir)) {
-            res.sendFile(imgdir);
-            return;
+    //productos mas vendidos
+    static ProductosMasVendidos = async(req: Request, res: Response)=>{
+        const detalleORepo = getRepository(DetalleOrden)
+        try {
+            const productosMasVendidos = await detalleORepo.query(` select 
+            dto.productoId,p.nombreProducto, sum(dto.cantidad) as totalVentas
+            
+            from detalle_orden dto
+            inner join producto p on dto.productoId = p.id
+            group by dto.productoId
+            order by sum(dto.cantidad) desc
+            limit 0, 5`)
+            res.json({productosMasVendidos})
+        } catch (error) {
+            console.log(error);
         }
     }
 }

@@ -11,5 +11,7 @@ const order = OrdenController;
 
 router.post('/new-order', [CheckJwt, checkRoleU(['user'])], ordenC.guardarOrden_DetalleOrden);
 router.post('/order-paginated', order.MostrarOrdenPaginadas)
+router.post('/add-reservation',[CheckJwt, checkRoleU(['user'])], order.AddReservacion)
+router.post('/order-status/:id', order.EstadoOrden)
 
 export default router;

@@ -87,7 +87,10 @@ class ClienteController{
         const cliente = await clienteRepo.find();
         cliente.map(cliente =>{
             delete cliente.password;
-            delete cliente.hashPassword;
+            delete cliente.resetPassword;
+            delete cliente.confirmacionCode;
+            delete cliente.role;
+            delete cliente.estado;
             return cliente
         });
         if(cliente.length>0){
@@ -154,7 +157,7 @@ class ClienteController{
     const{id} = req.params;
     const clienteRepo = getRepository(Cliente);
     try{
-        const cliente = await clienteRepo.findOneOrFail({select :[`id`, `apellido`, `nombre`, `email`,`telefono`,`direccion`,`imagen`, 'role',`estado`],
+        const cliente = await clienteRepo.findOneOrFail({select :[`id`, `apellido`, `nombre`, `email`,`telefono`,`direccion`,`imagen`, ],
     where:{id}});
     const imgdir = path.resolve(__dirname, `../../src/uploads/usuarios/${cliente.imagen}`);
         if(fs.existsSync(imgdir)){

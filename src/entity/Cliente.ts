@@ -22,7 +22,7 @@ export class Cliente {
     @Column()
     email: string;
 
-    @Column({select: false})
+    @Column()
     password: string;
 
     @Column({default : ""})
@@ -37,13 +37,13 @@ export class Cliente {
     @Column({default: 'user'})
     role: string;
 
-    @Column({default: "", select :false})
+    @Column({default: ""})
     confirmacionCode: string
 
     @Column({default : 0})
     estado: boolean;
 
-    @Column({default : "", select : false})
+    @Column({default : ""})
     resetPassword : string ;
 
     //relacion entre Producto y rating

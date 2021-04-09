@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction} from 'express';
 
 export const CheckJwt = (req : Request, res : Response, next : NextFunction)=>{
-    const token = <string>req.headers['authorization'];
+    const token = <string>req.headers.token;
     //check if parser is undefined
     if(typeof token !== 'undefined'){
         //split the space and get token from Array

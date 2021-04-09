@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { Marca } from '../entity/Marca';
 class MarcaController {
-
     static MostrarMarcas = async (req: Request, res: Response) => {
         try {
             const marcaRepo = getRepository(Marca);
