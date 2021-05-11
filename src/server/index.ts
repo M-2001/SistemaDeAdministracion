@@ -66,7 +66,7 @@ class Server {
         this.app.use(fileUpload());
 
         //CORS
-        this.app.use(cors());
+        // this.app.use(cors());
 
         //Lectura del body
         this.app.use(express.json());
@@ -85,7 +85,6 @@ class Server {
     }
     //Declaracion de rutas de la aplicacion
     routes() {
-        this.app.use(this.routenames.authEmpleado, routesEmpleado)
         this.app.use(this.routenames.cliente, RoutesCliente)
         this.app.use(this.routenames.authEmpleado, authemp)
         this.app.use(this.routenames.authCliente, authclt)
@@ -100,6 +99,7 @@ class Server {
         this.app.use(this.routenames.carrito, routescarrito)
         this.app.use(this.routenames.cupon, routesCupon)
         this.app.use(this.routenames.pay,routesPay)
+        this.app.use(this.routenames.empleado,routesEmpleado)
     }
 }
 export default Server;

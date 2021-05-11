@@ -17,7 +17,7 @@ PaypalSdk.configure({
 
 interface Product {
     id ?: string,
-    qty: number
+    qt: number
 }
 
 let Items : any;
@@ -37,7 +37,7 @@ class PayController{
                 const item = items[index];
                 const productoItem = await proRepo.findOneOrFail(item.id);
 
-                let operacion = productoItem.costo_standar * item.qty;
+                let operacion = productoItem.costo_standar * item.qt;
                 let Totaldesc = operacion * productoItem.descuento
                 let totalPay =  operacion - Totaldesc
                     amount += totalPay

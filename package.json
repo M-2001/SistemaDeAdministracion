@@ -34,6 +34,8 @@
       "typeorm": "0.2.30"
    },
    "scripts": {
-      "start": "ts-node-dev src/index.ts"
+      "start": "ts-node-dev src/index.ts",
+      "postinstall": "tsc",
+      "deploy": "git add . && git commit -m Heroku && git push heroku master"
    }
 }

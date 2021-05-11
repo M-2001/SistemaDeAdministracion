@@ -8,6 +8,7 @@ const auth = AuthEmployeeController;
 
 //login Empleado
 router.post('/loginEmployee', auth.Login);
+router.post('/add-password/:id',auth.addNewPassword)
 //change password
 router.post('/change-password', [CheckJwt], auth.passwordChange);
 //forgot password

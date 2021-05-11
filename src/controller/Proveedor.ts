@@ -5,7 +5,7 @@ import { getRepository } from 'typeorm';
 
 class ProveedorController {
 
-    static MostrarProveedors = async (req: Request, res: Response) => {
+    static MostrarProveedors = async (_: Request, res: Response) => {
         try {
             const proveedorRepo = getRepository(Proveedor);
             const proveedor = await proveedorRepo.find()
@@ -116,7 +116,7 @@ class ProveedorController {
     };
 
     static EliminarProveedor = async (req: Request, res: Response) => {
-        let proveedor;
+        let proveedor:Proveedor;
         const { id } = req.params;
         const proveedorRepo = getRepository(Proveedor);
         try {
@@ -128,13 +128,13 @@ class ProveedorController {
         try {
             await proveedorRepo.remove(proveedor)
         } catch (error) {
-            return res.status(409).json({ message: 'Algo ha salido mal!' });
+            return res.send({ message: 'No puedes eliminar este proveedor porque hay registros implicados' });
         }
-        res.json({ messge: 'Proveedor ha sido eliminada!' });
+        res.json({ messge: 'Proveedor ha sido eliminada!',ok:true });
     };
     //estado proveedor
     static EstadoProveedor = async (req: Request, res: Response) => {
-        let proveedor;
+        let proveedor:Proveedor;
         const id = req.body;
         const proveedorRepo = getRepository(Proveedor);
         try {

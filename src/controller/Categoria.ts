@@ -101,7 +101,7 @@ class CategoriaController {
         } catch (error) {
             return res.status(409).json({ message: 'Algo ha salido mal!' });
         }
-        res.json({messge:'Se actualizo el registro!'});
+        res.json({ messge: 'Se actualizo el registro!' });
     };
 
     static EliminarCategoria = async (req: Request, res: Response) => {
@@ -117,9 +117,9 @@ class CategoriaController {
         try {
             await categoriaRepo.remove(category)
         } catch (error) {
-            return res.status(409).json({ message: 'Algo ha salido mal!' });
+            return res.send({ message: 'No puedes eliminar esta categoria porque podria haber registros vinculados' });
         }
-        res.json({ messge: 'Categoria ha sido eliminada!' });
+        res.json({ messge: 'Categoria ha sido eliminada!', ok: true });
     };
 
     //estado categoria

@@ -12,24 +12,18 @@ class ProductoController {
     //mostrar todos los productos
 
     static MostrarProductos = async (req: Request, res: Response) => {
-        let pagina = req.query.pagina || 0;
-        let product = req.query.producto || "";
-        pagina = Number(pagina);
-        let take = req.query.limit || 10;
-        take = Number(take)
         try {
             const productoRepo = getRepository(Producto)
-            const producto = await productoRepo.createQueryBuilder('producto')
-                .leftJoin('producto.proveedor', 'prov',)
-                .select(['prov.id', 'prov.nombre_proveedor'])
-                .leftJoin('producto.marca', 'marca',)
+            const [producto, _] = await productoRepo.createQueryBuilder('producto')
+                .innerJoin('producto.marca', 'marca')
+                .innerJoin('producto.categoria', 'categoria')
+                .innerJoin('producto.proveedor', 'proveedor')
+                .addSelect(['proveedor.nombre_proveedor', 'proveedor.id'])
+                .addSelect(['categoria.categoria', 'categoria.id'])
                 .addSelect(['marca.marca', 'marca.id'])
-                .leftJoin('producto.categoria', 'cat')
-                .addSelect(['cat.categoria'],)
-                .skip(pagina)
-                .take(take)
-                .where("producto.nombreProducto like :name", { name: `%${product}%` })
-                .getManyAndCount();
+                .take(3)
+                .orderBy('producto.id', 'DESC')
+                .getManyAndCount()
             if (producto.length > 0) {
                 res.json({ productos: producto })
             } else {
@@ -45,6 +39,15 @@ class ProductoController {
     static ProductosPaginados = async (req: Request, res: Response) => {
         let pagina = req.query.pagina || 1;
         let search = req.query.producto || "";
+        let order: 'ASC' | 'DESC';
+        let typeOrder = Number(req.query.order || 0);
+        if (typeOrder === 0) {
+            order = 'ASC'
+        } else if (typeOrder === 1) {
+            order = 'DESC'
+        } else {
+            order = 'ASC'
+        }
         pagina = Number(pagina);
         let take = 5;
         take = Number(take)
@@ -59,9 +62,10 @@ class ProductoController {
                 .addSelect(['marca.marca', 'marca.id'])
                 .skip((pagina - 1) * take)
                 .take(take)
-                .where("producto.nombreProducto like :name", { name:`%${search}%` })
+                .where("producto.nombreProducto like :name", { name: `%${search}%` })
+                .orderBy('producto.id', order)
                 .getManyAndCount()
-            //.orderBy('codigo_producto', 'DESC')
+
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;
@@ -70,9 +74,9 @@ class ProductoController {
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             } else {
-                res.json({ message: 'No se encontraron resultados' })
+                res.json({ message: 'No se encontraron resultados', empty: true })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal' })
@@ -82,7 +86,7 @@ class ProductoController {
 
     //mostrar productos por categorias
     static MostrarProductosCategoria = async (req: Request, res: Response) => {
-        const { categoria } = req.body;
+        const categoria = req.query.categoria;
         let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
         let take = req.query.limit || 5;
@@ -103,14 +107,14 @@ class ProductoController {
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;
-                if (totalPages % 1 == 0) {
+                if (totalPages % 1 !== 0) {
                     totalPages = Math.trunc(totalPages) + 1;
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             } else {
-                res.json({ message: 'No se encontraron resultados con categoria: ' + categoria })
+                res.json({ message: 'No se encontraron resultados con categoria: ' + categoria, empty: true })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal' })
@@ -119,7 +123,7 @@ class ProductoController {
 
     //mostrar por marca
     static MostrarProductosMarca = async (req: Request, res: Response) => {
-        const { marca } = req.body;
+        const marca = req.query.marca;
         let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
         let take = req.query.limit || 5;
@@ -140,14 +144,14 @@ class ProductoController {
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;
-                if (totalPages % 1 == 0) {
+                if (totalPages % 1 !== 0) {
                     totalPages = Math.trunc(totalPages) + 1;
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             } else {
-                res.json({ message: 'No se encontraron resultados' })
+                res.json({ message: 'No se encontraron resultados', empty: true })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal' })
@@ -253,7 +257,7 @@ class ProductoController {
             return res.status(409).json({ message: 'Algo ha salido mal!', });
         }
 
-        res.json({ messge: 'Producto actualizado con exito!', ok: true,producto });
+        res.json({ messge: 'Producto actualizado con exito!', ok: true, producto });
     }
     //delete product
     static EliminarProducto = async (req: Request, res: Response) => {
@@ -372,7 +376,7 @@ class ProductoController {
         }
     };
     //productos mas vendidos
-    static ProductosMasVendidos = async(req: Request, res: Response)=>{
+    static ProductosMasVendidos = async (req: Request, res: Response) => {
         const detalleORepo = getRepository(DetalleOrden)
         try {
             const productosMasVendidos = await detalleORepo.query(` select 
@@ -383,9 +387,17 @@ class ProductoController {
             group by dto.productoId
             order by sum(dto.cantidad) desc
             limit 0, 5`)
-            res.json({productosMasVendidos})
+            res.json({ productosMasVendidos })
         } catch (error) {
             console.log(error);
+        }
+    }
+    static getImage = (req: Request, res: Response) => {
+        const name = req.query.image
+        const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${name}`);
+        if (fs.existsSync(imgdir)) {
+            res.sendFile(imgdir);
+            return;
         }
     }
 }

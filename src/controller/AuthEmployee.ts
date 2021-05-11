@@ -18,21 +18,21 @@ class AuthEmployeeController{
             emp = await empRepository.findOneOrFail({where:{codeAccess : code}});
         }
         catch(e){
-            return res.status(400).json({message:'Code or password incorrect!'})
+            return res.send({message:'Code or password incorrect!',ok:false})
         }
         //check password
         if (!emp.checkPassword(password)){
-            return res.status(400).json({message:'Code or password incorrect'});
+            return res.send({message:'Code or password incorrect',ok:false});
         }
 
         // if(emp.estado == false){
         //     res.json({ok : false, message :'Access denied'});
         // }   
         else{
-            const token =  jwt.sign({id: emp.id, code: emp.codeAccess}, process.env.JWTSECRET,{
+            const token =  jwt.sign({id: emp.id, code: emp.codeAccess,role:emp.role}, process.env.JWTSECRET,{
             expiresIn : '48h'
         }); 
-        res.json({message:'Ok', token : token, /*refreshToken,*/});
+        res.json({message:'Ok', token : token,ok:true/*refreshToken,*/});
         }
         //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
 
@@ -182,5 +182,23 @@ class AuthEmployeeController{
         }
         res.json({message:'Registro Activado!'})
     };
+    static addNewPassword = async (req: Request, res: Response)=>{
+        const id = req.params
+        const { password } = req.body
+        let employee:Employee;
+        const emplRepo = getRepository(Employee);
+        try {
+            employee = await emplRepo.findOneOrFail(id)
+            if(employee){
+                employee.password = password
+                employee.hashPassword()
+                await emplRepo.save(employee)
+                return res.send({message:"Se guardo la contraseña",ok:true})
+            }
+        } catch (error) {
+            return res.status(400).json({ message: error });
+        }
+
+    }
 }
 export default AuthEmployeeController;
