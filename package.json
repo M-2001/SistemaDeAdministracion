@@ -34,9 +34,7 @@
       "typeorm": "0.2.30"
    },
    "scripts": {
-      "build":"rimraf dist && tsc",
-      "start": "node dist/index.js",
-      "postinstall": "npm run build",
-      "start:dev":"ts-node-dev src/index.ts"
+      "start:dev": "ts-node-dev src/index.ts",
+      "start":"ts-node src/index.ts"
    }
 }
