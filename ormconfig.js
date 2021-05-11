@@ -1,3 +1,5 @@
+
+console.log(process.env.PORT, "use this PORT")
 module.exports={
     "type": "mysql",
     "host": "remotemysql.com",

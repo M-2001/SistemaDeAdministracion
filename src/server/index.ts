@@ -13,15 +13,11 @@ import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
-
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import routesPay from '../router/pay';
-import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
 import * as path from 'path';
-import  ejs = require('ejs')
-
 class Server {
     private routenames = {
         empleado: '/api/empleado',
@@ -46,13 +42,14 @@ class Server {
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor() {
         this.app = express();
+        this.port = process.env.PORT || '3080';
         this.middleware();
         this.routes();
 
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen() {
-        this.app.listen(process.env.PORT || 3080, () => {
+        this.app.listen(this.port, () => {
             console.log(`Server is running in http://localhost:${this.port}`);
         });
     }
