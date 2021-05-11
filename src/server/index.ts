@@ -46,7 +46,7 @@ class Server {
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor() {
         this.app = express();
-        this.port = process.env.PORT || '8081';
+        this.port = process.env.PORT;
         this.middleware();
         this.routes();
 
