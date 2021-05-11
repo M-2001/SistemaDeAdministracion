@@ -1,10 +1,10 @@
 {
    "type": "mysql",
-   "host": "remotemysql.com",
+   "host": "localhost",
    "port": 3306,
-   "username": "KY5FBukBBf",
-   "password": "4230irXXVz",
-   "database": "KY5FBukBBf",
+   "username": "root",
+   "password": "",
+   "database": "system_pc",
    "synchronize": true,
    "logging": false,
    "entities": [
