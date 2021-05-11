@@ -53,7 +53,7 @@ class Server {
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen() {
-        this.app.listen(this.port, () => {
+        this.app.listen(this.port || 3080, () => {
             console.log(`Server is running in http://localhost:${this.port}`);
         });
     }
