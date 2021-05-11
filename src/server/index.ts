@@ -66,7 +66,7 @@ class Server {
         this.app.use(fileUpload());
 
         //CORS
-        // this.app.use(cors());
+        this.app.use(cors());
 
         //Lectura del body
         this.app.use(express.json());
