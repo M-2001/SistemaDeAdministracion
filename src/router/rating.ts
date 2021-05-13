@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { checkRole } from '../middleware/role';
 import { CheckJwt } from '../middleware/jwt';
 import RatingController from '../controller/Rating';
 import { checkRoleU } from '../middleware/roleUser';

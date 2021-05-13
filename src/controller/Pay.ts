@@ -59,8 +59,8 @@ class PayController{
                         "payment_method": "paypal"
                         },
                     "redirect_urls": {
-                        "return_url": "http://localhost:3000/pay-checkout/success",
-                        "cancel_url": "http://localhost:3000/pay-checkout/cancel"
+                        "return_url": "http://localhost:8081/pay-checkout/success",
+                        "cancel_url": "http://localhost:8081/pay-checkout/cancel"
                         },
                     "transactions": [{
                         "amount": {
@@ -156,7 +156,7 @@ class PayController{
                 ordenC.PrecioTotal = totalPrice;
                 ordenC.TotalDesc = totalDesc;
                 const actualizarOrden = await ordenRepo.save(ordenC);
-                res.json({ok: true, message:'Compra Exitosa!!!'});
+                //res.json({ok: true, message:'Compra Exitosa!!!'});
 
         } catch (error) {
             console.log(error);
@@ -179,7 +179,7 @@ class PayController{
                 throw error;
             } else {
                 console.log(JSON.stringify(payment));
-                res.json({ message : 'Success'});
+                res.json({ message : 'Compra Exitosa!!!'});
             }
         });
         } catch (error) {

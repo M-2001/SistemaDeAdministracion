@@ -9,7 +9,6 @@ import routesCtria from '../router/categoria';
 import routesMarca from '../router/marca';
 import routesProd from '../router/producto';
 import routesProveedor from '../router/proveedor';
-import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
@@ -32,7 +31,6 @@ class Server{
     private marca = { marca :'/marca'}
     private proveedor = { proveedor : '/proveedor'}
     private producto = { producto : '/producto'}
-    private usuario = { usuario : '/usuario'}
     private rating = { rating : '/producto-rating'}
     private orden = { orden : '/orden'}
     private ordenDte = {ordenDte : '/orden-detalle'}
@@ -91,7 +89,6 @@ class Server{
         this.app.use(this.marca.marca, routesMarca)
         this.app.use(this.proveedor.proveedor, routesProveedor)
         this.app.use(this.producto.producto, routesProd)
-        this.app.use(this.usuario.usuario, routesUsuario)
         this.app.use(this.rating.rating, routesRating)
         this.app.use(this.orden.orden , routesOrden)
         this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
