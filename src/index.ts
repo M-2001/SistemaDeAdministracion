@@ -5,7 +5,7 @@ import  * as dotenv from 'dotenv';
 
 dotenv.config()
 
- createConnection(//{
+createConnection(//{
 //     type: "mysql",
 //     host: "remotemysql.com",
 //     port: 3306,
