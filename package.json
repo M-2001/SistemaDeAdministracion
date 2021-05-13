@@ -34,8 +34,8 @@
       "typeorm": "^0.2.30"
    },
    "scripts": {
-      "start": "nodemon dist/index.js",
+      "start": "node dist/index.js",
       "build": "tsc",
-      "start:dev": "nodemon src/index.ts"
+      "start:dev": "ts-node src/index.ts"
    }
 }
