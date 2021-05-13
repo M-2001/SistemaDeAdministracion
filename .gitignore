@@ -1,6 +1,6 @@
 .idea/
 .vscode/
 node_modules/
-dist/
+src/
 tmp/
 temp/
