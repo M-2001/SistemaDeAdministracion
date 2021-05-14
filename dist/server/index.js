@@ -37,7 +37,7 @@ class Server {
         this.cupon = { cupon: '/cupon' };
         this.pay = { pay: '/pay-checkout' };
         this.app = express();
-        this.PORT = process.env.PORT, '0.0.0.0';
+        this.PORT = process.env.PORT || '8081';
         this.middleware();
         this.routes();
     }
