@@ -16,31 +16,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const server = new index_1.default();
 server.listen();
-typeorm_1.createConnection( //{
-//     type: "mysql",
-//     host: "remotemysql.com",
-//     port: 3306,
-//     username: "wevbdYXWC1",
-//     password: "Ht7TqGGjPl",
-//     database: "wevbdYXWC1",
-//     synchronize: true,
-//     logging: true,
-//     entities: [
-//         "dist/entity/**/*.js",
-//     ],
-//         migrations: [
-//         "dist/migration/**/*.js"
-//     ],
-//         subscribers: [
-//         "dist/subscriber/**/*.js"
-//     ],
-//         cli: {
-//         "entitiesDir": "dist/entity",
-//         "migrationsDir": "dist/migration",
-//         "subscribersDir": "dist/subscriber"
-//     }
-// }
-).then(() => __awaiter(void 0, void 0, void 0, function* () {
+typeorm_1.createConnection().then(() => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Database Online!!!');
 })).catch(error => console.log(error));
 //# sourceMappingURL=index.js.map
