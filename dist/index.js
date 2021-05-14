@@ -14,30 +14,30 @@ const typeorm_1 = require("typeorm");
 const index_1 = require("./server/index");
 const dotenv = require("dotenv");
 dotenv.config();
-typeorm_1.createConnection( {
-    type: "mysql",
-    host: "remotemysql.com",
-    port: 3306,
-    username: "wevbdYXWC1",
-    password: "Ht7TqGGjPl",
-    database: "wevbdYXWC1",
-    synchronize: true,
-    logging: true,
-    entities: [
-        "dist/entity/**/*.js",
-    ],
-        migrations: [
-        "dist/migration/**/*.js"
-    ],
-        subscribers: [
-        "dist/subscriber/**/*.js"
-    ],
-        cli: {
-        "entitiesDir": "dist/entity",
-        "migrationsDir": "dist/migration",
-        "subscribersDir": "dist/subscriber"
-    }
-}
+typeorm_1.createConnection( //{
+//     type: "mysql",
+//     host: "remotemysql.com",
+//     port: 3306,
+//     username: "wevbdYXWC1",
+//     password: "Ht7TqGGjPl",
+//     database: "wevbdYXWC1",
+//     synchronize: true,
+//     logging: true,
+//     entities: [
+//         "dist/entity/**/*.js",
+//     ],
+//         migrations: [
+//         "dist/migration/**/*.js"
+//     ],
+//         subscribers: [
+//         "dist/subscriber/**/*.js"
+//     ],
+//         cli: {
+//         "entitiesDir": "dist/entity",
+//         "migrationsDir": "dist/migration",
+//         "subscribersDir": "dist/subscriber"
+//     }
+// }
 ).then(() => __awaiter(void 0, void 0, void 0, function* () {
     const server = new index_1.default();
     server.listen();
