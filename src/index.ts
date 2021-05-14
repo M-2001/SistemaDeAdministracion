@@ -5,6 +5,8 @@ import  * as dotenv from 'dotenv';
 
 dotenv.config()
 
+    const server = new Server();
+    server.listen();
 createConnection(//{
 //     type: "mysql",
 //     host: "remotemysql.com",
@@ -31,10 +33,5 @@ createConnection(//{
 //     }
 // }
 ).then(async () => {
-
-
-    const server = new Server();
-    server.listen();
     console.log('Database Online!!!');
-
 }).catch(error => console.log(error));

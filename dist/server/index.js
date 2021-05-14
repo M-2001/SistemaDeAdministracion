@@ -19,6 +19,7 @@ const pay_1 = require("../router/pay");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const path = require("path");
+const PORT = process.env.PORT || 5000;
 class Server {
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor() {
@@ -37,14 +38,13 @@ class Server {
         this.cupon = { cupon: '/cupon' };
         this.pay = { pay: '/pay-checkout' };
         this.app = express();
-        this.PORT = process.env.PORT || '8081';
         this.middleware();
         this.routes();
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen() {
-        this.app.listen(this.PORT, () => {
-            console.log(`Server is running in http://localhost:${this.PORT}`);
+        this.app.listen(PORT, () => {
+            console.log(`Server is running on port: ${PORT}`);
         });
     }
     //middlewares necesarios para la aplicacion

@@ -14,6 +14,8 @@ const typeorm_1 = require("typeorm");
 const index_1 = require("./server/index");
 const dotenv = require("dotenv");
 dotenv.config();
+const server = new index_1.default();
+server.listen();
 typeorm_1.createConnection( //{
 //     type: "mysql",
 //     host: "remotemysql.com",
@@ -39,8 +41,6 @@ typeorm_1.createConnection( //{
 //     }
 // }
 ).then(() => __awaiter(void 0, void 0, void 0, function* () {
-    const server = new index_1.default();
-    server.listen();
     console.log('Database Online!!!');
 })).catch(error => console.log(error));
 //# sourceMappingURL=index.js.map

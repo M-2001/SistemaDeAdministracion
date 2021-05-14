@@ -18,11 +18,11 @@ import routesPay from '../router/pay';
 import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
 import * as path from 'path';
-import  ejs = require('ejs')
+import  ejs = require('ejs');
+const PORT = process.env.PORT || 5000
 
 class Server{
     private app : Application;
-    private PORT : string;
     private empleado = { empleado: '/empleado'}
     private cliente = {cliente: '/user'}
     private authEmpleado = {auth: '/auth'}
@@ -42,15 +42,14 @@ class Server{
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor(){
         this.app = express();
-        this.PORT = process.env.PORT || '8081';
         this.middleware();
         this.routes();
         
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen(){
-        this.app.listen(this.PORT,() =>{
-            console.log(`Server is running in http://localhost:${this.PORT}`);
+        this.app.listen(PORT,() =>{
+            console.log(`Server is running on port: ${PORT}`);
         });
     }
     //middlewares necesarios para la aplicacion

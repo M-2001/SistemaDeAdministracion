@@ -6,7 +6,7 @@ module.exports = {
    "password": "Ht7TqGGjPl",
    "database": "wevbdYXWC1",
    "synchronize": true,
-   "logging": true,
+   "logging": false,
    "entities": [
       "dist/entity/**/*.js"
    ],
