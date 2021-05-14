@@ -37,14 +37,14 @@ class Server {
         this.cupon = { cupon: '/cupon' };
         this.pay = { pay: '/pay-checkout' };
         this.app = express();
-        this.port = process.env.PORT, '0.0.0.0';
+        this.PORT = process.env.PORT, '0.0.0.0';
         this.middleware();
         this.routes();
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen() {
-        this.app.listen(this.port, () => {
-            console.log(`Server is running in http://localhost:${this.port}`);
+        this.app.listen(this.PORT, () => {
+            console.log(`Server is running in http://localhost:${this.PORT}`);
         });
     }
     //middlewares necesarios para la aplicacion
