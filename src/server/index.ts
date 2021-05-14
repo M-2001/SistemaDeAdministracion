@@ -22,7 +22,7 @@ import  ejs = require('ejs')
 
 class Server{
     private app : Application;
-    private PORT : string;
+    //private PORT : string;
     private empleado = { empleado: '/empleado'}
     private cliente = {cliente: '/user'}
     private authEmpleado = {auth: '/auth'}
@@ -42,15 +42,15 @@ class Server{
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor(){
         this.app = express();
-        this.PORT = process.env.PORT, '0.0.0.0' ;
+        //this.PORT = process.env.PORT, '0.0.0.0' ;
         this.middleware();
         this.routes();
         
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen(){
-        this.app.listen(this.PORT,() =>{
-            console.log(`Server is running in http://localhost:${this.PORT}`);
+        this.app.listen(process.env.PORT || 8081,() =>{
+            console.log(`Server is running in http://localhost:${process.env.PORT}`);
         });
     }
     //middlewares necesarios para la aplicacion
