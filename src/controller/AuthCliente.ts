@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { Cliente } from '../entity/Cliente';
 import { validate } from 'class-validator';
 import { Employee } from '../entity/Employee';
-
+import { transporter } from '../config/nodemailer.config';
 
 class AuthClienteController {
 
@@ -90,8 +90,11 @@ class AuthClienteController {
 
         try {
             cliente = await clienteRespo.findOneOrFail({ where: { email } });
+            if(!cliente){
+                return res.send({ ok:false })
+            }
             const token = jwt.sign({ id: cliente.id, email: cliente.email }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-            verifycationLink = `http://localhost:9000/new-password/${token}`;
+            verifycationLink = `http://localhost:3000/reset-password/${token}`;
             cliente.resetPassword = token;
 
         } catch (e) {
@@ -99,13 +102,13 @@ class AuthClienteController {
         }
         //TODO: sendEmail
         try {
-            // await transporter.sendMail({
-            // from : '"Forgot Password " <castlem791@gmail.com>',//sender address
-            // to: empl.email,
-            // subject: "Forgot Password",
-            //html: '<b>Please check on the following link , or paste this into your browser to complete the process:</b>
-            //<a href="${verifycationLink}">${verifycationLink}</a>',
-            //});
+            await transporter.sendMail({
+            from : '"Forgot Password " <castlem791@gmail.com>',//sender address
+            to: cliente.email,
+            subject: "Forgot Password",
+            html: `<b>Please check on the following link , or paste this into your browser to complete the process:</b>
+            <a href="${verifycationLink}">${verifycationLink}</a>`,
+            });
         } catch (error) {
             emailStatus = error;
             return res.status(401).json({ message: 'Something goes wrong!' });
@@ -116,7 +119,7 @@ class AuthClienteController {
             emailStatus = error;
             return res.status(400).json({ message: 'Something goes wrong!' })
         }
-        res.json({ message, info: emailStatus, verifycationLink });
+        res.json({ message, info: emailStatus });
     };
     //create new password to reset password
     static createNewPassword = async (req: Request, res: Response) => {
