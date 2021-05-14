@@ -42,15 +42,15 @@ class Server{
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor(){
         this.app = express();
-        //this.port = process.env.PORT || '8081';
+        this.port = process.env.PORT, '0.0.0.0' ;
         this.middleware();
         this.routes();
         
     }
     //funcion principal para levantar un servido en el puerto especificado
     listen(){
-        this.app.listen( process.env.PORT || '8081',()=>{
-            console.log(`Server is running in http://localhost:${process.env.PORT}`);
+        this.app.listen(this.port,() =>{
+            console.log(`Server is running in http://localhost:${this.port}`);
         });
     }
     //middlewares necesarios para la aplicacion
