@@ -14,11 +14,9 @@ const router = Router();
 const pay = PayController;
 
 
-router.get('/success', [CheckJwt ,checkRoleU(['user'])], pay.PaySuccess);
+router.post('/success',CheckJwt, pay.PaySuccess);
+router.get('/cancel', (req: Request, res: Response)=>res.send('Canceled'))
 
-router.get('/cancel', (_req: Request, res: Response)=>res.send('Canceled'))
-
-router.post('/', pay.Pay );
-
+router.post('/',CheckJwt, pay.Pay)
 
 export default router

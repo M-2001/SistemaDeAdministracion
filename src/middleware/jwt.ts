@@ -13,7 +13,7 @@ export const CheckJwt = (req : Request, res : Response, next : NextFunction)=>{
             jwtPayload = <any>jwt.verify(bearer, process.env.JWTSECRET);
             res.locals.jwtPayload = jwtPayload;
         } catch (e) {
-            return res.status(401).json({message: 'Lo sentimos, no estas authorizado para acceder!'});
+            return res.status(401).json({message: 'Lo sentimos, no estas authorizado para acceder!',ok:false});
         }
         const {id, email} = jwtPayload;
         const newToken = jwt.sign({id, email}, process.env.JWTSECRET, {

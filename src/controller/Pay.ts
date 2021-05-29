@@ -17,10 +17,11 @@ PaypalSdk.configure({
 
 interface Product {
     id ?: string,
-    qty: number
+    qt: number
 }
 
 let Items : any;
+let Token : any
 
 class PayController{
 
@@ -37,14 +38,14 @@ class PayController{
                 const item = items[index];
                 const productoItem = await proRepo.findOneOrFail(item.id);
 
-                let operacion = productoItem.costo_standar * item.qty;
-                let Totaldesc = operacion * productoItem.descuento
+                let operacion = productoItem.costo_standar * item.qt;
+                let Totaldesc = operacion * productoItem.descuento / 100
                 let totalPay =  operacion - Totaldesc
-                    amount += totalPay
-                    totalPrice += totalPay
-                    const OnlyTwoDecimals = amount.toFixed(2);
+                amount += totalPay
+                totalPrice += totalPay
+                const OnlyTwoDecimals = amount.toFixed(2);
                     //Items.push(items)
-                    console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
+                console.log("price: ",OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
             }
             } catch (error) {
                 console.log(error);
@@ -59,8 +60,8 @@ class PayController{
                         "payment_method": "paypal"
                         },
                     "redirect_urls": {
-                        "return_url": "http://localhost:8081/pay-checkout/success",
-                        "cancel_url": "http://localhost:8081/pay-checkout/cancel"
+                        "return_url": "http://localhost:3000/pay",
+                        "cancel_url": "http://localhost:3080/api/pay-checkout/cancel"
                         },
                     "transactions": [{
                         "amount": {
@@ -73,7 +74,7 @@ class PayController{
                 PaypalSdk.payment.create(create_payment, function(error: any, payment : any){
                     if (error) {
                         //throw error;
-                        console.log('Esto no funciona');
+                        console.log('Esto no funciona',error.response.details);
                     } else {
                         if(create_payment.payer.payment_method === "paypal"){
                             var redirectUrl;
@@ -84,7 +85,7 @@ class PayController{
                                     //res.redirect(payment.links[index].href)
                                 }
                             }
-                            res.redirect(redirectUrl)
+                            res.send({redirectUrl})
                         }
                         // for (let index = 0; index < payment.links.length; index++) {
                         //     if(payment.links[index].rel === 'approval-url'){
@@ -104,8 +105,7 @@ class PayController{
         const ordenRepo = getRepository(Order);
         const ordeDRepo = getRepository(DetalleOrden)
         const proRepo = getRepository(Producto);
-        let items = Items;
-        
+        let items = req.body;
         const payerId : any = req.query.PayerID;
         const paymentId : any = req.query.paymentId;
         let totalPrice : number = 0;
@@ -122,23 +122,20 @@ class PayController{
                 const item = items[index];
                 const productoItem = await proRepo.findOneOrFail(item.id);
 
-                let operacion = productoItem.costo_standar * item.qty;
-                let Totaldesc = operacion * productoItem.descuento
+                let operacion = productoItem.costo_standar * item.qt;
+                let Totaldesc = operacion * productoItem.descuento / 100
                 let totalPay =  operacion - Totaldesc
-                let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                     amount += totalPay
                     totalPrice += totalPay
                     totalDesc += Totaldesc
-                    const OnlyTwoDecimals = amount.toFixed(2);
-                    const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
-                    console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                     try {
                         //save Orden Detalle
                         const saveOD = new DetalleOrden();
                         saveOD.orden = ordenC,
                         saveOD.producto = productoItem,
-                        saveOD.cantidad = item.qty,
+                        saveOD.cantidad = item.qt,
                         saveOD.totalUnidad = amount,
                         saveOD.descuento = Totaldesc
         
@@ -155,8 +152,7 @@ class PayController{
             }
                 ordenC.PrecioTotal = totalPrice;
                 ordenC.TotalDesc = totalDesc;
-                const actualizarOrden = await ordenRepo.save(ordenC);
-                //res.json({ok: true, message:'Compra Exitosa!!!'});
+                const actualizarOrden = await ordenRepo.save(ordenC)
 
         } catch (error) {
             console.log(error);
@@ -178,8 +174,7 @@ class PayController{
                 console.log(error.response);
                 throw error;
             } else {
-                console.log(JSON.stringify(payment));
-                res.json({ message : 'Compra Exitosa!!!'});
+                res.json({ message : 'Gracias por su compra',ok:true});
             }
         });
         } catch (error) {

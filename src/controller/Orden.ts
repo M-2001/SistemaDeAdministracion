@@ -7,7 +7,7 @@ import { DetalleOrden } from '../entity/Detalles_Orden';
 
 interface Product {
     id ?: string,
-    qty: number
+    qt: number
 }
 
 class OrdenController {
@@ -63,8 +63,8 @@ class OrdenController {
                 const item = items[index];
                 const productoItem = await proRepo.findOneOrFail(item.id);
 
-                let operacion = productoItem.costo_standar * item.qty;
-                let Totaldesc = operacion * productoItem.descuento
+                let operacion = productoItem.costo_standar * item.qt;
+                let Totaldesc = operacion * productoItem.descuento /100
                 let totalPay =  operacion - Totaldesc
                 //let qtyExist = productoItem.catidad_por_unidad - item.qty;
 
@@ -72,7 +72,6 @@ class OrdenController {
                     totalPrice += totalPay
                     totalDesc += Totaldesc
                     const OnlyTwoDecimals = amount.toFixed(2);
-                    const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
                     console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
 
                     try {
@@ -80,7 +79,7 @@ class OrdenController {
                     const saveOD = new DetalleOrden();
                     saveOD.orden = ordenC,
                     saveOD.producto = productoItem,
-                    saveOD.cantidad = item.qty,
+                    saveOD.cantidad = item.qt,
                     saveOD.totalUnidad = amount,
                     saveOD.descuento = Totaldesc
 
