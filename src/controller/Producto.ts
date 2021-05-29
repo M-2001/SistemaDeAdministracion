@@ -6,6 +6,7 @@ import { UploadedFile } from 'express-fileupload';
 import * as path from 'path';
 import * as fs from 'fs';
 import { DetalleOrden } from '../entity/Detalles_Orden';
+import { Rating } from '../entity/Rating';
 
 class ProductoController {
 
@@ -376,28 +377,58 @@ class ProductoController {
         }
     };
     //productos mas vendidos
-    static ProductosMasVendidos = async (req: Request, res: Response) => {
-        const detalleORepo = getRepository(DetalleOrden)
-        try {
-            const productosMasVendidos = await detalleORepo.query(` select 
-            dto.productoId,p.nombreProducto, sum(dto.cantidad) as totalVentas
-            
-            from detalle_orden dto
-            inner join producto p on dto.productoId = p.id
-            group by dto.productoId
-            order by sum(dto.cantidad) desc
-            limit 0, 5`)
-            res.json({ productosMasVendidos })
-        } catch (error) {
-            console.log(error);
-        }
-    }
+   
+
     static getImage = (req: Request, res: Response) => {
         const name = req.query.image
         const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${name}`);
         if (fs.existsSync(imgdir)) {
             res.sendFile(imgdir);
             return;
+        }
+    }
+       //productos mas vendidos
+    static ProductosMasVendidos = async(_: Request, res: Response)=>{
+        const productoRepo = getRepository(Producto)
+        const detalleORepo = getRepository(DetalleOrden)
+        try {
+            const productos = await productoRepo.find()
+            productos.map(async pro  => {
+                let producto = pro.id
+                const DO = await detalleORepo.createQueryBuilder('detalle_orden')
+                .innerJoin('detalle_orden.producto','dto')
+                .addSelect(['dto.nombreProducto','dto.id'])
+                .where({producto})
+                //.orderBy('SUM(detalle_orden.cantidad)', 'DESC')
+                .getMany()
+
+                let totalVenta = DO.map((a)=> a.cantidad).reduce((a,b)=>a+b);
+                console.log(pro, `Total ventas: `, totalVenta);
+                //console.log(DO.map((a)=>a.cantidad).reduce((a,b)=> a+b));
+            });
+            res.json({productos})
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    //productos mas vendidos
+    static ProductosConMasRatings = async(_req: Request, res: Response)=>{
+        const productoRepo = getRepository(Producto)
+        const ratingRepo = getRepository(Rating)
+        try {
+            const productos = await productoRepo.find()
+            productos.map(async pro  => {
+                let producto = pro.id
+                const Rating = await ratingRepo.createQueryBuilder('rating')
+                .innerJoin('rating.producto','dto')
+                .addSelect(['dto.nombreProducto','dto.id'])
+                .where({producto})
+                .getMany()
+                console.log(pro, `ratings: `, Rating.length);
+            });
+            res.json({productos})
+        } catch (error) {
+            console.log(error);
         }
     }
 }

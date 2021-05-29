@@ -17,6 +17,9 @@ router.put('/new-password', auth.createNewPassword);
 //activarUsuario
 router.get('/confirmUser', auth.ActivarCuenta);
 
+//refreshToken
+
+router.post('/refreshToken', auth.refreshToken)
 
 
 

@@ -24,6 +24,13 @@ router.put('/:id', producto.EditarProducto);
 router.delete('/:id', [CheckJwt, checkRole(['admin'])], producto.EliminarProducto);
 
 //productos mas vendidos
+<<<<<<< HEAD
 
+=======
+router.post('/bestSellers', producto.ProductosMasVendidos);
+
+//produstos con mas rating
+router.post('/more-ratings', producto.ProductosConMasRatings)
+>>>>>>> origin/herokutest
 
 export default router;

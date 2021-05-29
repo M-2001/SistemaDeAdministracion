@@ -27,23 +27,24 @@ class AuthClienteController {
             return res.status(400).json({ message: 'Username or password incorrect' });
         }
 
-        if (cliente.estado == false) {
-            res.json({ ok: false, message: ' Acceso Denegado' });
-        } else {
-            const token = jwt.sign({ clienteid: cliente.id, email: cliente.email }, process.env.JWTSECRET, {
-                expiresIn: '48h'
-            });
-            res.json({ message: 'Ok', token: token, /*refreshToken,*/ });
+
+        if(cliente.estado == false){
+            res.json({ok:false, message:' Acceso Denegado'});
+        }else{
+            const token =  jwt.sign({clienteid: cliente.id, email: cliente.email}, process.env.JWTSECRET,{
+            expiresIn : '48h'
+        });
+        const refreshToken = jwt.sign({clienteid: cliente.id,email:cliente.email}, process.env.JWTSECRETREFRESH,{expiresIn : '48h'});
+
+        cliente.refreshToken = refreshToken;
+        try {
+            await clienteRepository.save(cliente);
+            res.json({message:'Ok', token : token, refreshToken});
+        } catch (error) {
+            return res.status(400).json({message: 'somthing goes wrong!'})
         }
-
-        //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
-
-        // user.refreshToken = refreshToken;
-        // try {
-        //     await empRepository.save(emp);
-        // } catch (error) {
-        //     return res.status(400).json({message: 'somthing goes wrong!'})
-        // }
+        
+        }
     };
 
     //passwordChange
@@ -189,6 +190,28 @@ class AuthClienteController {
         }
         res.json({ message: 'Usuario Activado!', ok: true })
     };
+
+    //refreshToken
+    
+    static refreshToken = async(req: Request, res:Response)=>{
+        const refreshToken = req.headers.refresh as string;
+        if(!(refreshToken)){
+            res.status(400).json({message: 'something goes wrong!'})
+        };
+        const clienteRepo = getRepository(Cliente);
+        let cliente : Cliente;
+        try {
+            const verifyResult = jwt.verify(refreshToken, process.env.JWTSECRETREFRESH);
+            const {email} = verifyResult as Cliente;
+            console.log(verifyResult);
+            cliente = await clienteRepo.findOneOrFail({where : {email}});
+
+        } catch (error) {
+            return res.status(401).json({message: 'somthing goes wrong!'})
+        }
+        const token = jwt.sign({clienteid : cliente.id, email: cliente.email}, process.env.JWTSECRET, {expiresIn: '10m'});
+        res.json({ok : true, token})
+    }
 }
 
 export default AuthClienteController;

@@ -9,7 +9,6 @@ import routesCtria from '../router/categoria';
 import routesMarca from '../router/marca';
 import routesProd from '../router/producto';
 import routesProveedor from '../router/proveedor';
-import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
@@ -88,7 +87,6 @@ class Server {
         this.app.use(this.routenames.marca, routesMarca)
         this.app.use(this.routenames.proveedor, routesProveedor)
         this.app.use(this.routenames.producto, routesProd)
-        this.app.use(this.routenames.usuario, routesUsuario)
         this.app.use(this.routenames.rating, routesRating)
         this.app.use(this.routenames.orden, routesOrden)
         this.app.use(this.routenames.ordenDte, routesOrdenDte)
