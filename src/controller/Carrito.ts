@@ -6,13 +6,12 @@ import OrdenDetalle from './OrdenDetalle';
 import { DetalleOrden } from '../entity/Detalles_Orden';
 
 interface Product {
-    id ?: string,
+    id: number,
     qty: number
 }
 
 let Items : any
 class CarritoController{
-
     static AgregarProductoCarrito = async (req: Request, res : Response) => {
 
         let items : Product[] = req.body;
