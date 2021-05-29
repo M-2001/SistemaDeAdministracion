@@ -14,11 +14,11 @@ const router = Router();
 const pay = PayController;
 
 
-router.get('/success', [CheckJwt ,checkRoleU(['user'])], pay.PaySuccess);
+router.post('/success',CheckJwt, pay.PaySuccess);
 
 router.get('/cancel', (req: Request, res: Response)=>res.send('Canceled'))
 
-router.post('/', /*[CheckJwt ,checkRoleU(['user'])],*/ pay.Pay /*(req: Request, res: Response)=>{
+router.post('/',CheckJwt, pay.Pay /*(req: Request, res: Response)=>{
 //     var payment = {
 //         "intent": "sale",
 // "payer": {

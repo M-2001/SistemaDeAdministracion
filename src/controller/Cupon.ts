@@ -33,20 +33,16 @@ class CuponController {
     }
 
     static EstadoCupon = async (req: Request, res: Response) => {
-        let cupon;
+        let cupon:Cupon;
         const id = req.body;
         const cuponRepo = getRepository(Cupon);
         try {
             cupon = await cuponRepo.findOneOrFail(id)
 
-            if (cupon.status == true) {
-                cupon.status = false
-            } else {
-                cupon.status = true
-            }
+            cupon.status = !cupon.status
 
-            const cuponStatus = await cuponRepo.save(cupon)
-            res.json({ ok: true, cupon: cuponStatus.status })
+            await cuponRepo.save(cupon)
+            res.json({ ok: true })
 
         } catch (error) {
             console.log(error);
@@ -81,7 +77,7 @@ class CuponController {
             const [cupones, totalItems] = await cuponRepo.findAndCount({ take, skip: (pagina - 1) * take });
             if (cupones.length > 0) {
                 let totalPages: number = totalItems / take;
-                if (totalPages % 1 == 0) {
+                if (totalPages % 1 !== 0) {
                     totalPages = Math.trunc(totalPages) + 1;
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1

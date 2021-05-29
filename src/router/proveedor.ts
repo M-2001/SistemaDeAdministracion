@@ -7,13 +7,13 @@ const router = Router();
 const proveedor = ProveedorController;
 
 
-router.get('/proveedores-paginated', /*[CheckJwt, checkRole(['admin'])],*/ proveedor.MostrarProveedoresPaginados)
+router.get('/proveedores-paginated', proveedor.MostrarProveedoresPaginados)
 //estado del producto
-router.put('/status'/*, [CheckJwt, checkRole(['admin'])]*/, proveedor.EstadoProveedor);
-router.get('/'/*,[CheckJwt, checkRole(['admin'])]*/, proveedor.MostrarProveedors);
-router.post('/'/*, [CheckJwt, checkRole(['admin'])]*/, proveedor.AgregarProveedor);
-router.get('/:id'/*, [CheckJwt, checkRole(['admin'])]*/, proveedor.ObtenerProveedorPorID);
-router.put('/:id'/*, [CheckJwt, checkRole(['admin'])]*/, proveedor.ActualizarProveedor);
-router.delete('/:id'/*, [CheckJwt, checkRole(['admin'])]*/, proveedor.EliminarProveedor);
+router.put('/status', CheckJwt, proveedor.EstadoProveedor);
+router.get('/', proveedor.MostrarProveedors);
+router.post('/', CheckJwt, proveedor.AgregarProveedor);
+router.get('/:id', proveedor.ObtenerProveedorPorID);
+router.put('/:id', CheckJwt, proveedor.ActualizarProveedor);
+router.delete('/:id', [CheckJwt, checkRole(['admin'])], proveedor.EliminarProveedor);
 
 export default router;

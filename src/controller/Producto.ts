@@ -265,13 +265,17 @@ class ProductoController {
         const prodRepo = getRepository(Producto);
         try {
             const producto = await prodRepo.findOneOrFail(id);
-            await prodRepo.delete(producto);
-            const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
-            if (fs.existsSync(imgdir)) {
-                fs.unlinkSync(imgdir)
+            try {
+                await prodRepo.remove(producto)
+                const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
+                if (fs.existsSync(imgdir)) {
+                    fs.unlinkSync(imgdir)
+                }
+            } catch (error) {
+                return res.send({ message: 'No puedes eliminar este producto porque podria haber registros vinculados' });
             }
             //delete 
-            res.status(201).json({ message: 'Producto eliminado' });
+            res.json({ messge: 'Se elimino el producto!', ok: true });
         }
         catch (e) {
             res.status(404).json({ message: 'No hay registros con este id: ' + id });
@@ -356,23 +360,19 @@ class ProductoController {
     }
     //estado producto
     static EstadoProducto = async (req: Request, res: Response) => {
-        let producto;
+        let producto: Producto;
         const id = req.body;
         const proRepo = getRepository(Producto);
         try {
             producto = await proRepo.findOneOrFail(id)
 
-            if (producto.status == true) {
-                producto.status = false
-            } else {
-                producto.status = true
-            }
+            producto.status = !producto.status
 
-            const productoStatus = await proRepo.save(producto)
-            res.json({ ok: true, cupon: productoStatus.status })
+            await proRepo.save(producto)
+            res.json({ ok: true })
 
         } catch (error) {
-            console.log(error);
+            res.json({ ok: false, message: 'No se pudo completar la accion solicitada' })
         }
     };
     //productos mas vendidos

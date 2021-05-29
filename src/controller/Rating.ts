@@ -119,7 +119,7 @@ class RatingController {
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
                 res.json({ ok: true, ratings, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({ message: 'No se encontraron resultados!' })
+                res.json({ message: 'No se encontraron productos!' })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal!' })

@@ -66,7 +66,7 @@ export class EmpleadoController {
         const { id } = req.params;
         const employeeRepo = getRepository(Employee);
         try {
-            const employee = await employeeRepo.findOneOrFail({ select: [`id`, `apellido`, `nombre`, `codeAccess`, `telefono`, `direccion`, `imagen`, 'role', `estado`], where: { id } });
+            const employee = await employeeRepo.findOneOrFail({ select: [`id`,`email`, `apellido`, `nombre`, `codeAccess`, `telefono`, `direccion`, `imagen`, 'role', `estado`], where: { id } });
             if (employee) {
                 res.send({ ok: true, employee })
             }
@@ -163,9 +163,9 @@ export class EmpleadoController {
     };
     //Editar Employee
     static EditarEmpleado = async (req: Request, res: Response) => {
-        let employee;
+        let employee:Employee;
         const { id } = req.params;
-        const { apellido, nombre, telefono, direccion } = req.body;
+        const { apellido, nombre, telefono, direccion,email } = req.body;
         const emplRepo = getRepository(Employee);
 
         try {
@@ -174,6 +174,7 @@ export class EmpleadoController {
             employee.nombre = nombre;
             employee.telefono = telefono;
             employee.direccion = direccion;
+            employee.email = email
 
         } catch (error) {
             return res.status(404).json({ message: 'No se han encontrado resultados ' })

@@ -9,7 +9,7 @@ const cupon = CuponController;
 router.post('/create-cupon', CheckJwt, cupon.CrearCupon);
 router.put('/status', CheckJwt, cupon.EstadoCupon);
 router.get('/show-cupons', CheckJwt, cupon.MostrarCupones);
-router.post('/cupon-paginated', CheckJwt, cupon.MostrarCuponesPaginados);
+router.get('/cupon-paginated', cupon.MostrarCuponesPaginados);
 router.delete('/destroy-cupon', [CheckJwt, checkRole(['admin'])], cupon.EliminarCupon)
 
 export default router;

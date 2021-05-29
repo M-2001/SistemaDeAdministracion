@@ -125,18 +125,20 @@ class AuthClienteController {
     static createNewPassword = async (req: Request, res: Response) => {
         const { newPassword } = req.body;
         const resetPassword = req.headers.reset as string;
+        console.log(newPassword,resetPassword)
         if (!(resetPassword && newPassword)) {
-            res.status(400).json({ message: 'all the fields are require' });
+            res.status(400).json({ message: 'Faltan datos importantes' });
         }
-        const clienteRepo = getRepository(Cliente);
         let jwtPayload;
+        const clienteRepo = getRepository(Cliente);
         let cliente: Cliente;
         try {
-            jwtPayload = jwt.verify(resetPassword, process.env.JWTSECRETRESET);
             cliente = await clienteRepo.findOneOrFail({ where: { resetPassword } });
+            jwtPayload = jwt.verify(resetPassword, process.env.JWTSECRETRESET);
+            console.log(cliente)
 
         } catch (error) {
-            return res.status(401).json({ message: 'error' })
+            return res.status(401).json({ message: 'No se ah completado la accion' })
         }
         cliente.password = newPassword;
 
@@ -153,7 +155,7 @@ class AuthClienteController {
         } catch (error) {
             return res.status(400).json({ message: error });
         }
-        res.json({ message: 'password changed!' })
+        res.json({ message: 'Se actualizo tu contraseña',ok:true })
     }
 
     //activar usuario
