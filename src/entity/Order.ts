@@ -22,6 +22,9 @@ export class Order {
     TotalDesc: number;
 
     @Column()
+    codigoOrden : string
+
+    @Column()
     status: number
     
     @OneToMany(type => DetalleOrden, detalle => detalle.orden)

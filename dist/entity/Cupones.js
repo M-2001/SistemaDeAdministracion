@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Cupon = void 0;
 const typeorm_1 = require("typeorm");
 let Cupon = class Cupon {
 };
@@ -30,7 +31,7 @@ __decorate([
     __metadata("design:type", Date)
 ], Cupon.prototype, "fechaExp", void 0);
 __decorate([
-    typeorm_1.Column({ default: 1 }),
+    typeorm_1.Column({ default: 0 }),
     __metadata("design:type", Boolean)
 ], Cupon.prototype, "status", void 0);
 Cupon = __decorate([
