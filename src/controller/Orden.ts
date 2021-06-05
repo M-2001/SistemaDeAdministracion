@@ -11,7 +11,7 @@ import { Cupon } from '../entity/Cupones';
 
 interface Product {
     id ?: string,
-    qty: number
+    qt: number
 }
 
 class OrdenController {
@@ -165,7 +165,6 @@ class OrdenController {
                     totalPrice += totalPay
                     totalDesc += Totaldesc
                     const OnlyTwoDecimals = amount.toFixed(2);
-                    const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
                     console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                     
                     let itemString : string = item.qty.toString()

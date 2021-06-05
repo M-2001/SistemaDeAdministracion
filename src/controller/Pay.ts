@@ -21,7 +21,7 @@ PaypalSdk.configure({
 
 interface Product {
     id ?: string,
-    qty: number
+    qt: number
 }
 
 let Items : any;
@@ -80,7 +80,6 @@ class PayController{
                             let operacion = productoItem.costo_standar * item.qty;
                             let Totaldesc = operacion * productoItem.descuento/100;
                             let totalPay =  operacion - Totaldesc;
-
                             amount += totalPay
                             totalPrice += totalPay
                             const OnlyTwoDecimals = amount.toFixed(2);
@@ -105,8 +104,8 @@ class PayController{
                         "payment_method": "paypal"
                         },
                     "redirect_urls": {
-                        "return_url": "http://localhost:5000/pay-checkout/success",
-                        "cancel_url": "http://localhost:5000/pay-checkout/cancel"
+                        "return_url": "http://localhost:3000/pay",
+                        "cancel_url": "http://localhost:3080/api/pay-checkout/cancel"
                         },
                     "transactions": [{
                         "amount": {
@@ -119,7 +118,7 @@ class PayController{
                 PaypalSdk.payment.create(create_payment, function(error: any, payment : any){
                     if (error) {
                         //throw error;
-                        console.log('Esto no funciona');
+                        console.log('Esto no funciona',error.response.details);
                     } else {
                         if(create_payment.payer.payment_method === "paypal"){
                             var redirectUrl;
@@ -130,7 +129,7 @@ class PayController{
                                     //res.redirect(payment.links[index].href)
                                 }
                             }
-                            res.redirect(redirectUrl)
+                            res.send({redirectUrl})
                         }
                     }
                 });
@@ -146,11 +145,10 @@ class PayController{
         const proRepo = getRepository(Producto);
         const cuponRepo = getRepository(Cupon);
         const clienteRepo = getRepository(Cliente);
-        let items = Items;
         let CODIGO_CUPON = CODE_CUPON;
         let ordenC: Order;
         let cuponExist: Cupon;
-        
+        let items = req.body;
         const payerId : any = req.query.PayerID;
         const paymentId : any = req.query.paymentId;
         let totalPrice : number = 0;
@@ -245,9 +243,6 @@ class PayController{
                 or.codigoOrden = codigoO;
                 or.status = 2
                 ordenC = await ordenRepo.save(or);
-
-
-
                 for (let index = 0; index < items.length; index++) {
                     let amount: number = 0;
                     const item = items[index];
@@ -270,13 +265,12 @@ class PayController{
                     let itm  = {codigoOrden: ordenC.codigoOrden, cantidad : itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals}
 
                     itemEmail.push(itm)
-
                     try {
                         //save Orden Detalle
                         const saveOD = new DetalleOrden();
                         saveOD.orden = ordenC,
                         saveOD.producto = productoItem,
-                        saveOD.cantidad = item.qty,
+                        saveOD.cantidad = item.qt,
                         saveOD.totalUnidad = amount,
                         saveOD.descuento = Totaldesc
         
@@ -408,8 +402,7 @@ class PayController{
                 console.log(error.response);
                 throw error;
             } else {
-                console.log(JSON.stringify(payment));
-                res.json({ message : 'Compra Exitosa!!!'});
+                res.json({ message : 'Gracias por su compra',ok:true});
             }
         });
         } catch (error) {

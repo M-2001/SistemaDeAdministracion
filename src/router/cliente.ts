@@ -9,9 +9,10 @@ const cliente = ClienteController;
 router.get('/', cliente.getClientes)
 router.get('/best-client',[CheckJwt, checkRole(['admin'])], cliente.MejoresClientes)
 router.post('/', cliente.RegistroCliente);
-router.post('/photo', CheckJwt, cliente.ImagenPerfilCliente);
-router.get('/:id', cliente.getClienteByID);
-router.put('/', CheckJwt, cliente.EditarCliente);
+router.get('/image', cliente.getImage)
+router.post('/photo/:id', CheckJwt, cliente.ImagenPerfilCliente);
+router.put('/:id', CheckJwt, cliente.EditarCliente);
 router.delete('/:id', cliente.EliminarCliente);
+router.get('/:id',CheckJwt, cliente.getClienteByID);
 
 export default router

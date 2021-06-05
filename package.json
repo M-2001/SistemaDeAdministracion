@@ -2,7 +2,7 @@
    "name": "new-typeorm-project",
    "version": "0.0.1",
    "description": "Awesome project developed with TypeORM.",
-   "main": "index.ts",
+   "type": "commonjs",
    "devDependencies": {
       "@types/bcryptjs": "^2.4.2",
       "@types/cors": "^2.8.10",
@@ -31,14 +31,18 @@
       "jsonwebtoken": "^8.5.1",
       "mysql": "^2.14.1",
       "nodemailer": "^6.4.18",
+      "nodemon": "^2.0.7",
       "paypal-rest-sdk": "^1.8.1",
       "reflect-metadata": "^0.1.10",
-      "typeorm": "^0.2.30"
+      "ts-node-dev": "^1.1.6",
+      "typeorm": "0.2.30"
    },
    "scripts": {
+      "start:dev": "ts-node-dev src/index.ts",
       "start": "node dist/index.js",
       "build": "tsc",
       "dev": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/index.ts",
       "start:dev": "nodemon src/index.ts"
+      "typeorm":"node  --requiere ts-node/register  ./node_modules/typeorm/cli.js"
    }
 }
