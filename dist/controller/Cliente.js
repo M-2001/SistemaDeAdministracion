@@ -16,6 +16,7 @@ const path = require("path");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const nodemailer_config_1 = require("../config/nodemailer.config");
+const Order_1 = require("../entity/Order");
 class ClienteController {
 }
 //create new cliente
@@ -219,6 +220,41 @@ ClienteController.EliminarCliente = (req, res) => __awaiter(void 0, void 0, void
     }
     catch (e) {
         res.status(404).json({ message: 'No hay registros con este id: ' + id });
+    }
+});
+//static BestClients
+ClienteController.MejoresClientes = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
+    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
+    const OrdenesCliente = [];
+    try {
+        const clientes = yield clienteRepo.find();
+        if (!clientes) {
+            return res.status(400).json({ message: 'No se encontraron resultados!!!' });
+        }
+        else {
+            for (let index = 0; index < clientes.length; index++) {
+                let cliente = clientes[index].id;
+                let client = clientes[index];
+                try {
+                    const OrdenesClient = yield ordenRepo.createQueryBuilder('orden')
+                        .innerJoin('orden.cliente', 'orClt')
+                        .addSelect(['orClt.nombre', 'orClt.id', 'orClt.email'])
+                        .where({ cliente })
+                        .getMany();
+                    let items = { nombre: client.nombre, apellido: client.apellido, email: client.email, ordenes: OrdenesClient.length };
+                    OrdenesCliente.push(items);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+            ;
+            res.json({ OrdenesCliente });
+        }
+    }
+    catch (error) {
+        console.log(error);
     }
 });
 exports.default = ClienteController;

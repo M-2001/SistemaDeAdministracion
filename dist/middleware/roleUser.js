@@ -9,9 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.checkRoleU = void 0;
 const typeorm_1 = require("typeorm");
 const Cliente_1 = require("../entity/Cliente");
-exports.checkRoleU = (roles) => {
+const checkRoleU = (roles) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         const { clienteid } = res.locals.jwtPayload;
         const userRepo = typeorm_1.getRepository(Cliente_1.Cliente);
@@ -32,4 +33,5 @@ exports.checkRoleU = (roles) => {
         }
     });
 };
+exports.checkRoleU = checkRoleU;
 //# sourceMappingURL=roleUser.js.map

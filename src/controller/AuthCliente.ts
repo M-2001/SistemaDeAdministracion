@@ -32,7 +32,7 @@ class AuthClienteController {
             const token =  jwt.sign({clienteid: cliente.id, email: cliente.email}, process.env.JWTSECRET,{
             expiresIn : '48h'
         });
-        const refreshToken = jwt.sign({clienteid: cliente.id,email:cliente.email}, process.env.JWTSECRETREFRESH,{expiresIn : '48h'});
+        const refreshToken = jwt.sign({clienteid: cliente.id, email:cliente.email}, process.env.JWTSECRETREFRESH,{expiresIn : '48h'});
 
         cliente.refreshToken = refreshToken;
         try {
@@ -202,7 +202,7 @@ class AuthClienteController {
         } catch (error) {
             return res.status(401).json({message: 'somthing goes wrong!'})
         }
-        const token = jwt.sign({clienteid : cliente.id, email: cliente.email}, process.env.JWTSECRET, {expiresIn: '10m'});
+        const token = jwt.sign({clienteid : cliente.id, email: cliente.email}, process.env.JWTSECRET, {expiresIn: '48h'});
         res.json({ok : true, token})
     }
 }

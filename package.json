@@ -38,7 +38,7 @@
    "scripts": {
       "start": "node dist/index.js",
       "build": "tsc",
-      "dev":"ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/index.ts",
-      "start:dev": "ts-node src/index.ts"
+      "dev": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/index.ts",
+      "start:dev": "nodemon src/index.ts"
    }
 }

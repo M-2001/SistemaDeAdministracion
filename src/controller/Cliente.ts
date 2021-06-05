@@ -7,7 +7,14 @@ import * as fs from 'fs';
 import { UploadedFile } from 'express-fileupload';
 import * as jwt from 'jsonwebtoken';
 import { transporter } from '../config/nodemailer.config';
+import { Order } from '../entity/Order';
 
+interface OrdenesClient{
+    nombre : string,
+    apellido : string,
+    email : string,
+    ordenes : number
+}
 class ClienteController{
     //create new cliente
     static RegistroCliente = async ( req : Request, res : Response) =>{
@@ -218,6 +225,44 @@ class ClienteController{
         }
         catch(e){
             res.status(404).json({message:'No hay registros con este id: ' + id});
+        }
+    }
+
+    //static BestClients
+    static MejoresClientes = async (_req: Request, res : Response) =>{
+        const clienteRepo = getRepository(Cliente);
+        const ordenRepo = getRepository(Order);
+        const OrdenesCliente : OrdenesClient[] = [];
+        
+        try {
+            const clientes = await clienteRepo.find();
+            if(!clientes){
+                return res.status(400).json({message: 'No se encontraron resultados!!!'});
+            }else{
+                for (let index = 0; index < clientes.length; index++) {
+                    
+                    let cliente = clientes[index].id;
+                    let client = clientes[index];
+                    try {
+                        const OrdenesClient = await ordenRepo.createQueryBuilder('orden')
+                        .innerJoin('orden.cliente', 'orClt')
+                        .addSelect(['orClt.nombre', 'orClt.id','orClt.email'])
+                        .where({cliente})
+                        .getMany()
+
+                        let items = { nombre : client.nombre, apellido: client.apellido, email: client.email, ordenes: OrdenesClient.length}
+                        OrdenesCliente.push(items)
+                        
+                    } catch (error) {
+                        console.log(error);
+                    }
+                    
+                };
+                res.json({OrdenesCliente});
+            }
+            
+        } catch (error) {
+            console.log(error);
         }
     }
 }

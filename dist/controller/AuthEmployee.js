@@ -39,7 +39,7 @@ AuthEmployeeController.Login = (req, res) => __awaiter(void 0, void 0, void 0, f
         const token = jwt.sign({ id: emp.id, code: emp.codeAccess }, process.env.JWTSECRET, {
             expiresIn: '48h'
         });
-        res.json({ message: 'Ok', token: token, });
+        res.json({ message: 'Ok', token: token, /*refreshToken,*/ });
     }
     //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
     // user.refreshToken = refreshToken;
