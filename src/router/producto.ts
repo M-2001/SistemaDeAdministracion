@@ -18,13 +18,14 @@ router.post('/file-product/:id', CheckJwt, producto.ImagenProducto);
 router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto
 router.put('/status', CheckJwt, producto.EstadoProducto);
+
+router.get('/bestSellers', producto.ProductosMasVendidos);
+
+//produstos con mas rating
+router.get('/more-ratings', producto.ProductosConMasRatings)
 router.post('/', CheckJwt, producto.AgregarProducto);
 router.get('/:id', producto.ObtenerProductoPorID);
 router.put('/:id', producto.EditarProducto);
 router.delete('/:id', [CheckJwt, checkRole(['admin'])], producto.EliminarProducto);
-router.post('/bestSellers', producto.ProductosMasVendidos);
-
-//produstos con mas rating
-router.post('/more-ratings', producto.ProductosConMasRatings)
 
 export default router;

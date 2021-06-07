@@ -106,7 +106,7 @@ class CuponController {
         } catch (error) {
             return res.status(409).json({ message: 'Algo ha salido mal!' });
         }
-        res.json({ messge: 'Cupon ha sido eliminado!' });
+        res.json({ message: 'Cupon ha sido eliminado!',ok:true });
     };
 
 }

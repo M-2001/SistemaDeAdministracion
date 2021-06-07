@@ -377,7 +377,7 @@ class ProductoController {
         }
     };
     //productos mas vendidos
-   
+
 
     static getImage = (req: Request, res: Response) => {
         const name = req.query.image
@@ -387,46 +387,100 @@ class ProductoController {
             return;
         }
     }
-       //productos mas vendidos
-    static ProductosMasVendidos = async(_: Request, res: Response)=>{
+    //productos mas vendidos
+    static ProductosMasVendidos = async (req: Request, res: Response) => {
         const productoRepo = getRepository(Producto)
         const detalleORepo = getRepository(DetalleOrden)
+        let pagina = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take)
         try {
-            const productos = await productoRepo.find()
-            productos.map(async pro  => {
+            const [productos, totalItems] = await productoRepo.createQueryBuilder('producto')
+                .leftJoin('producto.proveedor', 'prov',)
+                .addSelect(['prov.nombre_proveedor'])
+                .leftJoin('producto.categoria', 'cat')
+                .addSelect(['cat.categoria'])
+                .leftJoin('producto.marca', 'marca',)
+                .addSelect(['marca.marca'])
+                .skip((pagina - 1) * take)
+                .take(take)
+                .getManyAndCount();
+            const formated = productos.map(async pro => {
                 let producto = pro.id
                 const DO = await detalleORepo.createQueryBuilder('detalle_orden')
-                .innerJoin('detalle_orden.producto','dto')
-                .addSelect(['dto.nombreProducto','dto.id'])
-                .where({producto})
-                //.orderBy('SUM(detalle_orden.cantidad)', 'DESC')
-                .getMany()
+                    .innerJoin('detalle_orden.producto', 'dto')
+                    .addSelect(['dto.nombreProducto', 'dto.id'])
+                    .where({ producto })
+                    .getMany()
 
-                let totalVenta = DO.map((a)=> a.cantidad).reduce((a,b)=>a+b);
-                console.log(pro, `Total ventas: `, totalVenta);
-                //console.log(DO.map((a)=>a.cantidad).reduce((a,b)=> a+b));
+                let totalVenta = DO.map((a) => a.cantidad).reduce((a, b) => a + b, 0);
+                const newPro = { ...pro, totalVenta }
+                return newPro;
             });
-            res.json({productos})
+            let totalPages: number;
+            let nextPage: number;
+            let prevPage: number
+            if (productos.length > 0) {
+                totalPages = totalItems / take;
+                if (totalPages % 1 !== 0) {
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                nextPage = pagina >= totalPages ? pagina : pagina + 1
+                prevPage = pagina <= 1 ? pagina : pagina - 1
+            }
+            Promise.all(formated).then(values => {
+                res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+            });
+
         } catch (error) {
             console.log(error);
         }
     }
     //productos mas vendidos
-    static ProductosConMasRatings = async(_req: Request, res: Response)=>{
+    static ProductosConMasRatings = async (req: Request, res: Response) => {
         const productoRepo = getRepository(Producto)
         const ratingRepo = getRepository(Rating)
+        let pagina = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take)
         try {
-            const productos = await productoRepo.find()
-            productos.map(async pro  => {
+            const [productos, totalItems] = await productoRepo.createQueryBuilder('producto')
+                .leftJoin('producto.proveedor', 'prov',)
+                .addSelect(['prov.nombre_proveedor'])
+                .leftJoin('producto.categoria', 'cat')
+                .addSelect(['cat.categoria'])
+                .leftJoin('producto.marca', 'marca',)
+                .addSelect(['marca.marca'])
+                .skip((pagina - 1) * take)
+                .take(take)
+                .getManyAndCount();
+            const formated = productos.map(async pro => {
                 let producto = pro.id
                 const Rating = await ratingRepo.createQueryBuilder('rating')
-                .innerJoin('rating.producto','dto')
-                .addSelect(['dto.nombreProducto','dto.id'])
-                .where({producto})
-                .getMany()
-                console.log(pro, `ratings: `, Rating.length);
+                    .innerJoin('rating.producto', 'dto')
+                    .addSelect(['dto.nombreProducto', 'dto.id'])
+                    .where({ producto })
+                    .getMany()
+                let totalRating = Rating.map((a) => a.ratingNumber).reduce((a, b) => a + b, 0);
+                const newPro = { ...pro, totalRating }
+                return newPro;
             });
-            res.json({productos})
+            let totalPages: number;
+            let nextPage: number;
+            let prevPage: number
+            if (productos.length > 0) {
+                totalPages = totalItems / take;
+                if (totalPages % 1 !== 0) {
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                nextPage = pagina >= totalPages ? pagina : pagina + 1
+                prevPage = pagina <= 1 ? pagina : pagina - 1
+            }
+            Promise.all(formated).then(values => {
+                res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+            });
         } catch (error) {
             console.log(error);
         }
