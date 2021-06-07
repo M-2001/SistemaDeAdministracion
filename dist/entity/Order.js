@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Order = void 0;
 const typeorm_1 = require("typeorm");
 const Cliente_1 = require("./Cliente");
 const Detalles_Orden_1 = require("./Detalles_Orden");
@@ -35,6 +36,10 @@ __decorate([
     typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
     __metadata("design:type", Number)
 ], Order.prototype, "TotalDesc", void 0);
+__decorate([
+    typeorm_1.Column(),
+    __metadata("design:type", String)
+], Order.prototype, "codigoOrden", void 0);
 __decorate([
     typeorm_1.Column(),
     __metadata("design:type", Number)

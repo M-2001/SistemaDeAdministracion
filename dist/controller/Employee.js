@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EmpleadoController = void 0;
 const class_validator_1 = require("class-validator");
 const typeorm_1 = require("typeorm");
 const Employee_1 = require("../entity/Employee");

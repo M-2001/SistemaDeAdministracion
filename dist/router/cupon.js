@@ -10,6 +10,7 @@ router.post('/create-cupon', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], cupo
 router.put('/status', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], cupon.EstadoCupon);
 router.get('/show-cupons', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], cupon.MostrarCupones);
 router.post('/cupon-paginated', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], cupon.MostrarCuponesPaginados);
+router.post('/share-cupon', cupon.SendCupon);
 router.delete('/destroy-cupon', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], cupon.EliminarCupon);
 exports.default = router;
 //# sourceMappingURL=cupon.js.map

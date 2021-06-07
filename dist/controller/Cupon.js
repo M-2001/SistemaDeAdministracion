@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Cupones_1 = require("../entity/Cupones");
+const Cliente_1 = require("../entity/Cliente");
+const nodemailer_config_1 = require("../config/nodemailer.config");
 class CuponController {
 }
 //crear cupon de descuento
@@ -115,6 +117,73 @@ CuponController.EliminarCupon = (req, res) => __awaiter(void 0, void 0, void 0, 
         return res.status(409).json({ message: 'Algo ha salido mal!' });
     }
     res.json({ messge: 'Cupon ha sido eliminado!' });
+});
+//enviar Cupon
+CuponController.SendCupon = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
+    const email = req.body.email;
+    let CODIGO_CUPON = req.query.CODIGO_CUPON;
+    let cuponExist;
+    let cliente;
+    //bus
+    try {
+        if (CODIGO_CUPON) {
+            try {
+                cuponExist = yield cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
+                if (cuponExist.status == true) {
+                    return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
+                }
+                else {
+                    try {
+                        cliente = yield clienteRepo.findOne({ where: { email } });
+                        if (!cliente) {
+                            return res.status(400).json({ messge: 'El cliente con el email: ' + email + ' no existe!!!' });
+                        }
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
+                    //Try send email 
+                    try {
+                        let subject = ` ${cliente.nombre + " " + cliente.apellido + " , Por ser cliente especial !!!"} `;
+                        yield nodemailer_config_1.transporter.sendMail({
+                            from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
+                            to: cliente.email,
+                            subject: subject,
+                            html: ` <!DOCTYPE html>
+                                <html lang="en">
+                                <head> </head>
+                                <body><div>
+                                <h3>Felicidades !!! Por ser cliente especial te regalamos un cupon de descuento en el total de tu compra</h3>
+                                <p>Aplica tu cupón con un %${cuponExist.descuento} de descuento en tu compra total!!! </p>
+                                <p>Codigo Cupon: ${cuponExist.codigo}</p>
+                                <p>${cliente.nombre + " " + cliente.apellido}, este Cupón solo es valido para ti, si lo compartes ya no sera valido</p>
+                                
+                                <a href="${"Link tienda"}">Visitanos pronto !!!</a>
+                                </div>
+                                </body>
+                                </html>`
+                        });
+                        res.json({ message: "Email enviado con exito!!!" });
+                    }
+                    catch (error) {
+                        console.log('Algo salio mal al enviar email!!!');
+                    }
+                    console.log('vamos bien loco');
+                }
+            }
+            catch (error) {
+                return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
+            }
+        }
+        else {
+            return res.status(405).json({ message: 'Debe enviar un codigo de cupon!!!' });
+        }
+    }
+    catch (error) {
+        console.log(error);
+    }
 });
 exports.default = CuponController;
 //# sourceMappingURL=Cupon.js.map

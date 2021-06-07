@@ -41,7 +41,7 @@
       "start:dev": "ts-node-dev src/index.ts",
       "start": "node dist/index.js",
       "build": "tsc",
-      "serve": "nodemon dist/index.js",
+      "dev": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/index.ts",
       "typeorm":"node  --requiere ts-node/register  ./node_modules/typeorm/cli.js"
    }
 }

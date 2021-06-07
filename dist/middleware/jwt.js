@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CheckJwt = void 0;
 const jwt = require("jsonwebtoken");
-exports.CheckJwt = (req, res, next) => {
+const CheckJwt = (req, res, next) => {
     const token = req.headers.token;
     //check if parser is undefined
     if (typeof token !== 'undefined') {
@@ -29,4 +30,5 @@ exports.CheckJwt = (req, res, next) => {
         res.status(403).json({ message: 'No Authorized!' });
     }
 };
+exports.CheckJwt = CheckJwt;
 //# sourceMappingURL=jwt.js.map

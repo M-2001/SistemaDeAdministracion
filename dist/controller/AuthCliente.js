@@ -201,7 +201,7 @@ AuthClienteController.refreshToken = (req, res) => __awaiter(void 0, void 0, voi
     catch (error) {
         return res.status(401).json({ message: 'somthing goes wrong!' });
     }
-    const token = jwt.sign({ clienteid: cliente.id, email: cliente.email }, process.env.JWTSECRET, { expiresIn: '10m' });
+    const token = jwt.sign({ clienteid: cliente.id, email: cliente.email }, process.env.JWTSECRET, { expiresIn: '48h' });
     res.json({ ok: true, token });
 });
 exports.default = AuthClienteController;
