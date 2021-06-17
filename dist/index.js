@@ -13,10 +13,18 @@ require("reflect-metadata");
 const typeorm_1 = require("typeorm");
 const index_1 = require("./server/index");
 const dotenv = require("dotenv");
+const express = require("express");
+const cors = require("cors");
+const app = express();
 dotenv.config();
-const server = new index_1.default();
-server.listen();
-typeorm_1.createConnection().then(() => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Database Online!!!');
-})).catch(error => console.log(error));
+const SocketServer = index_1.default.instance;
+SocketServer.start(() => {
+    app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+    console.log('Servidor corriendo en puerto: ' + SocketServer.port);
+    typeorm_1.createConnection().then((connection) => __awaiter(void 0, void 0, void 0, function* () {
+        if (connection) {
+            return console.log('Conectado a la base de datos con exito!!!');
+        }
+    })).catch(error => console.log(error));
+});
 //# sourceMappingURL=index.js.map

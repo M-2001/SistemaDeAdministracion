@@ -2,12 +2,8 @@ import { getRepository } from 'typeorm';
 import { Request, Response } from 'express';
 import { DetalleOrden } from '../entity/Detalles_Orden';
 import OrdenController from './Orden';
-import Stripe from 'stripe';
-const stripe = new Stripe(process.env.SECRETKEYSTRIPE, {apiVersion :'2020-08-27',})
 
-const orden = OrdenController;
 
-//const stripe = require('stripe')(process.env.SECRETKEYSTRIPE);
 
 class OrdenDetalle {
     static MostrarDteOrdenPaginadas = async ( req : Request, res : Response ) => {

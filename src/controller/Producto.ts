@@ -1,5 +1,5 @@
 import { validate } from 'class-validator';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { createQueryBuilder, getRepository } from 'typeorm';
 import { Producto } from '../entity/Producto';
 import { UploadedFile } from 'express-fileupload';
@@ -7,12 +7,26 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { DetalleOrden } from '../entity/Detalles_Orden';
 import { Rating } from '../entity/Rating';
+import { resolve } from 'url';
 
 class ProductoController{
 
     //mostrar todos los productos
+    public getAllProducts = async(): Promise<Producto[]>=>{
+        try {
+            const productoRepo = getRepository(Producto)
+            const producto = await productoRepo.find()
+            if (producto.length > 0) {
+                return producto
+            } 
+        } catch (error) {
+            return []
+        }
+    };
     
-    static MostrarProductos = async ( req : Request, res : Response) => {
+    static MostrarProductos = async( req: Request, res: Response): Promise<void> =>{
+        return new Promise( async( resolve, reject) =>{
+        
         let pagina = req.query.pagina || 0;
         pagina = Number(pagina);
         let take = req.query.limit || 10;
@@ -25,19 +39,26 @@ class ProductoController{
             .leftJoin('producto.marca', 'marca',)
             .addSelect(['marca.marca'])
             .leftJoin('producto.categoria', 'cat')
+            
             .addSelect(['cat.categoria'])
             .skip(pagina)
             .take(take)
-            .getManyAndCount();
-            if (producto.length > 0) {
-                res.json({productos : producto})
-            } else {
-                res.json({message : 'No se encontraron resultados'})
-            }
+            .getManyAndCount()
+            .then(productos =>{
+                return res.json({productos})
+            })
+            .catch(err => {
+                return res.json({message:'Algo salio mal'})
+            })
+            // if (producto.length > 0) {
+            //     return res.json({productos : producto})
+            // } else {
+            //     return res.json({message : 'No se encontraron resultados'})
+            // }
         } catch (error) {
-            res.json({message:'Algo ha salido mal'})
+            return res.json({message : 'No se encontraron resultados'})
         }
-        
+        })
     };
 
     //mostrar productos paginados

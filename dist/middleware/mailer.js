@@ -14,7 +14,10 @@ exports.transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     }
 });
-exports.transporter.verify().then(() => {
-    console.log('Ready to send Email');
+exports.transporter.verify().then((connected) => {
+    if (connected) {
+        console.log('Servidor listo para enviar correos!!!');
+    }
+    console.log('Sucedio un error al intentar connectar con el servdor de correos!!!');
 });
 //# sourceMappingURL=mailer.js.map

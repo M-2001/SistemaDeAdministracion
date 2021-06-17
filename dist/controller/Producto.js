@@ -17,35 +17,56 @@ const fs = require("fs");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 const Rating_1 = require("../entity/Rating");
 class ProductoController {
+    constructor() {
+        //mostrar todos los productos
+        this.getAllProducts = () => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+                const producto = yield productoRepo.find();
+                if (producto.length > 0) {
+                    return producto;
+                }
+            }
+            catch (error) {
+                return [];
+            }
+        });
+    }
 }
-//mostrar todos los productos
 ProductoController.MostrarProductos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let pagina = req.query.pagina || 0;
-    pagina = Number(pagina);
-    let take = req.query.limit || 10;
-    take = Number(take);
-    try {
-        const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-        const producto = yield productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
-            .leftJoin('producto.categoria', 'cat')
-            .addSelect(['cat.categoria'])
-            .skip(pagina)
-            .take(take)
-            .getManyAndCount();
-        if (producto.length > 0) {
-            res.json({ productos: producto });
+    return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
+        let pagina = req.query.pagina || 0;
+        pagina = Number(pagina);
+        let take = req.query.limit || 10;
+        take = Number(take);
+        try {
+            const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+            const producto = yield productoRepo.createQueryBuilder('producto')
+                .leftJoin('producto.proveedor', 'prov')
+                .addSelect(['prov.nombre_proveedor'])
+                .leftJoin('producto.marca', 'marca')
+                .addSelect(['marca.marca'])
+                .leftJoin('producto.categoria', 'cat')
+                .addSelect(['cat.categoria'])
+                .skip(pagina)
+                .take(take)
+                .getManyAndCount()
+                .then(productos => {
+                return res.json({ productos });
+            })
+                .catch(err => {
+                return res.json({ message: 'Algo salio mal' });
+            });
+            // if (producto.length > 0) {
+            //     return res.json({productos : producto})
+            // } else {
+            //     return res.json({message : 'No se encontraron resultados'})
+            // }
         }
-        else {
-            res.json({ message: 'No se encontraron resultados' });
+        catch (error) {
+            return res.json({ message: 'No se encontraron resultados' });
         }
-    }
-    catch (error) {
-        res.json({ message: 'Algo ha salido mal' });
-    }
+    }));
 });
 //mostrar productos paginados
 ProductoController.ProductosPaginados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

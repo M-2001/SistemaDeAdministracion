@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Carrito_1 = require("./Carrito");
 const Producto_1 = require("../entity/Producto");
 const typeorm_1 = require("typeorm");
 const Order_1 = require("../entity/Order");
@@ -18,21 +17,19 @@ const nodemailer_config_1 = require("../config/nodemailer.config");
 const PaypalSdk = require("paypal-rest-sdk");
 const Cliente_1 = require("../entity/Cliente");
 const Cupones_1 = require("../entity/Cupones");
-const carrito = Carrito_1.default;
 PaypalSdk.configure({
     'mode': 'sandbox',
     'client_id': 'AaPEDYf8ahu1pp5C2bmNOI5882b6dBnHaG2e3ZAOf2TvR6p01Ad3v1K2npww4os2O2sbl0tKQbdn5HtT',
     'client_secret': 'EBEvKMxyW2YpshzcQbycRzHJIirGDcvs8tG_u_VD56FWzZzzNOrl_NUcgdI8bSlmvt-g4CKAL8MGANvD'
 });
 let Items;
-let CODE_CUPON;
 class PayController {
 }
 PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let items = req.body;
     let CODIGO_CUPON = req.query.CODIGO_CUPON;
     Items = items;
-    CODE_CUPON = CODIGO_CUPON;
+    //let CODE_CUPON = CODIGO_CUPON;
     const proRepo = typeorm_1.getRepository(Producto_1.Producto);
     const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     let totalPrice = 0;
@@ -57,7 +54,6 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                             amount += totalPay;
                             totalPrice += totalPay;
                             const OnlyTwoDecimals = amount.toFixed(2);
-                            //Items.push(items)
                             console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                         }
                     }
@@ -82,7 +78,6 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     amount += totalPay;
                     totalPrice += totalPay;
                     const OnlyTwoDecimals = amount.toFixed(2);
-                    //Items.push(items)
                     console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                 }
             }
@@ -94,8 +89,18 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     catch (error) {
         return console.log('Algo salio mal');
     }
-    let total = totalPrice.toFixed(2);
-    //res.json({ total });
+    let urlSuccess;
+    let total;
+    if (cuponExist) {
+        const Totaldesct = totalPrice * cuponExist.descuento / 100;
+        const Totalprice = totalPrice - Totaldesct;
+        urlSuccess = "http://localhost:5000/pay-checkout/success?CODIGO_CUPON=" + CODIGO_CUPON;
+        total = Totalprice.toFixed(2);
+    }
+    else {
+        urlSuccess = "http://localhost:5000/pay-checkout/success";
+        total = totalPrice.toFixed(2);
+    }
     //try to pay
     try {
         const create_payment = {
@@ -104,7 +109,7 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": "http://localhost:5000/pay-checkout/success",
+                "return_url": urlSuccess,
                 "cancel_url": "http://localhost:5000/pay-checkout/cancel"
             },
             "transactions": [{
@@ -147,11 +152,12 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let items = Items;
-    let CODIGO_CUPON = CODE_CUPON;
     let ordenC;
     let cuponExist;
+    //var params = new URLSearchParams(location.search);
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
+    const CODIGO_CUPON = req.query.CODIGO_CUPON;
     let totalPrice = 0;
     let totalDesc = 0;
     let total;

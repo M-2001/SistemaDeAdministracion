@@ -18,11 +18,14 @@ const cupon_1 = require("../router/cupon");
 const pay_1 = require("../router/pay");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
-const path = require("path");
-const PORT = process.env.PORT || 5000;
+const SocketIO = require("socket.io");
+const http = require("http");
+const sockets = require("../sockets/sockets");
+//const PORT = process.env.PORT || 5000
 class Server {
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor() {
+        //sirve para iniciar todas las rutas necesarias
         this.empleado = { empleado: '/empleado' };
         this.cliente = { cliente: '/user' };
         this.authEmpleado = { auth: '/auth' };
@@ -40,26 +43,21 @@ class Server {
         this.app = express();
         this.middleware();
         this.routes();
-    }
-    //funcion principal para levantar un servido en el puerto especificado
-    listen() {
-        this.app.listen(PORT, () => {
-            console.log(`Server is running on port: ${PORT}`);
-        });
+        this.config();
+        this.sockets();
+        this.conectarCliente();
     }
     //middlewares necesarios para la aplicacion
     middleware() {
         //this.app.set('view engine', 'ejs')
+        //CORS
+        this.app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
         //fileupload
         this.app.use(fileUpload());
-        //CORS
-        this.app.use(cors());
         //Lectura del body
         this.app.use(express.json());
         //Parseo de body
         this.app.use(bodyParser.urlencoded({ extended: true }));
-        this.app.use('/', express.static(path.join(__dirname, '../views')));
-        this.app.get('/', (req, res) => res.redirect('../views/index.html'));
         //this.app.get('/', (req, res) => res.render('index'));
     }
     //Declaracion de rutas de la aplicacion
@@ -79,6 +77,41 @@ class Server {
         this.app.use(this.cupon.cupon, cupon_1.default);
         this.app.use(this.pay.pay, pay_1.default);
     }
+    //servira para crear una nueva instancia del servidor
+    static get instance() {
+        return this._intance || (this._intance = new this());
+    }
+    //configuracion del puerto en cual correra la aplicaccion
+    config() {
+        this.port = process.env.PORT || Server.PORT;
+        this.httpServer = new http.Server(this.app);
+    }
+    //configuracion para conectar con los sockets
+    sockets() {
+        this.io = new SocketIO.Server(this.httpServer, {
+            cors: {
+                origin: ['http://localhost:3000'],
+                allowedHeaders: 'Content-Type',
+                methods: 'GET, POST',
+                credentials: true,
+            }
+        });
+        //require('socket.io')(this.httpServer,{origin:'*',})
+    }
+    //connectar cliente que escuchar los eventos del servidor
+    conectarCliente() {
+        this.io.on("connect", cliente => {
+            this.socketID = cliente.id;
+            console.log('Usuario conectado al servidor con id: ' + this.socketID);
+            sockets.ConnectClient(cliente, this.io);
+            sockets.desconectar(cliente, this.io);
+        });
+    }
+    //funcion principal que se encarga de iniciar el servidor
+    start(callback) {
+        this.httpServer.listen(this.port, callback);
+    }
 }
+Server.PORT = 5000;
 exports.default = Server;
 //# sourceMappingURL=index.js.map
