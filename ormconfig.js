@@ -18,7 +18,7 @@ module.exports = {
    // "logging": false,
 
    "entities": [
-      "src/entity/**/*.ts"
+      "dist/entity/**/*.js"
    ],
    "migrations": [
       "dist/migration/**/*.js"

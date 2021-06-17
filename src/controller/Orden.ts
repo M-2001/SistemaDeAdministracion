@@ -16,8 +16,22 @@ interface Product {
 
 class OrdenController {
 
-    static MostrarOrdenPaginadas = async (req: Request, res: Response) => {
-        let pagina = req.query.pagina || 1;
+    //mostrar ordenes para evento en los sockets
+    public MostrarOrdenes = async(): Promise<Order[]>=>{
+        try {
+            const ordenRepo = getRepository(Order)
+            const orden = await ordenRepo.find()
+            if (orden.length > 0) {
+                return orden
+            } 
+        } catch (error) {
+            return []
+        }
+    }
+
+    //mostrar ordenes Paginadas
+    static MostrarOrdenPaginadas = async ( req : Request, res : Response ) => {
+        let pagina  = req.query.pagina || 1;
         pagina = Number(pagina);
         let take = req.query.limit || 5;
         let searchOrden = req.query.searchOrden || "";

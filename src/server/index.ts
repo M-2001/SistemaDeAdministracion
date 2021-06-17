@@ -1,6 +1,6 @@
-import { Application } from "express";
+import { Application, Response } from 'express';
 import * as express from 'express';
-import cors = require('cors');
+import cors = require ('cors');
 import routesEmpleado from '../router/empleado';
 import RoutesCliente from '../router/cliente';
 import authemp from '../router/authempleado';
@@ -15,9 +15,34 @@ import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import routesPay from '../router/pay';
-import * as fileUpload from 'express-fileupload'
-import * as path from 'path';
-class Server {
+import * as bodyParser from "body-parser";
+import * as fileUpload from 'express-fileupload';
+import * as SocketIO from 'socket.io';
+
+import * as http from 'http';
+
+import * as sockets from '../sockets/sockets'
+
+import { ConnectClient } from '../sockets/sockets';
+import  ejs = require('ejs');
+import ProductoController from "../controller/Producto";
+//const PORT = process.env.PORT || 5000
+
+class Server{
+    public static readonly PORT: number = 5000;
+
+    private static _intance : Server;
+    private app : express.Application;
+
+    private httpServer : http.Server;
+
+    //encargada de eventos de los sockets
+    private io : SocketIO.Server;
+    private socketID: any;
+    
+    public port: string | number;
+    
+    //sirve para iniciar todas las rutas necesarias
     private routenames = {
         empleado: '/api/empleado',
         cliente: '/api/user',
@@ -35,51 +60,40 @@ class Server {
         cupon: '/api/cupon',
         pay:'/api/pay-checkout'
     }
-    private app: Application;
-    private port: string;
 
     //se encarga de ejecutar todos los metodos que sean llamados
-    constructor() {
+    constructor(){
         this.app = express();
-        this.port = process.env.PORT || '3080';
         this.middleware();
         this.routes();
-
-    }
-    //funcion principal para levantar un servido en el puerto especificado
-    listen() {
-        this.app.listen(this.port, () => {
-            console.log(`Server is running in http://localhost:${this.port}`);
-        });
+        this.config();
+        this.sockets();
+        this.conectarCliente();
+        
     }
     //middlewares necesarios para la aplicacion
-    middleware() {
+    middleware(){
 
         //this.app.set('view engine', 'ejs')
 
+        //CORS
+        this.app.use(cors({origin:'http://localhost:3000', credentials: true}));
+
         //fileupload
         this.app.use(fileUpload());
-
-        //CORS
-        this.app.use(cors());
 
         //Lectura del body
         this.app.use(express.json());
 
         //Parseo de body
-        this.app.use(express.urlencoded({ extended: true }))
-        this.app.use(express.static('src'))
+        this.app.use(bodyParser.urlencoded({extended:true}));
 
-        this.app.use('/', express.static(path.join(__dirname, '../views')))
-
-        this.app.get('/', (req, res)=> res.redirect('../views/index.html'))
-        
         //this.app.get('/', (req, res) => res.render('index'));
-    
-
     }
+
     //Declaracion de rutas de la aplicacion
-    routes() {
+    routes(){
+        this.app.use(this.routenames.empleado, routesEmpleado)
         this.app.use(this.routenames.cliente, RoutesCliente)
         this.app.use(this.routenames.authEmpleado, authemp)
         this.app.use(this.routenames.authCliente, authclt)
@@ -88,12 +102,52 @@ class Server {
         this.app.use(this.routenames.proveedor, routesProveedor)
         this.app.use(this.routenames.producto, routesProd)
         this.app.use(this.routenames.rating, routesRating)
-        this.app.use(this.routenames.orden, routesOrden)
+        this.app.use(this.routenames.orden , routesOrden)
         this.app.use(this.routenames.ordenDte, routesOrdenDte)
         this.app.use(this.routenames.carrito, routescarrito)
         this.app.use(this.routenames.cupon, routesCupon)
-        this.app.use(this.routenames.pay,routesPay)
-        this.app.use(this.routenames.empleado,routesEmpleado)
+        this.app.use(this.routenames.pay, routesPay)
+    }
+
+    //servira para crear una nueva instancia del servidor
+    public static get instance() {
+        return this._intance || (this._intance = new this())
+    }
+
+    //configuracion del puerto en cual correra la aplicaccion
+    private config(): void {
+        this.port = process.env.PORT || Server.PORT;
+        this.httpServer = new http.Server(this.app);
+    }
+
+    //configuracion para conectar con los sockets
+    private sockets (){
+        this.io = new SocketIO.Server(this.httpServer, {
+            cors:{
+                origin:['http://localhost:3000'],
+                allowedHeaders:'Content-Type',
+                methods: 'GET, POST',
+                credentials: true,
+            }
+        })
+        //require('socket.io')(this.httpServer,{origin:'*',})
+    }
+
+    //connectar cliente que escuchar los eventos del servidor
+    private conectarCliente(): void {
+        this.io.on("connect", cliente  => {
+            this.socketID = cliente.id;
+
+            console.log('Usuario conectado al servidor con id: ' + this.socketID);
+
+            sockets.ConnectClient(cliente, this.io);
+            sockets.desconectar(cliente, this.io)
+        });
+    }
+
+    //funcion principal que se encarga de iniciar el servidor
+    start(callback: any) {
+        this.httpServer.listen(this.port, callback);
     }
 }
 export default Server;

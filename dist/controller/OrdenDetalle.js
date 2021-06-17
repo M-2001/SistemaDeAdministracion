@@ -11,11 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
-const Orden_1 = require("./Orden");
-const stripe_1 = require("stripe");
-const stripe = new stripe_1.default(process.env.SECRETKEYSTRIPE, { apiVersion: '2020-08-27', });
-const orden = Orden_1.default;
-//const stripe = require('stripe')(process.env.SECRETKEYSTRIPE);
 class OrdenDetalle {
 }
 OrdenDetalle.MostrarDteOrdenPaginadas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

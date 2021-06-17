@@ -17,6 +17,21 @@ const Cliente_1 = require("../entity/Cliente");
 const nodemailer_config_1 = require("../config/nodemailer.config");
 const Cupones_1 = require("../entity/Cupones");
 class OrdenController {
+    constructor() {
+        //mostrar ordenes para evento en los sockets
+        this.MostrarOrdenes = () => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const ordenRepo = typeorm_1.getRepository(Order_1.Order);
+                const orden = yield ordenRepo.find();
+                if (orden.length > 0) {
+                    return orden;
+                }
+            }
+            catch (error) {
+                return [];
+            }
+        });
+    }
 }
 //mostrar ordenes Paginadas
 OrdenController.MostrarOrdenPaginadas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

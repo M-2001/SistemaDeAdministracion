@@ -10,9 +10,6 @@ import { Cliente } from '../entity/Cliente';
 import { Cupon } from '../entity/Cupones';
 import ItemProducto from '../entity/ItemEmail';
 
-
-const carrito = CarritoController;
-
 PaypalSdk.configure({
     'mode':'sandbox',//sandbox or live
     'client_id': 'AaPEDYf8ahu1pp5C2bmNOI5882b6dBnHaG2e3ZAOf2TvR6p01Ad3v1K2npww4os2O2sbl0tKQbdn5HtT',
@@ -25,7 +22,6 @@ interface Product {
 }
 
 let Items : any;
-let CODE_CUPON : any;
 
 class PayController{
 
@@ -34,11 +30,12 @@ class PayController{
             let items : Product[] = req.body;
             let CODIGO_CUPON = req.query.CODIGO_CUPON;
             Items = items;
-            CODE_CUPON = CODIGO_CUPON;
+            //let CODE_CUPON = CODIGO_CUPON;
             const proRepo =  getRepository(Producto);
             const cuponRepo = getRepository(Cupon);
             let totalPrice : number = 0;
             let cuponExist: Cupon;
+
             try {
                 //verificar CODE_CUPON
                 if (CODIGO_CUPON) {
@@ -60,7 +57,7 @@ class PayController{
                                     amount += totalPay
                                     totalPrice += totalPay
                                     const OnlyTwoDecimals = amount.toFixed(2);
-                                    //Items.push(items)
+                                    
                                     console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                             }
                             } catch (error) {
@@ -83,19 +80,30 @@ class PayController{
                             amount += totalPay
                             totalPrice += totalPay
                             const OnlyTwoDecimals = amount.toFixed(2);
-                            //Items.push(items)
+
                             console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                     }
                     } catch (error) {
                         return console.log('Algo salio mal!!!');
                     }
+                    
+                    
                 }
             } catch (error) {
                 return console.log('Algo salio mal');
             }
+            let urlSuccess : any;
+            let total : string;
+            if (cuponExist) {
+                const Totaldesct = totalPrice * cuponExist.descuento/100;
+                const Totalprice = totalPrice - Totaldesct;
+                urlSuccess = "http://localhost:5000/pay-checkout/success?CODIGO_CUPON=" + CODIGO_CUPON;
+                total = Totalprice.toFixed(2)
+            } else {
+                urlSuccess = "http://localhost:5000/pay-checkout/success";
+                total = totalPrice.toFixed(2);
+            }
 
-            let total = totalPrice.toFixed(2);
-            //res.json({ total });
             //try to pay
             try {
                 const create_payment = {
@@ -104,8 +112,9 @@ class PayController{
                         "payment_method": "paypal"
                         },
                     "redirect_urls": {
-                        "return_url": "http://localhost:3000/pay",
-                        "cancel_url": "http://localhost:3080/api/pay-checkout/cancel"
+
+                        "return_url": urlSuccess,
+                        "cancel_url": "http://localhost:5000/pay-checkout/cancel"
                         },
                     "transactions": [{
                         "amount": {
@@ -118,7 +127,9 @@ class PayController{
                 PaypalSdk.payment.create(create_payment, function(error: any, payment : any){
                     if (error) {
                         //throw error;
-                        console.log('Esto no funciona',error.response.details);
+
+                        console.log('Esto no funciona');
+
                     } else {
                         if(create_payment.payer.payment_method === "paypal"){
                             var redirectUrl;
@@ -145,12 +156,16 @@ class PayController{
         const proRepo = getRepository(Producto);
         const cuponRepo = getRepository(Cupon);
         const clienteRepo = getRepository(Cliente);
-        let CODIGO_CUPON = CODE_CUPON;
+
+        let items = Items;
         let ordenC: Order;
         let cuponExist: Cupon;
-        let items = req.body;
+
+        //var params = new URLSearchParams(location.search);
+        
         const payerId : any = req.query.PayerID;
         const paymentId : any = req.query.paymentId;
+        const CODIGO_CUPON : any = req.query.CODIGO_CUPON;
         let totalPrice : number = 0;
         let totalDesc : number = 0;
         let total : any;
@@ -162,6 +177,7 @@ class PayController{
         try {
             //verificar CODE_CUPON
             if (CODIGO_CUPON) {
+                
                 try {
                     cuponExist = await cuponRepo.findOneOrFail({where:{codigo : CODIGO_CUPON}});
                     if(cuponExist.status == true){
