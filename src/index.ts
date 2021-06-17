@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {createConnection} from "typeorm";
+import { createConnection } from "typeorm";
 import Server from './server/index';
 import  * as dotenv from 'dotenv';
 import * as express from 'express';
@@ -18,5 +18,4 @@ SocketServer.start(()=>{
         }
     }).catch(error => console.log(error));
 });
-
 

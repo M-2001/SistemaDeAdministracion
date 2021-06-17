@@ -43,20 +43,23 @@ class Server{
     public port: string | number;
     
     //sirve para iniciar todas las rutas necesarias
-    private empleado = { empleado: '/empleado'}
-    private cliente = {cliente: '/user'}
-    private authEmpleado = {auth: '/auth'}
-    private authCliente = {auth: '/authU'}
-    private categoria = { categoria : '/categoria'}
-    private marca = { marca :'/marca'}
-    private proveedor = { proveedor : '/proveedor'}
-    private producto = { producto : '/producto'}
-    private rating = { rating : '/producto-rating'}
-    private orden = { orden : '/orden'}
-    private ordenDte = {ordenDte : '/orden-detalle'}
-    private carrito = {carrito : '/carrito'}
-    private cupon = {cupon : '/cupon'}
-    private pay = {pay:'/pay-checkout'}
+    private routenames = {
+        empleado: '/api/empleado',
+        cliente: '/api/user',
+        authEmpleado: '/api/auth',
+        authCliente: '/api/authU',
+        categoria: '/api/categoria',
+        marca: '/api/marca',
+        proveedor: '/api/proveedor',
+        producto: '/api/producto',
+        usuario: '/api/usuario',
+        rating: '/api/producto-rating',
+        orden: '/api/orden',
+        ordenDte: '/api/orden-detalle',
+        carrito: '/api/carrito',
+        cupon: '/api/cupon',
+        pay:'/api/pay-checkout'
+    }
 
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor(){
@@ -90,20 +93,20 @@ class Server{
 
     //Declaracion de rutas de la aplicacion
     routes(){
-        this.app.use(this.empleado.empleado, routesEmpleado)
-        this.app.use(this.cliente.cliente, RoutesCliente)
-        this.app.use(this.authEmpleado.auth, authemp)
-        this.app.use(this.authCliente.auth, authclt)
-        this.app.use(this.categoria.categoria, routesCtria)
-        this.app.use(this.marca.marca, routesMarca)
-        this.app.use(this.proveedor.proveedor, routesProveedor)
-        this.app.use(this.producto.producto, routesProd)
-        this.app.use(this.rating.rating, routesRating)
-        this.app.use(this.orden.orden , routesOrden)
-        this.app.use(this.ordenDte.ordenDte, routesOrdenDte)
-        this.app.use(this.carrito.carrito, routescarrito)
-        this.app.use(this.cupon.cupon, routesCupon)
-        this.app.use(this.pay.pay, routesPay)
+        this.app.use(this.routenames.empleado, routesEmpleado)
+        this.app.use(this.routenames.cliente, RoutesCliente)
+        this.app.use(this.routenames.authEmpleado, authemp)
+        this.app.use(this.routenames.authCliente, authclt)
+        this.app.use(this.routenames.categoria, routesCtria)
+        this.app.use(this.routenames.marca, routesMarca)
+        this.app.use(this.routenames.proveedor, routesProveedor)
+        this.app.use(this.routenames.producto, routesProd)
+        this.app.use(this.routenames.rating, routesRating)
+        this.app.use(this.routenames.orden , routesOrden)
+        this.app.use(this.routenames.ordenDte, routesOrdenDte)
+        this.app.use(this.routenames.carrito, routescarrito)
+        this.app.use(this.routenames.cupon, routesCupon)
+        this.app.use(this.routenames.pay, routesPay)
     }
 
     //servira para crear una nueva instancia del servidor
