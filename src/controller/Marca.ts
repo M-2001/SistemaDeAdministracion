@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { Marca } from '../entity/Marca';
 class MarcaController {
-    static MostrarMarcas = async (req: Request, res: Response) => {
+    static MostrarMarcas = async (_: Request, res: Response) => {
         try {
             const marcaRepo = getRepository(Marca);
             const marca = await marcaRepo.find()
@@ -16,7 +16,6 @@ class MarcaController {
             res.json({ message: 'Algo ha salido mal' })
         }
     };
-
     static MostrarMarcasPaginadas = async (req: Request, res: Response) => {
         let pagina = req.query.pagina || 1;
         let mark = req.query.marca || '';
@@ -25,10 +24,9 @@ class MarcaController {
         take = Number(take);
         try {
             const marcasRepo = getRepository(Marca);
-            // const [marcas, totalItems] = await marcasRepo.findAndCount({take, skip : (pagina -1) * take});
             const [marcas, totalItems] = await marcasRepo.createQueryBuilder('marca').skip((pagina - 1) * take)
                 .take(take)
-                .where("marca.marca like :name", { name:`%${mark}%` })
+                .where("marca.marca like :name", { name: `%${mark}%` })
                 .getManyAndCount()
             if (marcas.length > 0) {
                 let totalPages: number = totalItems / take;
@@ -45,7 +43,6 @@ class MarcaController {
             res.json({ message: 'Algo ha salido mal!' })
         }
     }
-
     static AgregarMarca = async (req: Request, res: Response) => {
         const { marca } = req.body;
         try {
@@ -70,7 +67,6 @@ class MarcaController {
         //all ok 
         res.json({ message: 'Se ha agregado una nueva marca' });
     };
-
     static ObtenerMarcaPorID = async (req: Request, res: Response) => {
         const { id } = req.params;
         try {
@@ -81,9 +77,8 @@ class MarcaController {
             return res.status(404).json({ message: 'No hay registros con este id: ' + id });
         }
     };
-
     static ActualizarMarca = async (req: Request, res: Response) => {
-        let marc;
+        let marc: Marca;
         const { id } = req.params;
         const { marca } = req.body;
         const marcaRepo = getRepository(Marca);
@@ -93,8 +88,6 @@ class MarcaController {
         } catch (error) {
             return res.status(404).json({ message: 'No se han encontrado resultados con el id: ' + id })
         }
-        const ValidateOps = { validationError: { target: false, value: false } };
-        const errors = await validate(marc, ValidateOps);
         //Try to save data Category
         try {
             await marcaRepo.save(marc)
@@ -103,9 +96,8 @@ class MarcaController {
         }
         res.json({ messge: 'Se actualizo el registro!' });
     };
-
     static EliminarMarca = async (req: Request, res: Response) => {
-        let marca;
+        let marca: Marca;
         const { id } = req.params;
         const marcaRepo = getRepository(Marca);
         try {
@@ -117,14 +109,12 @@ class MarcaController {
         try {
             await marcaRepo.remove(marca)
         } catch (error) {
-            return res.status(409).json({ message: 'Algo ha salido mal!' });
+            return res.send({ message: 'No puedes eliminar esta marca porque podria haber registros vinculados' });
         }
-        res.json({ messge: 'Marca ha sido eliminada!' });
+        res.json({ messge: 'Marca ha sido eliminada!', ok: true });
     };
-
-    //estado marca
     static EstadoMarca = async (req: Request, res: Response) => {
-        let marca;
+        let marca: Marca;
         const id = req.body;
         const marcaRepo = getRepository(Marca);
         try {

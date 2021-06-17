@@ -24,6 +24,9 @@ export class Employee {
 
     @Column({default : ""})
     telefono: string;
+    
+    @Column({default : ""})
+    email: string;
 
     @Column({default : ""})
     direccion: string;

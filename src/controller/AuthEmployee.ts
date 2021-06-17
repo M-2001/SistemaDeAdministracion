@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { validate } from "class-validator";
 import { transporter } from "../middleware/mailer";
+import { json } from "body-parser";
 
 class AuthEmployeeController{
     
@@ -18,21 +19,21 @@ class AuthEmployeeController{
             emp = await empRepository.findOneOrFail({where:{codeAccess : code}});
         }
         catch(e){
-            return res.status(400).json({message:'Code or password incorrect!'})
+            return res.send({message:'Code or password incorrect!',ok:false})
         }
         //check password
         if (!emp.checkPassword(password)){
-            return res.status(400).json({message:'Code or password incorrect'});
+            return res.send({message:'Code or password incorrect',ok:false});
         }
 
         // if(emp.estado == false){
         //     res.json({ok : false, message :'Access denied'});
         // }   
         else{
-            const token =  jwt.sign({id: emp.id, code: emp.codeAccess}, process.env.JWTSECRET,{
+            const token =  jwt.sign({id: emp.id, code: emp.codeAccess,role:emp.role}, process.env.JWTSECRET,{
             expiresIn : '48h'
         }); 
-        res.json({message:'Ok', token : token, /*refreshToken,*/});
+        res.json({message:'Ok', token : token,ok:true/*refreshToken,*/});
         }
         //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
 
@@ -75,46 +76,46 @@ class AuthEmployeeController{
 
     //ForgotPassword
     static forgotPassword = async(req: Request, res: Response)=>{
-        const {code} = req.body;
-        if(!(code)){
-            return res.status(400).json({message: 'Code es requerido para cambiar password'});
+        const {email} = req.body;
+        if(!(email)){
+            return res.status(400).json({message: 'El correo es requerido para cambiar password'});
         }
-        const message = 'check your email for a link to reset your password.';
+        const message = 'hemos enviado lo necesario a tu correo';
         let verifycationLink;
         let emailStatus = 'Ok';
-
+        let token:string;
         const emplRespo = getRepository(Employee);
         let empl : Employee;
 
         try{
-            empl = await emplRespo.findOneOrFail({where:{codeAccess : code}});
-            const token = jwt.sign({id: empl.id, code: empl.codeAccess}, process.env.JWTSECRETRESET, {expiresIn: '30m'});
-            verifycationLink = `http://localhost:9000/new-password/${token}`;
-            empl.resetPassword = token;
+            empl = await emplRespo.findOneOrFail({where:{email : email}});
+            token = jwt.sign({id: empl.id, code: empl.codeAccess}, process.env.JWTSECRETRESET, {expiresIn: '30m'});
+            verifycationLink = `http://localhost:3000/reset-password/${token}`;
 
         }catch(e){
-            return res.json({message});
+            return res.json({ok:false,message:'no se encontro to correo en los registros'});
         }
         //TODO: sendEmail
-        //try{
-                // await transporter.sendMail({
-                // from : '"Forgot Password " <castlem791@gmail.com>',//sender address
-                // to: empl.email,
-                // subject: "Forgot Password",
-                //html: '<b>Please check on the following link , or paste this into your browser to complete the process:</b>
-                //<a href="${verifycationLink}">${verifycationLink}</a>',
-            //});
-        // }catch(error){
-        //     emailStatus = error;
-        //     return res.status(401).json({message:'Something goes wrong!'});
-        // }
         try{
+                await transporter.sendMail({
+                from : '"Forgot Password " <castlem791@gmail.com>',//sender address
+                to: empl.email,
+                subject: "Forgot Password",
+                html: `<b>Please check on the following link , or paste this into your browser to complete the process:</b>
+                <a href="${verifycationLink}">${verifycationLink}</a>`,
+            });
+        }catch(error){
+            emailStatus = error;
+            return res.status(401).json({message:'Something goes wrong!'});
+        }
+        try{
+            empl.resetPassword = token
             await emplRespo.save(empl);
         }catch(error){
             emailStatus = error;
             return res.status(400).json({message:'Something goes wrong!'})
         }
-        res.json({message, info: emailStatus, verifycationLink});
+        res.json({message, ok:true,emailStatus});
     };
 
     //resetPassword
@@ -122,17 +123,18 @@ class AuthEmployeeController{
         const {newPassword} = req.body;
         const resetPassword = req.headers.reset as string;
         if(!(resetPassword && newPassword)){
-            res.status(400).json({message:'all the fields are require'});
+            return res.status(400).json({message:'all the fields are require'});
         }
         const emplRepo = getRepository(Employee);
         let jwtPayload;
         let empl: Employee;
-        try{
+        try {
+            empl = await emplRepo.findOneOrFail({ where: { resetPassword } });
             jwtPayload = jwt.verify(resetPassword, process.env.JWTSECRETRESET);
-            empl = await emplRepo.findOneOrFail({where: {resetPassword}});
+            console.log(empl)
 
-        }catch(error){
-            return res.status(401).json({message: 'error'})
+        } catch (error) {
+            return res.status(401).json({ message: 'No se ah completado la accion' })
         }
         empl.password = newPassword;
 
@@ -149,7 +151,7 @@ class AuthEmployeeController{
         }catch(error){
             return res.status(400).json({message:error});
         }
-        res.json({message:'password changed!'})
+        res.json({message:'password changed!',ok:true})
     }
 
     //activar cuenta administrador
@@ -182,5 +184,23 @@ class AuthEmployeeController{
         }
         res.json({message:'Registro Activado!'})
     };
+    static addNewPassword = async (req: Request, res: Response)=>{
+        const id = req.params
+        const { password } = req.body
+        let employee:Employee;
+        const emplRepo = getRepository(Employee);
+        try {
+            employee = await emplRepo.findOneOrFail(id)
+            if(employee){
+                employee.password = password
+                employee.hashPassword()
+                await emplRepo.save(employee)
+                return res.send({message:"Se guardo la contraseña",ok:true})
+            }
+        } catch (error) {
+            return res.status(400).json({ message: error });
+        }
+
+    }
 }
 export default AuthEmployeeController;

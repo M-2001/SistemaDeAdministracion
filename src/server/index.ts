@@ -9,19 +9,14 @@ import routesCtria from '../router/categoria';
 import routesMarca from '../router/marca';
 import routesProd from '../router/producto';
 import routesProveedor from '../router/proveedor';
-import routesUsuario from '../router/user';
 import routesRating from '../router/rating';
 import routesOrden from '../router/orden';
 import routesOrdenDte from '../router/OrdenDetalle';
-
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import routesPay from '../router/pay';
-import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload'
 import * as path from 'path';
-import  ejs = require('ejs')
-
 class Server {
     private routenames = {
         empleado: '/api/empleado',
@@ -46,7 +41,7 @@ class Server {
     //se encarga de ejecutar todos los metodos que sean llamados
     constructor() {
         this.app = express();
-        this.port = process.env.PORT || '8081';
+        this.port = process.env.PORT || '3080';
         this.middleware();
         this.routes();
 
@@ -85,7 +80,6 @@ class Server {
     }
     //Declaracion de rutas de la aplicacion
     routes() {
-        this.app.use(this.routenames.authEmpleado, routesEmpleado)
         this.app.use(this.routenames.cliente, RoutesCliente)
         this.app.use(this.routenames.authEmpleado, authemp)
         this.app.use(this.routenames.authCliente, authclt)
@@ -93,13 +87,13 @@ class Server {
         this.app.use(this.routenames.marca, routesMarca)
         this.app.use(this.routenames.proveedor, routesProveedor)
         this.app.use(this.routenames.producto, routesProd)
-        this.app.use(this.routenames.usuario, routesUsuario)
         this.app.use(this.routenames.rating, routesRating)
         this.app.use(this.routenames.orden, routesOrden)
         this.app.use(this.routenames.ordenDte, routesOrdenDte)
         this.app.use(this.routenames.carrito, routescarrito)
         this.app.use(this.routenames.cupon, routesCupon)
         this.app.use(this.routenames.pay,routesPay)
+        this.app.use(this.routenames.empleado,routesEmpleado)
     }
 }
 export default Server;

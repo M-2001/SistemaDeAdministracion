@@ -19,7 +19,7 @@ export class Cupon {
     @CreateDateColumn()
     fechaExp : Date;
 
-    @Column({default : 1})
+    @Column({default : 0})
     status: boolean;
 
 }

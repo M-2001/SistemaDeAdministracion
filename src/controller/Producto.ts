@@ -6,30 +6,25 @@ import { UploadedFile } from 'express-fileupload';
 import * as path from 'path';
 import * as fs from 'fs';
 import { DetalleOrden } from '../entity/Detalles_Orden';
+import { Rating } from '../entity/Rating';
 
 class ProductoController {
 
     //mostrar todos los productos
 
     static MostrarProductos = async (req: Request, res: Response) => {
-        let pagina = req.query.pagina || 0;
-        let product = req.query.producto || "";
-        pagina = Number(pagina);
-        let take = req.query.limit || 10;
-        take = Number(take)
         try {
             const productoRepo = getRepository(Producto)
-            const producto = await productoRepo.createQueryBuilder('producto')
-                .leftJoin('producto.proveedor', 'prov',)
-                .select(['prov.id', 'prov.nombre_proveedor'])
-                .leftJoin('producto.marca', 'marca',)
+            const [producto, _] = await productoRepo.createQueryBuilder('producto')
+                .innerJoin('producto.marca', 'marca')
+                .innerJoin('producto.categoria', 'categoria')
+                .innerJoin('producto.proveedor', 'proveedor')
+                .addSelect(['proveedor.nombre_proveedor', 'proveedor.id'])
+                .addSelect(['categoria.categoria', 'categoria.id'])
                 .addSelect(['marca.marca', 'marca.id'])
-                .leftJoin('producto.categoria', 'cat')
-                .addSelect(['cat.categoria'],)
-                .skip(pagina)
-                .take(take)
-                .where("producto.nombreProducto like :name", { name: `%${product}%` })
-                .getManyAndCount();
+                .take(3)
+                .orderBy('producto.id', 'DESC')
+                .getManyAndCount()
             if (producto.length > 0) {
                 res.json({ productos: producto })
             } else {
@@ -45,6 +40,15 @@ class ProductoController {
     static ProductosPaginados = async (req: Request, res: Response) => {
         let pagina = req.query.pagina || 1;
         let search = req.query.producto || "";
+        let order: 'ASC' | 'DESC';
+        let typeOrder = Number(req.query.order || 0);
+        if (typeOrder === 0) {
+            order = 'ASC'
+        } else if (typeOrder === 1) {
+            order = 'DESC'
+        } else {
+            order = 'ASC'
+        }
         pagina = Number(pagina);
         let take = 5;
         take = Number(take)
@@ -59,9 +63,10 @@ class ProductoController {
                 .addSelect(['marca.marca', 'marca.id'])
                 .skip((pagina - 1) * take)
                 .take(take)
-                .where("producto.nombreProducto like :name", { name:`%${search}%` })
+                .where("producto.nombreProducto like :name", { name: `%${search}%` })
+                .orderBy('producto.id', order)
                 .getManyAndCount()
-            //.orderBy('codigo_producto', 'DESC')
+
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;
@@ -70,9 +75,9 @@ class ProductoController {
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             } else {
-                res.json({ message: 'No se encontraron resultados' })
+                res.json({ message: 'No se encontraron resultados', empty: true })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal' })
@@ -82,7 +87,7 @@ class ProductoController {
 
     //mostrar productos por categorias
     static MostrarProductosCategoria = async (req: Request, res: Response) => {
-        const { categoria } = req.body;
+        const categoria = req.query.categoria;
         let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
         let take = req.query.limit || 5;
@@ -103,14 +108,14 @@ class ProductoController {
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;
-                if (totalPages % 1 == 0) {
+                if (totalPages % 1 !== 0) {
                     totalPages = Math.trunc(totalPages) + 1;
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             } else {
-                res.json({ message: 'No se encontraron resultados con categoria: ' + categoria })
+                res.json({ message: 'No se encontraron resultados con categoria: ' + categoria, empty: true })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal' })
@@ -119,7 +124,7 @@ class ProductoController {
 
     //mostrar por marca
     static MostrarProductosMarca = async (req: Request, res: Response) => {
-        const { marca } = req.body;
+        const marca = req.query.marca;
         let pagina = req.query.pagina || 1;
         pagina = Number(pagina);
         let take = req.query.limit || 5;
@@ -140,14 +145,14 @@ class ProductoController {
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;
-                if (totalPages % 1 == 0) {
+                if (totalPages % 1 !== 0) {
                     totalPages = Math.trunc(totalPages) + 1;
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             } else {
-                res.json({ message: 'No se encontraron resultados' })
+                res.json({ message: 'No se encontraron resultados', empty: true })
             }
         } catch (error) {
             res.json({ message: 'Algo ha salido mal' })
@@ -253,7 +258,7 @@ class ProductoController {
             return res.status(409).json({ message: 'Algo ha salido mal!', });
         }
 
-        res.json({ messge: 'Producto actualizado con exito!', ok: true,producto });
+        res.json({ messge: 'Producto actualizado con exito!', ok: true, producto });
     }
     //delete product
     static EliminarProducto = async (req: Request, res: Response) => {
@@ -261,13 +266,17 @@ class ProductoController {
         const prodRepo = getRepository(Producto);
         try {
             const producto = await prodRepo.findOneOrFail(id);
-            await prodRepo.delete(producto);
-            const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
-            if (fs.existsSync(imgdir)) {
-                fs.unlinkSync(imgdir)
+            try {
+                await prodRepo.remove(producto)
+                const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
+                if (fs.existsSync(imgdir)) {
+                    fs.unlinkSync(imgdir)
+                }
+            } catch (error) {
+                return res.send({ message: 'No puedes eliminar este producto porque podria haber registros vinculados' });
             }
             //delete 
-            res.status(201).json({ message: 'Producto eliminado' });
+            res.json({ messge: 'Se elimino el producto!', ok: true });
         }
         catch (e) {
             res.status(404).json({ message: 'No hay registros con este id: ' + id });
@@ -352,38 +361,126 @@ class ProductoController {
     }
     //estado producto
     static EstadoProducto = async (req: Request, res: Response) => {
-        let producto;
+        let producto: Producto;
         const id = req.body;
         const proRepo = getRepository(Producto);
         try {
             producto = await proRepo.findOneOrFail(id)
 
-            if (producto.status == true) {
-                producto.status = false
-            } else {
-                producto.status = true
-            }
+            producto.status = !producto.status
 
-            const productoStatus = await proRepo.save(producto)
-            res.json({ ok: true, cupon: productoStatus.status })
+            await proRepo.save(producto)
+            res.json({ ok: true })
+
+        } catch (error) {
+            res.json({ ok: false, message: 'No se pudo completar la accion solicitada' })
+        }
+    };
+    //productos mas vendidos
+
+
+    static getImage = (req: Request, res: Response) => {
+        const name = req.query.image
+        const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${name}`);
+        if (fs.existsSync(imgdir)) {
+            res.sendFile(imgdir);
+            return;
+        }
+    }
+    //productos mas vendidos
+    static ProductosMasVendidos = async (req: Request, res: Response) => {
+        const productoRepo = getRepository(Producto)
+        const detalleORepo = getRepository(DetalleOrden)
+        let pagina = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take)
+        try {
+            const [productos, totalItems] = await productoRepo.createQueryBuilder('producto')
+                .leftJoin('producto.proveedor', 'prov',)
+                .addSelect(['prov.nombre_proveedor'])
+                .leftJoin('producto.categoria', 'cat')
+                .addSelect(['cat.categoria'])
+                .leftJoin('producto.marca', 'marca',)
+                .addSelect(['marca.marca'])
+                .skip((pagina - 1) * take)
+                .take(take)
+                .getManyAndCount();
+            const formated = productos.map(async pro => {
+                let producto = pro.id
+                const DO = await detalleORepo.createQueryBuilder('detalle_orden')
+                    .innerJoin('detalle_orden.producto', 'dto')
+                    .addSelect(['dto.nombreProducto', 'dto.id'])
+                    .where({ producto })
+                    .getMany()
+
+                let totalVenta = DO.map((a) => a.cantidad).reduce((a, b) => a + b, 0);
+                const newPro = { ...pro, totalVenta }
+                return newPro;
+            });
+            let totalPages: number;
+            let nextPage: number;
+            let prevPage: number
+            if (productos.length > 0) {
+                totalPages = totalItems / take;
+                if (totalPages % 1 !== 0) {
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                nextPage = pagina >= totalPages ? pagina : pagina + 1
+                prevPage = pagina <= 1 ? pagina : pagina - 1
+            }
+            Promise.all(formated).then(values => {
+                res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+            });
 
         } catch (error) {
             console.log(error);
         }
-    };
+    }
     //productos mas vendidos
-    static ProductosMasVendidos = async(req: Request, res: Response)=>{
-        const detalleORepo = getRepository(DetalleOrden)
+    static ProductosConMasRatings = async (req: Request, res: Response) => {
+        const productoRepo = getRepository(Producto)
+        const ratingRepo = getRepository(Rating)
+        let pagina = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = req.query.limit || 5;
+        take = Number(take)
         try {
-            const productosMasVendidos = await detalleORepo.query(` select 
-            dto.productoId,p.nombreProducto, sum(dto.cantidad) as totalVentas
-            
-            from detalle_orden dto
-            inner join producto p on dto.productoId = p.id
-            group by dto.productoId
-            order by sum(dto.cantidad) desc
-            limit 0, 5`)
-            res.json({productosMasVendidos})
+            const [productos, totalItems] = await productoRepo.createQueryBuilder('producto')
+                .leftJoin('producto.proveedor', 'prov',)
+                .addSelect(['prov.nombre_proveedor'])
+                .leftJoin('producto.categoria', 'cat')
+                .addSelect(['cat.categoria'])
+                .leftJoin('producto.marca', 'marca',)
+                .addSelect(['marca.marca'])
+                .skip((pagina - 1) * take)
+                .take(take)
+                .getManyAndCount();
+            const formated = productos.map(async pro => {
+                let producto = pro.id
+                const Rating = await ratingRepo.createQueryBuilder('rating')
+                    .innerJoin('rating.producto', 'dto')
+                    .addSelect(['dto.nombreProducto', 'dto.id'])
+                    .where({ producto })
+                    .getMany()
+                let totalRating = Rating.map((a) => a.ratingNumber).reduce((a, b) => a + b, 0);
+                const newPro = { ...pro, totalRating }
+                return newPro;
+            });
+            let totalPages: number;
+            let nextPage: number;
+            let prevPage: number
+            if (productos.length > 0) {
+                totalPages = totalItems / take;
+                if (totalPages % 1 !== 0) {
+                    totalPages = Math.trunc(totalPages) + 1;
+                }
+                nextPage = pagina >= totalPages ? pagina : pagina + 1
+                prevPage = pagina <= 1 ? pagina : pagina - 1
+            }
+            Promise.all(formated).then(values => {
+                res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+            });
         } catch (error) {
             console.log(error);
         }

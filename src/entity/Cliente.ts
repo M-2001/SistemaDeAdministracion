@@ -40,11 +40,15 @@ export class Cliente {
     @Column({default: ""})
     confirmacionCode: string
 
+
     @Column({default : 0})
     estado: boolean;
 
     @Column({default : ""})
     resetPassword : string ;
+
+    @Column({default : ""})
+    refreshToken : string;
 
     //relacion entre Producto y rating
     @OneToMany(() => Rating, (rating : Rating) => rating.cliente)
