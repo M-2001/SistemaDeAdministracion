@@ -21,8 +21,8 @@ class CuponController {
 
             const cupon = new Cupon();
             cupon.codigo = codigo,
-            cupon.descuento = descuento,
-            cupon.fechaExp = new Date(fechaExp)
+                cupon.descuento = descuento,
+                cupon.fechaExp = new Date(fechaExp)
 
             newCupon = await cuponRepo.save(cupon);
             //all is ok
@@ -35,7 +35,7 @@ class CuponController {
     }
 
     static EstadoCupon = async (req: Request, res: Response) => {
-        let cupon:Cupon;
+        let cupon: Cupon;
         const id = req.body;
         const cuponRepo = getRepository(Cupon);
         try {
@@ -108,29 +108,29 @@ class CuponController {
         } catch (error) {
             return res.status(409).json({ message: 'Algo ha salido mal!' });
         }
-        res.json({ message: 'Cupon ha sido eliminado!',ok:true });
+        res.json({ message: 'Cupon ha sido eliminado!', ok: true });
     };
 
     //enviar Cupon
-    static SendCupon = async (req :Request, res: Response) => {
+    static SendCupon = async (req: Request, res: Response) => {
         const cuponRepo = getRepository(Cupon);
         const clienteRepo = getRepository(Cliente);
         const email = req.body.email;
         let CODIGO_CUPON = req.query.CODIGO_CUPON;
-        let cuponExist : Cupon;
-        let cliente : Cliente;
+        let cuponExist: Cupon;
+        let cliente: Cliente;
         //bus
         try {
             if (CODIGO_CUPON) {
                 try {
-                    cuponExist = await cuponRepo.findOneOrFail({where:{codigo : CODIGO_CUPON}});
-                    if(cuponExist.status == true){
-                        return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
-                    }else{
+                    cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
+                    if (cuponExist.status == true) {
+                        return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
+                    } else {
                         try {
-                            cliente = await clienteRepo.findOne({where:{email}});
+                            cliente = await clienteRepo.findOne({ where: { email } });
                             if (!cliente) {
-                                return res.status(400).json({messge: 'El cliente con el email: ' + email + ' no existe!!!'} )
+                                return res.status(400).json({ messge: 'El cliente con el email: ' + email + ' no existe!!!' })
                             }
                         } catch (error) {
                             console.log(error);
@@ -138,13 +138,13 @@ class CuponController {
 
                         //Try send email 
                         try {
-                            let subject : string = ` ${cliente.nombre + " " + cliente.apellido + " , Por ser cliente especial !!!"} `
+                            let subject: string = ` ${cliente.nombre + " " + cliente.apellido + " , Por ser cliente especial !!!"} `
 
                             await transporter.sendMail({
-                                from : `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
+                                from: `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
                                 to: cliente.email,
                                 subject: subject,
-                                html : ` <!DOCTYPE html>
+                                html: ` <!DOCTYPE html>
                                 <html lang="en">
                                 <head> </head>
                                 <body><div>
@@ -158,24 +158,35 @@ class CuponController {
                                 </body>
                                 </html>`
                             });
-                            res.json({message: "Email enviado con exito!!!"});
+                            res.json({ message: "Email enviado con exito!!!" });
                         } catch (error) {
                             console.log('Algo salio mal al enviar email!!!');
                         }
                         console.log('vamos bien loco');
                     }
                 }
-                    catch(error){
-                        return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!'});
-                    }
-                }else{
-                    return res.status(405).json({message: 'Debe enviar un codigo de cupon!!!'})
+                catch (error) {
+                    return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
                 }
-                
+            } else {
+                return res.status(405).json({ message: 'Debe enviar un codigo de cupon!!!' })
+            }
+
         } catch (error) {
             console.log(error);
         }
     }
 
+    static MostrarCupon = async (req: Request, res: Response) => {
+        const CODIGO_CUPON: any = req.query.code;
+        const cuponRepo = getRepository(Cupon);
+        try {
+            const cupon = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } })
+            return res.send({ ok: true, cupon })
+
+        } catch (error) {
+            return res.json({ message: "error em el servidor", error })
+        }
+    }
 }
 export default CuponController;

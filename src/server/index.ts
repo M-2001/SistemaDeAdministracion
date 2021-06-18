@@ -1,4 +1,3 @@
-import { Application, Response } from 'express';
 import * as express from 'express';
 import cors = require ('cors');
 import routesEmpleado from '../router/empleado';
@@ -15,17 +14,12 @@ import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import routesPay from '../router/pay';
-import * as bodyParser from "body-parser";
 import * as fileUpload from 'express-fileupload';
 import * as SocketIO from 'socket.io';
 
 import * as http from 'http';
 
 import * as sockets from '../sockets/sockets'
-
-import { ConnectClient } from '../sockets/sockets';
-import  ejs = require('ejs');
-import ProductoController from "../controller/Producto";
 //const PORT = process.env.PORT || 5000
 
 class Server{
@@ -86,7 +80,7 @@ class Server{
         this.app.use(express.json());
 
         //Parseo de body
-        this.app.use(bodyParser.urlencoded({extended:true}));
+        this.app.use(express.urlencoded({extended:true}));
 
         //this.app.get('/', (req, res) => res.render('index'));
     }

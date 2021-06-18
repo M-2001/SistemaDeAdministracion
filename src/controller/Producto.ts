@@ -13,53 +13,40 @@ class ProductoController {
 
     //mostrar todos los productos
 
-    public getAllProducts = async(): Promise<Producto[]>=>{
+    public getAllProducts = async (): Promise<Producto[]> => {
         try {
             const productoRepo = getRepository(Producto)
             const producto = await productoRepo.find()
             if (producto.length > 0) {
                 return producto
-            } 
+            }
         } catch (error) {
             return []
         }
     };
-    
-    static MostrarProductos = async( req: Request, res: Response): Promise<void> =>{
-        return new Promise( async( resolve, reject) =>{
-        
-        let pagina = req.query.pagina || 0;
-        pagina = Number(pagina);
-        let take = req.query.limit || 10;
-        take = Number(take)
+
+    static MostrarProductos = async (req: Request, res: Response) => {
         try {
             const productoRepo = getRepository(Producto)
-            const producto = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov', )
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.marca', 'marca',)
-            .addSelect(['marca.marca'])
-            .leftJoin('producto.categoria', 'cat')
-            
-            .addSelect(['cat.categoria'])
-            .skip(pagina)
-            .take(take)
-            .getManyAndCount()
-            .then(productos =>{
-                return res.json({productos})
-            })
-            .catch(err => {
-                return res.json({message:'Algo salio mal'})
-            })
-            // if (producto.length > 0) {
-            //     return res.json({productos : producto})
-            // } else {
-            //     return res.json({message : 'No se encontraron resultados'})
-            // }
+            const [productos,_] = await productoRepo.createQueryBuilder('producto')
+                .leftJoin('producto.proveedor', 'prov',)
+                .addSelect(['prov.nombre_proveedor'])
+                .leftJoin('producto.marca', 'marca',)
+                .addSelect(['marca.marca'])
+                .leftJoin('producto.categoria', 'cat')
+
+                .addSelect(['cat.categoria'])
+                .getManyAndCount()
+
+            if (productos.length > 0) {
+                return res.json({ productos })
+            } else {
+                return res.json({ message: 'No se encontraron resultados' })
+            }
         } catch (error) {
-            return res.json({message : 'No se encontraron resultados'})
+            return res.json({ message: 'No se encontraron resultados' })
         }
-        })
+
     };
 
     //mostrar productos paginados

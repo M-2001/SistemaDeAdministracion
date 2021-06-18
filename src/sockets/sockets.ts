@@ -4,7 +4,7 @@ import ProductoController from '../controller/Producto';
 import OrdenController from '../controller/Orden';
 
 //funcion que se encargara de conectar con un cliente
-export const ConnectClient = (cliente: Socket, io: socketIO.Server)=>{
+export const ConnectClient = (_: Socket, io: socketIO.Server)=>{
     const productoController = new ProductoController();
     const ordenController = new OrdenController();
 
@@ -29,7 +29,7 @@ export const ConnectClient = (cliente: Socket, io: socketIO.Server)=>{
 }
 
 //funcion que se encragara de notificar cuando el cliente se desconecte el servidor
-export const desconectar = (cliente: Socket, io: socketIO.Server)=>{
+export const desconectar = (cliente: Socket, _: socketIO.Server)=>{
         cliente.on('disconnect', ()=>{
             console.log('Server Disconnect!!!');
         });

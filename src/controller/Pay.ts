@@ -50,7 +50,7 @@ class PayController{
                                     const item = items[index];
                                     const productoItem = await proRepo.findOneOrFail(item.id);
                         
-                                    let operacion = productoItem.costo_standar * item.qty;
+                                    let operacion = productoItem.costo_standar * item.qt;
                                     let Totaldesc = 0.00;
                                     let totalPay =  operacion;
     
@@ -74,7 +74,7 @@ class PayController{
                             const item = items[index];
                             const productoItem = await proRepo.findOneOrFail(item.id);
                 
-                            let operacion = productoItem.costo_standar * item.qty;
+                            let operacion = productoItem.costo_standar * item.qt;
                             let Totaldesc = operacion * productoItem.descuento/100;
                             let totalPay =  operacion - Totaldesc;
                             amount += totalPay
@@ -97,10 +97,10 @@ class PayController{
             if (cuponExist) {
                 const Totaldesct = totalPrice * cuponExist.descuento/100;
                 const Totalprice = totalPrice - Totaldesct;
-                urlSuccess = "http://localhost:5000/pay-checkout/success?CODIGO_CUPON=" + CODIGO_CUPON;
+                urlSuccess = "http://localhost:3000/pay?CODIGO_CUPON=" + CODIGO_CUPON;
                 total = Totalprice.toFixed(2)
             } else {
-                urlSuccess = "http://localhost:5000/pay-checkout/success";
+                urlSuccess = "http://localhost:3000S/success";
                 total = totalPrice.toFixed(2);
             }
 
@@ -199,10 +199,10 @@ class PayController{
                             const item = items[index];
                             const productoItem = await proRepo.findOneOrFail(item.id);
                             try {
-                                let operacion = productoItem.costo_standar * item.qty;
+                                let operacion = productoItem.costo_standar * item.qt;
                                 let Totaldesc = 0.00;
                                 let totalPay =  operacion;
-                                let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                                let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                                 amount += totalPay
                                 totalPrice += totalPay
@@ -211,7 +211,7 @@ class PayController{
                                 const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
                                 console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
 
-                                let itemString : string = item.qty.toString()
+                                let itemString : string = item.qt.toString()
                                 
                                 let itm  = {codigoOrden: ordenC.codigoOrden, cantidad : itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals}
             
@@ -222,7 +222,7 @@ class PayController{
                                     const saveOD = new DetalleOrden();
                                     saveOD.orden = ordenC,
                                     saveOD.producto = productoItem,
-                                    saveOD.cantidad = item.qty,
+                                    saveOD.cantidad = item.qt,
                                     saveOD.totalUnidad = amount,
                                     saveOD.descuento = Totaldesc
                     
@@ -263,11 +263,10 @@ class PayController{
                     let amount: number = 0;
                     const item = items[index];
                     const productoItem = await proRepo.findOneOrFail(item.id);
-
-                    let operacion = productoItem.costo_standar * item.qty;
+                    let operacion = productoItem.costo_standar * item.qt;
                     let Totaldesc = operacion * productoItem.descuento/100;
                     let totalPay =  operacion - Totaldesc;
-                    let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                    let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                     amount += totalPay
                     totalPrice += totalPay
@@ -276,7 +275,7 @@ class PayController{
                     const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
                     console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
 
-                    let itemString : string = item.qty.toString()
+                    let itemString : string = item.qt.toString()
                     
                     let itm  = {codigoOrden: ordenC.codigoOrden, cantidad : itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals}
 
