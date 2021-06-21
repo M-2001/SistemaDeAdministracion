@@ -28,7 +28,7 @@ class PayController{
     static Pay = async( req : Request, res: Response) =>{
 
             let items : Product[] = req.body;
-            let CODIGO_CUPON = req.query.CODIGO_CUPON;
+            let CODIGO_CUPON = req.query.code;
             Items = items;
             //let CODE_CUPON = CODIGO_CUPON;
             const proRepo =  getRepository(Producto);
@@ -97,10 +97,10 @@ class PayController{
             if (cuponExist) {
                 const Totaldesct = totalPrice * cuponExist.descuento/100;
                 const Totalprice = totalPrice - Totaldesct;
-                urlSuccess = "http://localhost:3000/pay?CODIGO_CUPON=" + CODIGO_CUPON;
+                urlSuccess = "http://localhost:3000/pay?code=" + CODIGO_CUPON;
                 total = Totalprice.toFixed(2)
             } else {
-                urlSuccess = "http://localhost:3000S/success";
+                urlSuccess = "http://localhost:3000/pay";
                 total = totalPrice.toFixed(2);
             }
 
@@ -165,7 +165,7 @@ class PayController{
         
         const payerId : any = req.query.PayerID;
         const paymentId : any = req.query.paymentId;
-        const CODIGO_CUPON : any = req.query.CODIGO_CUPON;
+        const CODIGO_CUPON : any = req.query.code;
         let totalPrice : number = 0;
         let totalDesc : number = 0;
         let total : any;

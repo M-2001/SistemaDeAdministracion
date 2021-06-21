@@ -34,7 +34,7 @@ class ProductoController {
                 .leftJoin('producto.marca', 'marca',)
                 .addSelect(['marca.marca'])
                 .leftJoin('producto.categoria', 'cat')
-
+                .take(3)
                 .addSelect(['cat.categoria'])
                 .getManyAndCount()
 

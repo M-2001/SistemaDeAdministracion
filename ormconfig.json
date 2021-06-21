@@ -4,7 +4,7 @@
    "port": 3306,
    "username": "root",
    "password": "",
-   "database": "system_pc",
+   "database": "spc",
    "synchronize": true,
    "logging": false,
    "entities": [

@@ -83,12 +83,14 @@ class OrdenController {
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, ordenes, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
+                return res.json({ ok: true, ordenes, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({ message: 'No se encontraron resultados!' })
+                return res.json({ message: 'No se encontraron resultados!' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal!' })
+
+            console.log(error)
+            return res.json({ message: 'Algo ha salido mal!',error })
         }
     }
     static AddReservacion = async (req: Request, res: Response) => {

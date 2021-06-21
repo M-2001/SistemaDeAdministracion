@@ -178,14 +178,22 @@ class CuponController {
     }
 
     static MostrarCupon = async (req: Request, res: Response) => {
-        const CODIGO_CUPON: any = req.query.code;
-        const cuponRepo = getRepository(Cupon);
+        const codeCoupon = req.query.code
+        const cpRepo = getRepository(Cupon)
+        let cuponExist:Cupon;
         try {
-            const cupon = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } })
-            return res.send({ ok: true, cupon })
-
+            cuponExist = await cpRepo.findOneOrFail({ where: { codigo: codeCoupon } });
+            if (new Date(cuponExist.fechaExp).getTime() < Date.now()) {
+                return res.send({ ok: false, message: 'Cupon expirado' });
+            }
+            if (cuponExist.status == true) {
+                return res.send({ ok: false, message: 'Este cupon ya fue utilizado' });
+            }
+            else{
+                return res.send({ok:true})
+            }
         } catch (error) {
-            return res.json({ message: "error em el servidor", error })
+            return res.send({error,message:"Error en el servidor"})
         }
     }
 }

@@ -198,14 +198,14 @@ export class EmpleadoController {
         const employeeRepo = getRepository(Employee);
         let employee: Employee;
         if (req.files === undefined || req.files.foto === undefined) {
-            res.status(400).json({ ok: false, message: 'Ningun archivo selecionando' });
+           return  res.status(400).json({ ok: false, message: 'Ningun archivo selecionando' });
         } else {
             let foto = req.files.foto as UploadedFile;
             let fotoName = foto.name.split('.')
             console.log(fotoName);
             let ext = fotoName[fotoName.length - 1];
             //extensiones permitidas 
-            const extFile = ['png', 'jpeg', 'jpg', 'git'];
+            const extFile = ['png', 'jpeg', 'jpg'];
             if (extFile.indexOf(ext) < 0) {
                 return res.status(400)
                     .json({ message: 'Las estensiones permitidas son ' + extFile.join(', ') })
@@ -230,16 +230,16 @@ export class EmpleadoController {
                     console.log(employee);
                 }
                 catch (e) {
-                    res.status(404).json({ message: 'No hay registros con este id: ' + id });
+                    return res.status(404).json({ message: 'No hay registros con este id: ' + id });
                 }
                 //try to save employee
                 try {
                     await employeeRepo.createQueryBuilder().update(Employee).set({ imagen: nombreFoto }).where({ id }).execute();
                 } catch (error) {
-                    res.status(409).json({ message: 'Algo ha salido mal!' });
+                    return res.status(409).json({ message: 'Algo ha salido mal!' });
                 }
             }
-            res.json({ message: 'La imagen se ha guardado.' });
+           return  res.json({ message: 'La imagen se ha guardado.' });
         }
     }
     //create new employeeE 
