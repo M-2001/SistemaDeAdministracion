@@ -235,11 +235,11 @@ export class EmpleadoController {
                 //try to save employee
                 try {
                     await employeeRepo.createQueryBuilder().update(Employee).set({ imagen: nombreFoto }).where({ id }).execute();
+                    return  res.json({ message: 'La imagen se ha guardado.' });
                 } catch (error) {
                     return res.status(409).json({ message: 'Algo ha salido mal!' });
                 }
             }
-           return  res.json({ message: 'La imagen se ha guardado.' });
         }
     }
     //create new employeeE 
