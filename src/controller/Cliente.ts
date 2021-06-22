@@ -9,13 +9,20 @@ import * as jwt from 'jsonwebtoken';
 import { transporter } from '../config/nodemailer.config';
 import { Order } from '../entity/Order';
 
-interface OrdenesClient{
-    nombre : string,
-    apellido : string,
-    email : string,
-    ordenes : number
+interface OrdenesClient {
+    client: {
+        nombre: string,
+        apellido: string,
+        email: string,
+        telefono: string,
+        direccion: string,
+        id: number,
+        estado: boolean,
+        foto: string
+    }
+    ordenes: number
 }
-class ClienteController{
+class ClienteController {
     //create new cliente
     static RegistroCliente = async (req: Request, res: Response) => {
 
@@ -242,38 +249,63 @@ class ClienteController{
     }
 
     //static BestClients
-    static MejoresClientes = async (_req: Request, res : Response) =>{
+    static MejoresClientes = async (req: Request, res: Response) => {
+        let pagina = req.query.pagina || 1;
+        pagina = Number(pagina);
+        let take = 5;
+        take = Number(take)
         const clienteRepo = getRepository(Cliente);
         const ordenRepo = getRepository(Order);
-        const OrdenesCliente : OrdenesClient[] = [];
-        
+        const OrdenesCliente: OrdenesClient[] = [];
+
         try {
-            const clientes = await clienteRepo.find();
-            if(!clientes){
-                return res.status(400).json({message: 'No se encontraron resultados!!!'});
-            }else{
+            const [clientes, totalItems] = await clienteRepo.createQueryBuilder().skip((pagina - 1) * take).take(take).getManyAndCount();
+            if (!clientes) {
+                return res.status(400).json({ message: 'No se encontraron resultados!!!' });
+            } else {
                 for (let index = 0; index < clientes.length; index++) {
-                    
+
                     let cliente = clientes[index].id;
                     let client = clientes[index];
+                    const newclient = {
+                        nombre: client.nombre,
+                        apellido: client.apellido,
+                        email: client.email,
+                        telefono: client.telefono,
+                        direccion: client.direccion,
+                        estado: client.estado,
+                        foto: client.imagen,
+                        id: client.id
+                    }
                     try {
                         const OrdenesClient = await ordenRepo.createQueryBuilder('orden')
-                        .innerJoin('orden.cliente', 'orClt')
-                        .addSelect(['orClt.nombre', 'orClt.id','orClt.email'])
-                        .where({cliente})
-                        .getMany()
+                            .innerJoin('orden.cliente', 'orClt')
+                            .addSelect(['orClt.nombre', 'orClt.id', 'orClt.email'])
+                            .where({ cliente })
+                            .getMany()
 
-                        let items = { nombre : client.nombre, apellido: client.apellido, email: client.email, ordenes: OrdenesClient.length}
+                        let items = { client: newclient, ordenes: OrdenesClient.length }
                         OrdenesCliente.push(items)
-                        
+
                     } catch (error) {
                         console.log(error);
                     }
-                    
+
                 };
-                res.json({OrdenesCliente});
+                if (clientes.length > 0) {
+                    let totalPages: number = totalItems / take;
+                    if (totalPages % 1 !== 0) {
+                        totalPages = Math.trunc(totalPages) + 1;
+                    }
+                    let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
+                    let prevPage: number = pagina <= 1 ? pagina : pagina - 1
+                    res.json({ ok: true, OrdenesCliente, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+                }
+                else {
+                    res.status(404).json({ message: 'Not results!' });
+                }
             }
-            
+
         } catch (error) {
             console.log(error);
         }

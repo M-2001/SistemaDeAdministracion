@@ -25,7 +25,7 @@ export const ConnectClient = (_: Socket, io: socketIO.Server)=>{
             }
             return;
         });
-    },2500 );
+    },3500 );
 }
 
 //funcion que se encragara de notificar cuando el cliente se desconecte el servidor
