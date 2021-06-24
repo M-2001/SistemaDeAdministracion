@@ -33,7 +33,7 @@ class ClienteController {
 
         const clienteRepo = getRepository(Cliente);
         let cliente;
-        const message = 'User was registered successfully! Please check your email';
+        const message = "Se creo la cuenta con exito";
         let verifycationLink;
         let emailStatus = 'Ok';
 
@@ -43,7 +43,7 @@ class ClienteController {
         });
 
         if (emailExist) {
-            return res.status(400).json({ msj: 'Ya existe un usuario con el email' + email })
+            return res.send({ ok:false,message: 'Ya existe un usuario con el email' })
         }
         //Si no existe un resultado devuelto procede a crearlo
         cliente = new Cliente();
@@ -60,7 +60,7 @@ class ClienteController {
             return res.status(400).json({ errors });
         }
         try {
-            verifycationLink = `https://silly-owl-30.loca.lt/active/${token}`;
+            verifycationLink = `http://localhost:3000/active/${token}`;
 
         } catch (e) {
             return res.json({ error: 'something goes wrong!' });
@@ -89,7 +89,7 @@ class ClienteController {
             res.status(409).json({ message: 'something goes wrong' });
         }
         //res.json({mjs: 'Registro creado con exito!'})
-        res.send({ message });
+        res.send({ message,ok:true });
 
     };
     //Obtener todos los empleados

@@ -1,5 +1,5 @@
 import * as express from 'express';
-import cors = require ('cors');
+import cors = require('cors');
 import routesEmpleado from '../router/empleado';
 import RoutesCliente from '../router/cliente';
 import authemp from '../router/authempleado';
@@ -22,20 +22,20 @@ import * as http from 'http';
 import * as sockets from '../sockets/sockets'
 //const PORT = process.env.PORT || 5000
 
-class Server{
+class Server {
     public static readonly PORT: number = 5000;
 
-    private static _intance : Server;
-    private app : express.Application;
+    private static _intance: Server;
+    private app: express.Application;
 
-    private httpServer : http.Server;
+    private httpServer: http.Server;
 
     //encargada de eventos de los sockets
-    private io : SocketIO.Server;
+    private io: SocketIO.Server;
     private socketID: any;
-    
+
     public port: string | number;
-    
+
     //sirve para iniciar todas las rutas necesarias
     private routenames = {
         empleado: '/api/empleado',
@@ -52,26 +52,29 @@ class Server{
         ordenDte: '/api/orden-detalle',
         carrito: '/api/carrito',
         cupon: '/api/cupon',
-        pay:'/api/pay-checkout'
+        pay: '/api/pay-checkout'
     }
 
     //se encarga de ejecutar todos los metodos que sean llamados
-    constructor(){
+    constructor() {
         this.app = express();
         this.middleware();
         this.routes();
         this.config();
         this.sockets();
         this.conectarCliente();
-        
+
+    }
+    private corsOption = ()=>{
+
     }
     //middlewares necesarios para la aplicacion
-    middleware(){
+    middleware() {
 
         //this.app.set('view engine', 'ejs')
 
         //CORS
-        this.app.use(cors({origin:'http://localhost:3000', credentials: true}));
+        this.app.use(cors({ origin: ['http://localhost:3000',"http://localhost:3001"], credentials: true }));
 
         //fileupload
         this.app.use(fileUpload());
@@ -80,13 +83,13 @@ class Server{
         this.app.use(express.json());
 
         //Parseo de body
-        this.app.use(express.urlencoded({extended:true}));
+        this.app.use(express.urlencoded({ extended: true }));
 
         //this.app.get('/', (req, res) => res.render('index'));
     }
 
     //Declaracion de rutas de la aplicacion
-    routes(){
+    routes() {
         this.app.use(this.routenames.empleado, routesEmpleado)
         this.app.use(this.routenames.cliente, RoutesCliente)
         this.app.use(this.routenames.authEmpleado, authemp)
@@ -96,7 +99,7 @@ class Server{
         this.app.use(this.routenames.proveedor, routesProveedor)
         this.app.use(this.routenames.producto, routesProd)
         this.app.use(this.routenames.rating, routesRating)
-        this.app.use(this.routenames.orden , routesOrden)
+        this.app.use(this.routenames.orden, routesOrden)
         this.app.use(this.routenames.ordenDte, routesOrdenDte)
         this.app.use(this.routenames.carrito, routescarrito)
         this.app.use(this.routenames.cupon, routesCupon)
@@ -115,11 +118,11 @@ class Server{
     }
 
     //configuracion para conectar con los sockets
-    private sockets (){
+    private sockets() {
         this.io = new SocketIO.Server(this.httpServer, {
-            cors:{
-                origin:['http://localhost:3000'],
-                allowedHeaders:'Content-Type',
+            cors: {
+                origin: ['http://localhost:3000',"http://localhost:3001"],
+                allowedHeaders: 'Content-Type',
                 methods: 'GET, POST',
                 credentials: true,
             }
@@ -129,13 +132,11 @@ class Server{
 
     //connectar cliente que escuchar los eventos del servidor
     private conectarCliente(): void {
-        this.io.on("connect", cliente  => {
+        this.io.on("connect", cliente => {
             this.socketID = cliente.id;
-
             console.log('Usuario conectado al servidor con id: ' + this.socketID);
-
-            sockets.ConnectClient(cliente, this.io);
             sockets.desconectar(cliente, this.io)
+            sockets.nuevo(cliente, this.io)
         });
     }
 

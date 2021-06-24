@@ -16,19 +16,15 @@ interface Product {
 
 class OrdenController {
 
-    //mostrar ordenes para evento en los sockets
-    public MostrarOrdenes = async(): Promise<Order[]>=>{
-        try {
+    static MostrarOrdenes =  async ( req : Request, res : Response ) => {
+        try{
             const ordenRepo = getRepository(Order)
-            const orden = await ordenRepo.find()
-            if (orden.length > 0) {
-                return orden
-            } 
-        } catch (error) {
-            return []
-        }
+            const orders = await ordenRepo.find()
+            return res.send({ok:true,orders})
+        }catch{
+            return res.send({error:false,message:"error en el servidor"})
+                    }
     }
-
     //mostrar ordenes Paginadas
     static MostrarOrdenPaginadas = async ( req : Request, res : Response ) => {
         let pagina  = req.query.pagina || 1;
@@ -43,7 +39,7 @@ class OrdenController {
                 .addSelect(['cliente.nombre', 'cliente.apellido', 'cliente.direccion'])
                 .skip((pagina - 1) * take)
                 .take(take)
-                .where("orden.codigoOrden like : codeOrden", { codeOrden: `%${searchOrden}%` })
+                .where("orden.codigoOrden like :codeOrden", { codeOrden: `%${searchOrden}%` })
                 .getManyAndCount()
 
             if (ordenes.length > 0) {
@@ -58,6 +54,7 @@ class OrdenController {
                 res.json({ message: 'No se encontraron resultados!' })
             }
         } catch (error) {
+            console.log(error)
             res.json({ message: 'Algo ha salido mal!' })
         }
     }
@@ -254,7 +251,7 @@ class OrdenController {
             ordenC.TotalDesc = totalDesc
             const actualizarOrden = await ordenRepo.save(ordenC)
             total = totalPrice.toFixed(2);
-            res.json({ itemEmail });
+            res.json({ ok:true,message:"Se guardo tu reservacion" });
         }
 
         //try to send email

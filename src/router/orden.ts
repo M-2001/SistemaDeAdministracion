@@ -9,6 +9,7 @@ const router = Router();
 const ordenC = CarritoController;
 const order = OrdenController;
 
+router.get("/orders",CheckJwt,order.MostrarOrdenes)
 router.post('/new-order', [CheckJwt, checkRoleU(['user'])], ordenC.guardarOrden_DetalleOrden);
 router.get('/order-paginated',[CheckJwt], order.MostrarOrdenPaginadas)
 router.get('/order-client',CheckJwt,order.MostrarOrdenCliente)

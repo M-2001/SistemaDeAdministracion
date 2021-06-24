@@ -28,7 +28,7 @@ class ProductoController {
     static MostrarProductos = async (req: Request, res: Response) => {
         try {
             const productoRepo = getRepository(Producto)
-            const [productos,_] = await productoRepo.createQueryBuilder('producto')
+            const [productos, _] = await productoRepo.createQueryBuilder('producto')
                 .leftJoin('producto.proveedor', 'prov',)
                 .addSelect(['prov.nombre_proveedor'])
                 .leftJoin('producto.marca', 'marca',)
@@ -477,7 +477,8 @@ class ProductoController {
                     .where({ producto })
                     .getMany()
                 let totalRating = Rating.map((a) => a.ratingNumber).reduce((a, b) => a + b, 0);
-                const newPro = { ...pro, totalRating }
+                const total = totalRating / Rating.length;
+                const newPro = { ...pro, total }
                 return newPro;
             });
             let totalPages: number;
