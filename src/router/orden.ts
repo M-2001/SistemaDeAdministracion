@@ -3,6 +3,7 @@ import { CheckJwt } from '../middleware/jwt';
 import OrdenController from '../controller/Orden';
 import { checkRoleU } from '../middleware/roleUser';
 import CarritoController from '../controller/Carrito';
+import { checkRole } from '../middleware/role';
 
 const router = Router();
 
@@ -14,6 +15,6 @@ router.post('/new-order', [CheckJwt, checkRoleU(['user'])], ordenC.guardarOrden_
 router.get('/order-paginated',[CheckJwt], order.MostrarOrdenPaginadas)
 router.get('/order-client',CheckJwt,order.MostrarOrdenCliente)
 router.post('/add-reservation',[CheckJwt, checkRoleU(['user'])], order.AddReservacion)
+router.post('/local-order',CheckJwt, order.AddOrdenClienteLocal)
 router.post('/order-status/:id', order.EstadoOrden)
-
 export default router;

@@ -86,7 +86,7 @@ class ProductoController {
                         prod.status = false;
                         prod.catidad_por_unidad = 1;
                         productoRepo.save(producto);
-                        //console.log(prod.status);
+                        console.log(prod.status);
                     }
                 }
 
