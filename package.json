@@ -36,13 +36,12 @@
       "reflect-metadata": "^0.1.10",
       "socket.io": "^4.1.2",
       "typeorm": "^0.2.30"
-
    },
    "scripts": {
-      "start:dev": "ts-node-dev src/index.ts",
+      "start:dev": "nodemon src/index.ts",
       "start": "node dist/index.js",
       "build": "tsc",
       "dev": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/index.ts",
-      "typeorm":"node  --requiere ts-node/register  ./node_modules/typeorm/cli.js"
+      "typeorm": "node  --requiere ts-node/register  ./node_modules/typeorm/cli.js"
    }
 }

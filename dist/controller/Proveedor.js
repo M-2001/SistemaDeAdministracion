@@ -1,23 +1,14 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
 const Proveedor_1 = require("../entity/Proveedor");
 const typeorm_1 = require("typeorm");
 class ProveedorController {
 }
-ProveedorController.MostrarProveedors = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+ProveedorController.MostrarProveedors = async (_, res) => {
     try {
         const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
-        const proveedor = yield proveedorRepo.find();
+        const proveedor = await proveedorRepo.find();
         if (proveedor.length > 0) {
             res.json(proveedor);
         }
@@ -28,18 +19,22 @@ ProveedorController.MostrarProveedors = (req, res) => __awaiter(void 0, void 0, 
     catch (error) {
         res.json({ message: 'Algo ha salido mal' });
     }
-});
-ProveedorController.MostrarProveedoresPaginados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+ProveedorController.MostrarProveedoresPaginados = async (req, res) => {
     let pagina = req.query.pagina || 1;
+    let provider = req.query.proveedor || '';
     pagina = Number(pagina);
     let take = req.query.limit || 5;
     take = Number(take);
     try {
         const proveedoresRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
-        const [proveedores, totalItems] = yield proveedoresRepo.findAndCount({ take, skip: (pagina - 1) * take });
+        const [proveedores, totalItems] = await proveedoresRepo.createQueryBuilder('proveedor').skip((pagina - 1) * take)
+            .take(take)
+            .where("proveedor.nombre_proveedor like :name", { name: `%${provider}%` })
+            .getManyAndCount();
         if (proveedores.length > 0) {
             let totalPages = totalItems / take;
-            if (totalPages % 1 == 0) {
+            if (totalPages % 1 !== 0) {
                 totalPages = Math.trunc(totalPages) + 1;
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
@@ -54,12 +49,12 @@ ProveedorController.MostrarProveedoresPaginados = (req, res) => __awaiter(void 0
     catch (error) {
         res.json({ message: 'Algo ha salido mal!' });
     }
-});
-ProveedorController.AgregarProveedor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+ProveedorController.AgregarProveedor = async (req, res) => {
     const { nombre, email, telefono, direccion } = req.body;
     try {
         const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
-        const proveedorExist = yield proveedorRepo.findOne({ where: { nombre_proveedor: nombre } });
+        const proveedorExist = await proveedorRepo.findOne({ where: { nombre_proveedor: nombre } });
         console.log(proveedorExist);
         if (proveedorExist) {
             return res.status(400).json({ message: 'Ya existe una proveedor con ese nombre' });
@@ -71,36 +66,36 @@ ProveedorController.AgregarProveedor = (req, res) => __awaiter(void 0, void 0, v
         proveedor.direccion = direccion;
         //validations
         const ValidateOps = { validationError: { target: false, value: false } };
-        const errors = yield class_validator_1.validate(proveedor, ValidateOps);
+        const errors = await class_validator_1.validate(proveedor, ValidateOps);
         if (errors.length > 0) {
             return res.status(400).json({ errors });
         }
-        yield proveedorRepo.save(proveedor);
+        await proveedorRepo.save(proveedor);
     }
     catch (error) {
         res.status(400).json({ message: 'Algo ha salio mal!' });
     }
     //all ok 
     res.json({ message: 'Se agrego un nuevo proveedor' });
-});
-ProveedorController.ObtenerProveedorPorID = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+ProveedorController.ObtenerProveedorPorID = async (req, res) => {
     const { id } = req.params;
     try {
         const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
-        const proveedor = yield proveedorRepo.findOneOrFail({ where: { id } });
+        const proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
         res.json({ proveedor });
     }
     catch (error) {
         return res.status(404).json({ message: 'No hay registros con este id: ' + id });
     }
-});
-ProveedorController.ActualizarProveedor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+ProveedorController.ActualizarProveedor = async (req, res) => {
     let proveedor;
     const { id } = req.params;
     const { nombre, email, telefono, direccion } = req.body;
     const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
     try {
-        proveedor = yield proveedorRepo.findOneOrFail({ where: { id } });
+        proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
         proveedor.nombre_proveedor = nombre,
             proveedor.email = email,
             proveedor.telefono = telefono,
@@ -110,54 +105,54 @@ ProveedorController.ActualizarProveedor = (req, res) => __awaiter(void 0, void 0
         return res.status(404).json({ message: 'No se han encontrado resultados con el id: ' + id });
     }
     const ValidateOps = { validationError: { target: false, value: false } };
-    const errors = yield class_validator_1.validate(proveedor, ValidateOps);
+    const errors = await class_validator_1.validate(proveedor, ValidateOps);
     //Try to save data Category
     try {
-        yield proveedorRepo.save(proveedor);
+        await proveedorRepo.save(proveedor);
     }
     catch (error) {
         return res.status(409).json({ message: 'Algo ha salido mal!' });
     }
     res.json({ messge: 'Se actualizo el registro!' });
-});
-ProveedorController.EliminarProveedor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+ProveedorController.EliminarProveedor = async (req, res) => {
     let proveedor;
     const { id } = req.params;
     const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
     try {
-        proveedor = yield proveedorRepo.findOneOrFail({ where: { id } });
+        proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
     }
     catch (error) {
         return res.status(404).json({ message: 'No se han encontrado resultados ' });
     }
     //Try to delete Category
     try {
-        yield proveedorRepo.remove(proveedor);
+        await proveedorRepo.remove(proveedor);
     }
     catch (error) {
-        return res.status(409).json({ message: 'Algo ha salido mal!' });
+        return res.send({ message: 'No puedes eliminar este proveedor porque hay registros implicados' });
     }
-    res.json({ messge: 'Proveedor ha sido eliminada!' });
-});
+    res.json({ messge: 'Proveedor ha sido eliminada!', ok: true });
+};
 //estado proveedor
-ProveedorController.EstadoProveedor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+ProveedorController.EstadoProveedor = async (req, res) => {
     let proveedor;
     const id = req.body;
     const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
     try {
-        proveedor = yield proveedorRepo.findOneOrFail(id);
+        proveedor = await proveedorRepo.findOneOrFail(id);
         if (proveedor.status == true) {
             proveedor.status = false;
         }
         else {
             proveedor.status = true;
         }
-        const proveedorStatus = yield proveedorRepo.save(proveedor);
+        const proveedorStatus = await proveedorRepo.save(proveedor);
         res.json({ ok: true, proveedor: proveedorStatus.status });
     }
     catch (error) {
         console.log(error);
     }
-});
+};
 exports.default = ProveedorController;
 //# sourceMappingURL=Proveedor.js.map

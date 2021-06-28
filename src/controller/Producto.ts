@@ -80,6 +80,15 @@ class ProductoController {
                 .orderBy('producto.id', order)
                 .getManyAndCount()
 
+                for (let i = 0; i < producto.length; i++) {
+                    const prod = producto[i];
+                    if (prod.catidad_por_unidad <= 1) {
+                        prod.status = false;
+                        prod.catidad_por_unidad = 1;
+                        productoRepo.save(producto);
+                        //console.log(prod.status);
+                    }
+                }
 
             if (producto.length > 0) {
                 let totalPages: number = totalItems / take;

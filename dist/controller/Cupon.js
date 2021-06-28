@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Cupones_1 = require("../entity/Cupones");
@@ -16,7 +7,7 @@ const nodemailer_config_1 = require("../config/nodemailer.config");
 class CuponController {
 }
 //crear cupon de descuento
-CuponController.CrearCupon = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+CuponController.CrearCupon = async (req, res) => {
     let newCupon;
     try {
         const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
@@ -24,11 +15,12 @@ CuponController.CrearCupon = (req, res) => __awaiter(void 0, void 0, void 0, fun
         let month = date.getMonth() + 1;
         const codigoCupon = Math.floor(Math.random() * 90000) + 10000;
         const codigo = 'SYSTEM_PC-' + codigoCupon + month;
-        const { descuento } = req.body;
+        const { descuento, fechaExp } = req.body;
         const cupon = new Cupones_1.Cupon();
         cupon.codigo = codigo,
             cupon.descuento = descuento,
-            newCupon = yield cuponRepo.save(cupon);
+            cupon.fechaExp = new Date(fechaExp);
+        newCupon = await cuponRepo.save(cupon);
         //all is ok
         res.json({ ok: true, message: 'Cupon Creado con exito', newCupon });
         console.log(newCupon);
@@ -36,31 +28,26 @@ CuponController.CrearCupon = (req, res) => __awaiter(void 0, void 0, void 0, fun
     catch (error) {
         console.log(error);
     }
-});
-CuponController.EstadoCupon = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+CuponController.EstadoCupon = async (req, res) => {
     let cupon;
     const id = req.body;
     const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     try {
-        cupon = yield cuponRepo.findOneOrFail(id);
-        if (cupon.status == true) {
-            cupon.status = false;
-        }
-        else {
-            cupon.status = true;
-        }
-        const cuponStatus = yield cuponRepo.save(cupon);
-        res.json({ ok: true, cupon: cuponStatus.status });
+        cupon = await cuponRepo.findOneOrFail(id);
+        cupon.status = !cupon.status;
+        await cuponRepo.save(cupon);
+        res.json({ ok: true });
     }
     catch (error) {
         console.log(error);
     }
-});
-CuponController.MostrarCupones = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+CuponController.MostrarCupones = async (req, res) => {
     let cupon;
     const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     try {
-        cupon = yield cuponRepo.findAndCount();
+        cupon = await cuponRepo.findAndCount();
         if (cupon.length > 0) {
             res.json({ ok: true, cupon });
         }
@@ -71,19 +58,19 @@ CuponController.MostrarCupones = (req, res) => __awaiter(void 0, void 0, void 0,
     catch (error) {
         console.log(error);
     }
-});
+};
 //mostrar cupones Pajinados
-CuponController.MostrarCuponesPaginados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+CuponController.MostrarCuponesPaginados = async (req, res) => {
     let pagina = req.query.pagina || 1;
     pagina = Number(pagina);
     let take = req.query.limit || 5;
     take = Number(take);
     try {
         const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
-        const [cupones, totalItems] = yield cuponRepo.findAndCount({ take, skip: (pagina - 1) * take });
+        const [cupones, totalItems] = await cuponRepo.findAndCount({ take, skip: (pagina - 1) * take });
         if (cupones.length > 0) {
             let totalPages = totalItems / take;
-            if (totalPages % 1 == 0) {
+            if (totalPages % 1 !== 0) {
                 totalPages = Math.trunc(totalPages) + 1;
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
@@ -97,29 +84,29 @@ CuponController.MostrarCuponesPaginados = (req, res) => __awaiter(void 0, void 0
     catch (error) {
         res.json({ message: 'Algo ha salido mal!' });
     }
-});
+};
 //eliminar Cupon
-CuponController.EliminarCupon = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+CuponController.EliminarCupon = async (req, res) => {
     let cupon;
     const { id } = req.body;
     const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     try {
-        cupon = yield cuponRepo.findOneOrFail({ where: { id } });
+        cupon = await cuponRepo.findOneOrFail({ where: { id } });
     }
     catch (error) {
         return res.status(404).json({ message: 'No se han encontrado resultados ' });
     }
     //Try to delete Category
     try {
-        yield cuponRepo.remove(cupon);
+        await cuponRepo.remove(cupon);
     }
     catch (error) {
         return res.status(409).json({ message: 'Algo ha salido mal!' });
     }
-    res.json({ messge: 'Cupon ha sido eliminado!' });
-});
+    res.json({ message: 'Cupon ha sido eliminado!', ok: true });
+};
 //enviar Cupon
-CuponController.SendCupon = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+CuponController.SendCupon = async (req, res) => {
     const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     const email = req.body.email;
@@ -130,13 +117,13 @@ CuponController.SendCupon = (req, res) => __awaiter(void 0, void 0, void 0, func
     try {
         if (CODIGO_CUPON) {
             try {
-                cuponExist = yield cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
+                cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
                 if (cuponExist.status == true) {
                     return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                 }
                 else {
                     try {
-                        cliente = yield clienteRepo.findOne({ where: { email } });
+                        cliente = await clienteRepo.findOne({ where: { email } });
                         if (!cliente) {
                             return res.status(400).json({ messge: 'El cliente con el email: ' + email + ' no existe!!!' });
                         }
@@ -147,7 +134,7 @@ CuponController.SendCupon = (req, res) => __awaiter(void 0, void 0, void 0, func
                     //Try send email 
                     try {
                         let subject = ` ${cliente.nombre + " " + cliente.apellido + " , Por ser cliente especial !!!"} `;
-                        yield nodemailer_config_1.transporter.sendMail({
+                        await nodemailer_config_1.transporter.sendMail({
                             from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
                             to: cliente.email,
                             subject: subject,
@@ -184,6 +171,26 @@ CuponController.SendCupon = (req, res) => __awaiter(void 0, void 0, void 0, func
     catch (error) {
         console.log(error);
     }
-});
+};
+CuponController.MostrarCupon = async (req, res) => {
+    const codeCoupon = req.query.code;
+    const cpRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    let cuponExist;
+    try {
+        cuponExist = await cpRepo.findOneOrFail({ where: { codigo: codeCoupon } });
+        if (new Date(cuponExist.fechaExp).getTime() < Date.now()) {
+            return res.send({ ok: false, message: 'Cupon expirado' });
+        }
+        if (cuponExist.status == true) {
+            return res.send({ ok: false, message: 'Este cupon ya fue utilizado' });
+        }
+        else {
+            return res.send({ ok: true });
+        }
+    }
+    catch (error) {
+        return res.send({ error, message: "Error en el servidor" });
+    }
+};
 exports.default = CuponController;
 //# sourceMappingURL=Cupon.js.map

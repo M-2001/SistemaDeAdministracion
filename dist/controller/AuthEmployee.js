@@ -1,21 +1,13 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Employee_1 = require("../entity/Employee");
 const jwt = require("jsonwebtoken");
 const class_validator_1 = require("class-validator");
+const mailer_1 = require("../middleware/mailer");
 class AuthEmployeeController {
 }
-AuthEmployeeController.Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthEmployeeController.Login = async (req, res) => {
     const { code, password } = req.body;
     if (!(code && password)) {
         return res.status(400).json({ message: 'code & password are required' });
@@ -23,23 +15,23 @@ AuthEmployeeController.Login = (req, res) => __awaiter(void 0, void 0, void 0, f
     const empRepository = typeorm_1.getRepository(Employee_1.Employee);
     let emp;
     try {
-        emp = yield empRepository.findOneOrFail({ where: { codeAccess: code } });
+        emp = await empRepository.findOneOrFail({ where: { codeAccess: code } });
     }
     catch (e) {
-        return res.status(400).json({ message: 'Code or password incorrect!' });
+        return res.send({ message: 'Code or password incorrect!', ok: false });
     }
     //check password
     if (!emp.checkPassword(password)) {
-        return res.status(400).json({ message: 'Code or password incorrect' });
+        return res.send({ message: 'Code or password incorrect', ok: false });
     }
     // if(emp.estado == false){
     //     res.json({ok : false, message :'Access denied'});
     // }   
     else {
-        const token = jwt.sign({ id: emp.id, code: emp.codeAccess }, process.env.JWTSECRET, {
+        const token = jwt.sign({ id: emp.id, code: emp.codeAccess, role: emp.role }, process.env.JWTSECRET, {
             expiresIn: '48h'
         });
-        res.json({ message: 'Ok', token: token, /*refreshToken,*/ });
+        res.json({ message: 'Ok', token: token, ok: true /*refreshToken,*/ });
     }
     //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
     // user.refreshToken = refreshToken;
@@ -48,8 +40,8 @@ AuthEmployeeController.Login = (req, res) => __awaiter(void 0, void 0, void 0, f
     // } catch (error) {
     //     return res.status(400).json({message: 'somthing goes wrong!'})
     // }
-});
-AuthEmployeeController.passwordChange = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+AuthEmployeeController.passwordChange = async (req, res) => {
     const { id } = res.locals.jwtPayload;
     const { oldPassword, newPassword } = req.body;
     if (!(oldPassword && newPassword)) {
@@ -58,7 +50,7 @@ AuthEmployeeController.passwordChange = (req, res) => __awaiter(void 0, void 0, 
     const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     let empl;
     try {
-        empl = yield emplRepo.findOneOrFail(id);
+        empl = await emplRepo.findOneOrFail(id);
     }
     catch (e) {
         res.status(400).json({ message: 'Algo salio mal! ' });
@@ -68,7 +60,7 @@ AuthEmployeeController.passwordChange = (req, res) => __awaiter(void 0, void 0, 
     }
     empl.password = newPassword;
     const validateOps = { validationError: { target: false, value: false } };
-    const error = yield class_validator_1.validate(empl, validateOps);
+    const error = await class_validator_1.validate(empl, validateOps);
     if (error.length > 0) {
         res.status(400).json(error);
     }
@@ -76,83 +68,86 @@ AuthEmployeeController.passwordChange = (req, res) => __awaiter(void 0, void 0, 
     empl.hashPassword();
     emplRepo.save(empl);
     res.json({ message: 'Contraseña cambiada con exito! ' });
-});
+};
 //ForgotPassword
-AuthEmployeeController.forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { code } = req.body;
-    if (!(code)) {
-        return res.status(400).json({ message: 'Code es requerido para cambiar password' });
+AuthEmployeeController.forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    if (!(email)) {
+        return res.status(400).json({ message: 'El correo es requerido para cambiar password' });
     }
-    const message = 'check your email for a link to reset your password.';
+    const message = 'hemos enviado lo necesario a tu correo';
     let verifycationLink;
     let emailStatus = 'Ok';
+    let token;
     const emplRespo = typeorm_1.getRepository(Employee_1.Employee);
     let empl;
     try {
-        empl = yield emplRespo.findOneOrFail({ where: { codeAccess: code } });
-        const token = jwt.sign({ id: empl.id, code: empl.codeAccess }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `http://localhost:9000/new-password/${token}`;
-        empl.resetPassword = token;
+        empl = await emplRespo.findOneOrFail({ where: { email: email } });
+        token = jwt.sign({ id: empl.id, code: empl.codeAccess }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
+        verifycationLink = `http://localhost:3000/reset-password/${token}`;
     }
     catch (e) {
-        return res.json({ message });
+        return res.json({ ok: false, message: 'no se encontro to correo en los registros' });
     }
     //TODO: sendEmail
-    //try{
-    // await transporter.sendMail({
-    // from : '"Forgot Password " <castlem791@gmail.com>',//sender address
-    // to: empl.email,
-    // subject: "Forgot Password",
-    //html: '<b>Please check on the following link , or paste this into your browser to complete the process:</b>
-    //<a href="${verifycationLink}">${verifycationLink}</a>',
-    //});
-    // }catch(error){
-    //     emailStatus = error;
-    //     return res.status(401).json({message:'Something goes wrong!'});
-    // }
     try {
-        yield emplRespo.save(empl);
+        await mailer_1.transporter.sendMail({
+            from: '"Forgot Password " <castlem791@gmail.com>',
+            to: empl.email,
+            subject: "Forgot Password",
+            html: `<b>Please check on the following link , or paste this into your browser to complete the process:</b>
+                <a href="${verifycationLink}">${verifycationLink}</a>`,
+        });
+    }
+    catch (error) {
+        emailStatus = error;
+        return res.status(401).json({ message: 'Something goes wrong!' });
+    }
+    try {
+        empl.resetPassword = token;
+        await emplRespo.save(empl);
     }
     catch (error) {
         emailStatus = error;
         return res.status(400).json({ message: 'Something goes wrong!' });
     }
-    res.json({ message, info: emailStatus, verifycationLink });
-});
+    res.json({ message, ok: true, emailStatus });
+};
 //resetPassword
-AuthEmployeeController.createNewPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthEmployeeController.createNewPassword = async (req, res) => {
     const { newPassword } = req.body;
     const resetPassword = req.headers.reset;
     if (!(resetPassword && newPassword)) {
-        res.status(400).json({ message: 'all the fields are require' });
+        return res.status(400).json({ message: 'all the fields are require' });
     }
     const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     let jwtPayload;
     let empl;
     try {
+        empl = await emplRepo.findOneOrFail({ where: { resetPassword } });
         jwtPayload = jwt.verify(resetPassword, process.env.JWTSECRETRESET);
-        empl = yield emplRepo.findOneOrFail({ where: { resetPassword } });
+        console.log(empl);
     }
     catch (error) {
-        return res.status(401).json({ message: 'error' });
+        return res.status(401).json({ message: 'No se ah completado la accion' });
     }
     empl.password = newPassword;
     const validationsOps = { validationError: { target: false, value: false } };
-    const errors = yield class_validator_1.validate(empl, validationsOps);
+    const errors = await class_validator_1.validate(empl, validationsOps);
     if (errors.length > 0) {
         return res.status(400).json({ error: errors });
     }
     try {
         empl.hashPassword();
-        yield emplRepo.save(empl);
+        await emplRepo.save(empl);
     }
     catch (error) {
         return res.status(400).json({ message: error });
     }
-    res.json({ message: 'password changed!' });
-});
+    res.json({ message: 'password changed!', ok: true });
+};
 //activar cuenta administrador
-AuthEmployeeController.ActivarCuenta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthEmployeeController.ActivarCuenta = async (req, res) => {
     const confirmacionCode = req.headers.confirm;
     if (!(confirmacionCode)) {
         res.status(400).json({ message: 'all the fields are require' });
@@ -160,24 +155,42 @@ AuthEmployeeController.ActivarCuenta = (req, res) => __awaiter(void 0, void 0, v
     const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     let employee;
     try {
-        employee = yield emplRepo.findOneOrFail({ where: { confirmacionCode } });
+        employee = await emplRepo.findOneOrFail({ where: { confirmacionCode } });
     }
     catch (error) {
         return res.status(401).json({ message: 'error' });
     }
     const validationsOps = { validationError: { target: false, value: false } };
-    const errors = yield class_validator_1.validate(employee, validationsOps);
+    const errors = await class_validator_1.validate(employee, validationsOps);
     if (errors.length > 0) {
         return res.status(400).json({ error: errors });
     }
     try {
         employee.estado = true;
-        yield emplRepo.save(employee);
+        await emplRepo.save(employee);
     }
     catch (error) {
         return res.status(400).json({ message: error });
     }
     res.json({ message: 'Registro Activado!' });
-});
+};
+AuthEmployeeController.addNewPassword = async (req, res) => {
+    const id = req.params;
+    const { password } = req.body;
+    let employee;
+    const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
+    try {
+        employee = await emplRepo.findOneOrFail(id);
+        if (employee) {
+            employee.password = password;
+            employee.hashPassword();
+            await emplRepo.save(employee);
+            return res.send({ message: "Se guardo la contraseña", ok: true });
+        }
+    }
+    catch (error) {
+        return res.status(400).json({ message: error });
+    }
+};
 exports.default = AuthEmployeeController;
 //# sourceMappingURL=AuthEmployee.js.map

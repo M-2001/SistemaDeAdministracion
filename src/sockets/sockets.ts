@@ -14,7 +14,7 @@ export const desconectar = (cliente: Socket, _: socketIO.Server) => {
 export const nuevo = (cliente: Socket, io: socketIO.Server) => {
     cliente.on('new', () => {
         console.log('una nueva orden se ah realizado');
-        const obj = {message:"Hola mundo",ok:true}
-        io.emit("reload",obj)
+        const obj = {message:"Nueva Orden!!!", ok :true}
+        io.emit("reload", obj)
     });
 }

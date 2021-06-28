@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Pay_1 = require("../controller/Pay");
-const roleUser_1 = require("../middleware/roleUser");
 const PaypalSdk = require("paypal-rest-sdk");
 const jwt_1 = require("../middleware/jwt");
 PaypalSdk.configure({
@@ -12,8 +11,8 @@ PaypalSdk.configure({
 });
 const router = express_1.Router();
 const pay = Pay_1.default;
-router.get('/success', [jwt_1.CheckJwt, roleUser_1.checkRoleU(['user'])], pay.PaySuccess);
-router.get('/cancel', (_req, res) => res.send('Canceled'));
-router.post('/', pay.Pay);
+router.post('/success', jwt_1.CheckJwt, pay.PaySuccess);
+router.get('/cancel', (req, res) => res.send('Canceled'));
+router.post('/', jwt_1.CheckJwt, pay.Pay);
 exports.default = router;
 //# sourceMappingURL=pay.js.map

@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Producto_1 = require("../entity/Producto");
 const typeorm_1 = require("typeorm");
@@ -25,9 +16,9 @@ PaypalSdk.configure({
 let Items;
 class PayController {
 }
-PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+PayController.Pay = async (req, res) => {
     let items = req.body;
-    let CODIGO_CUPON = req.query.CODIGO_CUPON;
+    let CODIGO_CUPON = req.query.code;
     Items = items;
     //let CODE_CUPON = CODIGO_CUPON;
     const proRepo = typeorm_1.getRepository(Producto_1.Producto);
@@ -38,7 +29,7 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         //verificar CODE_CUPON
         if (CODIGO_CUPON) {
             try {
-                cuponExist = yield cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
+                cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
                 if (cuponExist.status == true) {
                     return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                 }
@@ -47,8 +38,8 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                         for (let index = 0; index < items.length; index++) {
                             let amount = 0;
                             const item = items[index];
-                            const productoItem = yield proRepo.findOneOrFail(item.id);
-                            let operacion = productoItem.costo_standar * item.qty;
+                            const productoItem = await proRepo.findOneOrFail(item.id);
+                            let operacion = productoItem.costo_standar * item.qt;
                             let Totaldesc = 0.00;
                             let totalPay = operacion;
                             amount += totalPay;
@@ -71,8 +62,8 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 for (let index = 0; index < items.length; index++) {
                     let amount = 0;
                     const item = items[index];
-                    const productoItem = yield proRepo.findOneOrFail(item.id);
-                    let operacion = productoItem.costo_standar * item.qty;
+                    const productoItem = await proRepo.findOneOrFail(item.id);
+                    let operacion = productoItem.costo_standar * item.qt;
                     let Totaldesc = operacion * productoItem.descuento / 100;
                     let totalPay = operacion - Totaldesc;
                     amount += totalPay;
@@ -94,11 +85,11 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     if (cuponExist) {
         const Totaldesct = totalPrice * cuponExist.descuento / 100;
         const Totalprice = totalPrice - Totaldesct;
-        urlSuccess = "http://localhost:5000/pay-checkout/success?CODIGO_CUPON=" + CODIGO_CUPON;
+        urlSuccess = "http://localhost:3000/pay?code=" + CODIGO_CUPON;
         total = Totalprice.toFixed(2);
     }
     else {
-        urlSuccess = "http://localhost:5000/pay-checkout/success";
+        urlSuccess = "http://localhost:3000/pay";
         total = totalPrice.toFixed(2);
     }
     //try to pay
@@ -135,7 +126,7 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                             //res.redirect(payment.links[index].href)
                         }
                     }
-                    res.redirect(redirectUrl);
+                    res.send({ redirectUrl });
                 }
             }
         });
@@ -143,8 +134,8 @@ PayController.Pay = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     catch (error) {
         return console.log('Algo salio mal!!!');
     }
-});
-PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+PayController.PaySuccess = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     const ordenRepo = typeorm_1.getRepository(Order_1.Order);
     const ordeDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
@@ -157,7 +148,7 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
     //var params = new URLSearchParams(location.search);
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
-    const CODIGO_CUPON = req.query.CODIGO_CUPON;
+    const CODIGO_CUPON = req.query.code;
     let totalPrice = 0;
     let totalDesc = 0;
     let total;
@@ -167,7 +158,7 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
         //verificar CODE_CUPON
         if (CODIGO_CUPON) {
             try {
-                cuponExist = yield cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
+                cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
                 if (cuponExist.status == true) {
                     return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                 }
@@ -180,23 +171,23 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     or.cliente = clienteid;
                     or.codigoOrden = codigoO;
                     or.status = 2;
-                    ordenC = yield ordenRepo.save(or);
+                    ordenC = await ordenRepo.save(or);
                     for (let index = 0; index < items.length; index++) {
                         let amount = 0;
                         const item = items[index];
-                        const productoItem = yield proRepo.findOneOrFail(item.id);
+                        const productoItem = await proRepo.findOneOrFail(item.id);
                         try {
-                            let operacion = productoItem.costo_standar * item.qty;
+                            let operacion = productoItem.costo_standar * item.qt;
                             let Totaldesc = 0.00;
                             let totalPay = operacion;
-                            let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                            let qtyExist = productoItem.catidad_por_unidad - item.qt;
                             amount += totalPay;
                             totalPrice += totalPay;
                             totalDesc += Totaldesc;
                             const OnlyTwoDecimals = amount.toFixed(2);
                             const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'), 10);
                             console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
-                            let itemString = item.qty.toString();
+                            let itemString = item.qt.toString();
                             let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
                             itemEmail.push(itm);
                             try {
@@ -204,10 +195,10 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
                                 const saveOD = new Detalles_Orden_1.DetalleOrden();
                                 saveOD.orden = ordenC,
                                     saveOD.producto = productoItem,
-                                    saveOD.cantidad = item.qty,
+                                    saveOD.cantidad = item.qt,
                                     saveOD.totalUnidad = amount,
                                     saveOD.descuento = Totaldesc;
-                                const Save = yield ordeDRepo.save(saveOD);
+                                const Save = await ordeDRepo.save(saveOD);
                             }
                             catch (error) {
                                 console.log(error);
@@ -215,7 +206,7 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
                             //actualizar producto
                             try {
                                 productoItem.catidad_por_unidad = qtyExist;
-                                const saveProduct = yield proRepo.save(productoItem);
+                                const saveProduct = await proRepo.save(productoItem);
                             }
                             catch (error) {
                                 return console.log('Error inesperado!!!');
@@ -242,22 +233,22 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
             or.cliente = clienteid;
             or.codigoOrden = codigoO;
             or.status = 2;
-            ordenC = yield ordenRepo.save(or);
+            ordenC = await ordenRepo.save(or);
             for (let index = 0; index < items.length; index++) {
                 let amount = 0;
                 const item = items[index];
-                const productoItem = yield proRepo.findOneOrFail(item.id);
-                let operacion = productoItem.costo_standar * item.qty;
+                const productoItem = await proRepo.findOneOrFail(item.id);
+                let operacion = productoItem.costo_standar * item.qt;
                 let Totaldesc = operacion * productoItem.descuento / 100;
                 let totalPay = operacion - Totaldesc;
-                let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                let qtyExist = productoItem.catidad_por_unidad - item.qt;
                 amount += totalPay;
                 totalPrice += totalPay;
                 totalDesc += Totaldesc;
                 const OnlyTwoDecimals = amount.toFixed(2);
                 const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'), 10);
                 console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
-                let itemString = item.qty.toString();
+                let itemString = item.qt.toString();
                 let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
                 itemEmail.push(itm);
                 try {
@@ -265,10 +256,10 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     const saveOD = new Detalles_Orden_1.DetalleOrden();
                     saveOD.orden = ordenC,
                         saveOD.producto = productoItem,
-                        saveOD.cantidad = item.qty,
+                        saveOD.cantidad = item.qt,
                         saveOD.totalUnidad = amount,
                         saveOD.descuento = Totaldesc;
-                    const Save = yield ordeDRepo.save(saveOD);
+                    const Save = await ordeDRepo.save(saveOD);
                 }
                 catch (error) {
                     console.log(error);
@@ -276,7 +267,7 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 //actualizar producto
                 try {
                     productoItem.catidad_por_unidad = qtyExist;
-                    const saveProduct = yield proRepo.save(productoItem);
+                    const saveProduct = await proRepo.save(productoItem);
                 }
                 catch (error) {
                     return console.log('Error inesperado!!!');
@@ -295,15 +286,15 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
         total = Totalprice.toFixed(2);
         ordenC.PrecioTotal = Totalprice;
         ordenC.TotalDesc = Totaldesct;
-        const actualizarOrden = yield ordenRepo.save(ordenC);
+        const actualizarOrden = await ordenRepo.save(ordenC);
         cuponExist.status = true;
-        const statusCupon = yield cuponRepo.save(cuponExist);
+        const statusCupon = await cuponRepo.save(cuponExist);
         //res.json({itemEmail});
     }
     else {
         ordenC.PrecioTotal = totalPrice;
         ordenC.TotalDesc = totalDesc;
-        const actualizarOrden = yield ordenRepo.save(ordenC);
+        const actualizarOrden = await ordenRepo.save(ordenC);
         total = totalPrice.toFixed(2);
         //res.json({itemEmail});
     }
@@ -311,7 +302,7 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         let direccionLocal = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
         let date = new Date();
-        const infoCliente = yield clienteRepo.findOneOrFail(clienteid.id);
+        const infoCliente = await clienteRepo.findOneOrFail(clienteid.id);
         let subject = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `;
         console.log(subject);
         console.log(direccionLocal, date, infoCliente);
@@ -320,7 +311,7 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }, '');
         let descTotal = itemEmail.map((a) => a.descuento).reduce((a, b) => a + b);
         console.log(descTotal);
-        yield nodemailer_config_1.transporter.sendMail({
+        await nodemailer_config_1.transporter.sendMail({
             from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
             to: infoCliente.email,
             subject: subject,
@@ -387,14 +378,13 @@ PayController.PaySuccess = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 throw error;
             }
             else {
-                console.log(JSON.stringify(payment));
-                res.json({ message: 'Compra Exitosa!!!' });
+                res.json({ message: 'Gracias por su compra', ok: true });
             }
         });
     }
     catch (error) {
         console.log(error);
     }
-});
+};
 exports.default = PayController;
 //# sourceMappingURL=Pay.js.map
