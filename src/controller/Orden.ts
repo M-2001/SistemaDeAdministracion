@@ -405,13 +405,18 @@ class OrdenController {
         let totalDesc: number = 0;
         let total: any;
 
-        //buscar employee con el token que recibe
         try {
-            employee = await employeeRepo.findOneOrFail({id});
+            employee = await employeeRepo.findOne({id});
+            if (employee.email == "") {
+                const adminEmail = await employeeRepo.findOne({where:{role: 'admin'}});
+                console.log(adminEmail.email);
+                employee.email = adminEmail.email;
+            }
 
         } catch (error) {
             console.log('Ocurrio un error!');
-        }
+        }//buscar employee con el token que recibe
+        
 
         //buscar cliente con el emailLocal
         try {
