@@ -40,6 +40,7 @@ class OrdenController {
                 .skip((pagina - 1) * take)
                 .take(take)
                 .where("orden.codigoOrden like :codeOrden", { codeOrden: `%${searchOrden}%` })
+                .orderBy("orden.id","DESC")
                 .getManyAndCount()
 
             if (ordenes.length > 0) {

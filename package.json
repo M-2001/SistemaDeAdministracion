@@ -33,16 +33,16 @@
       "nodemailer": "^6.4.18",
       "nodemon": "^2.0.7",
       "paypal-rest-sdk": "^1.8.1",
+      "react-push-notification": "^1.3.0",
       "reflect-metadata": "^0.1.10",
       "socket.io": "^4.1.2",
       "typeorm": "^0.2.30"
-
    },
    "scripts": {
       "start:dev": "ts-node-dev src/index.ts",
       "start": "node dist/index.js",
       "build": "tsc",
       "dev": "ts-node-dev --inspect --transpileOnly --ignore-watch node_modules src/index.ts",
-      "typeorm":"node  --requiere ts-node/register  ./node_modules/typeorm/cli.js"
+      "typeorm": "node  --requiere ts-node/register  ./node_modules/typeorm/cli.js"
    }
 }

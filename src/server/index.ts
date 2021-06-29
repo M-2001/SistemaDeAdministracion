@@ -137,7 +137,7 @@ class Server {
             console.log('Usuario conectado al servidor con id: ' + this.socketID);
             sockets.desconectar(cliente, this.io)
             sockets.nuevo(cliente, this.io)
-        });
+        })
     }
 
     //funcion principal que se encarga de iniciar el servidor
