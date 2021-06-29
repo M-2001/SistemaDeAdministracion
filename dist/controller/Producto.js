@@ -85,7 +85,7 @@ ProductoController.ProductosPaginados = async (req, res) => {
                 prod.status = false;
                 prod.catidad_por_unidad = 1;
                 productoRepo.save(producto);
-                //console.log(prod.status);
+                console.log(prod.status);
             }
         }
         if (producto.length > 0) {

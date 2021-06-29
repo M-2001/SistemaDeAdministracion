@@ -1,24 +1,35 @@
 module.exports = {
+
       "type": "mysql",
-      "host": "localhost",
+      "host": "remotemysql.com",
       "port": 3306,
-      "username": "root",
-      "password": "admind",
-      "database": "system-pc",
+      "username": "wevbdYXWC1",
+      "password": "Ht7TqGGjPl",
+      "database": "wevbdYXWC1",
       "synchronize": true,
       "logging": false,
+
+      // "type": "mysql",
+      // "host": "localhost",
+      // "port": 3306,
+      // "username": "root",
+      // "password": "admind",
+      // "database": "system-pc",
+      // "synchronize": true,
+      // "logging": false,
+
       "entities": [
-         "src/entity/**/*.ts"
+         "dist/entity/**/*.js"
       ],
       "migrations": [
-         "src/migration/**/*.ts"
+         "dist/migration/**/*.js"
       ],
       "subscribers": [
-         "src/subscriber/**/*.ts"
+         "dist/subscriber/**/*.js"
       ],
       "cli": {
-         "entitiesDir": "src/entity",
-         "migrationsDir": "src/migration",
-         "subscribersDir": "src/subscriber"
+         "entitiesDir": "dist/entity",
+         "migrationsDir": "dist/migration",
+         "subscribersDir": "dist/subscriber"
       }
 }
