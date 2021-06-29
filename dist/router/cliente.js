@@ -9,9 +9,10 @@ const cliente = Cliente_1.default;
 router.get('/', cliente.getClientes);
 router.get('/best-client', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], cliente.MejoresClientes);
 router.post('/', cliente.RegistroCliente);
-router.post('/photo', jwt_1.CheckJwt, cliente.ImagenPerfilCliente);
-router.get('/:id', cliente.getClienteByID);
-router.put('/', jwt_1.CheckJwt, cliente.EditarCliente);
+router.get('/image', cliente.getImage);
+router.post('/photo/:id', jwt_1.CheckJwt, cliente.ImagenPerfilCliente);
+router.put('/:id', jwt_1.CheckJwt, cliente.EditarCliente);
 router.delete('/:id', cliente.EliminarCliente);
+router.get('/:id', jwt_1.CheckJwt, cliente.getClienteByID);
 exports.default = router;
 //# sourceMappingURL=cliente.js.map

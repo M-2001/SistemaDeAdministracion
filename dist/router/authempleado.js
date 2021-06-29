@@ -7,6 +7,7 @@ const router = express_1.Router();
 const auth = AuthEmployee_1.default;
 //login Empleado
 router.post('/loginEmployee', auth.Login);
+router.post('/add-password/:id', auth.addNewPassword);
 //change password
 router.post('/change-password', [jwt_1.CheckJwt], auth.passwordChange);
 //forgot password

@@ -6,22 +6,23 @@ const jwt_1 = require("../middleware/jwt");
 const Producto_1 = require("../controller/Producto");
 const router = express_1.Router();
 const producto = Producto_1.default;
-router.get('/', producto.MostrarProductos);
+router.get('/news', producto.MostrarProductos);
+router.get('/image', producto.getImage);
+router.get('/bestSellers', producto.ProductosMasVendidos);
 router.get('/products-paginate', producto.ProductosPaginados);
-router.post('/product-categoria', producto.MostrarProductosCategoria);
-router.post('/product-marca', producto.MostrarProductosMarca);
-router.post('/', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.AgregarProducto);
-router.get('/:id', producto.ObtenerProductoPorID);
-router.put('/:id', producto.EditarProducto);
-router.delete('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EliminarProducto);
-router.post('/file-product/:id', producto.ImagenProducto);
+router.get('/product-categoria', producto.MostrarProductosCategoria);
+router.get('/product-marca', producto.MostrarProductosMarca);
+router.post('/file-product/:id', jwt_1.CheckJwt, producto.ImagenProducto);
 //eliminar image de producto
 router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto
-router.put('/status', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EstadoProducto);
-//productos mas vendidos
-router.post('/bestSellers', producto.ProductosMasVendidos);
+router.put('/status', jwt_1.CheckJwt, producto.EstadoProducto);
+router.get('/bestSellers', producto.ProductosMasVendidos);
 //produstos con mas rating
-router.post('/more-ratings', producto.ProductosConMasRatings);
+router.get('/more-ratings', producto.ProductosConMasRatings);
+router.post('/', jwt_1.CheckJwt, producto.AgregarProducto);
+router.get('/:id', producto.ObtenerProductoPorID);
+router.put('/:id', producto.EditarProducto);
+router.delete('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EliminarProducto);
 exports.default = router;
 //# sourceMappingURL=producto.js.map

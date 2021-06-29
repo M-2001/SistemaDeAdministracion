@@ -1,26 +1,17 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 class OrdenDetalle {
 }
-OrdenDetalle.MostrarDteOrdenPaginadas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
     let pagina = req.query.pagina || 1;
     pagina = Number(pagina);
     let take = req.query.limit || 5;
     take = Number(take);
     try {
         const ordenesDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-        const [ordenesD, totalItems] = yield ordenesDRepo.createQueryBuilder('orden_detalle')
+        const [ordenesD, totalItems] = await ordenesDRepo.createQueryBuilder('orden_detalle')
             .innerJoin('orden_detalle.producto', 'producto')
             .innerJoin('orden_detalle.orden', 'orden')
             .addSelect(['producto.nombreProducto'])
@@ -44,12 +35,12 @@ OrdenDetalle.MostrarDteOrdenPaginadas = (req, res) => __awaiter(void 0, void 0, 
     catch (error) {
         res.json({ message: 'Algo ha salido mal!' });
     }
-});
-OrdenDetalle.MostrarDteOrderByOrderId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+};
+OrdenDetalle.MostrarDteOrderByOrderId = async (req, res) => {
     const { orden } = req.body;
     try {
         const ordenesDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-        const ordenesD = yield ordenesDRepo.createQueryBuilder('orden_detalle')
+        const ordenesD = await ordenesDRepo.createQueryBuilder('orden_detalle')
             .innerJoin('orden_detalle.producto', 'producto')
             .innerJoin('orden_detalle.orden', 'orden')
             .addSelect(['producto.nombreProducto'])
@@ -66,6 +57,6 @@ OrdenDetalle.MostrarDteOrderByOrderId = (req, res) => __awaiter(void 0, void 0, 
     catch (error) {
         res.json({ message: 'Algo ha salido mal!' });
     }
-});
+};
 exports.default = OrdenDetalle;
 //# sourceMappingURL=OrdenDetalle.js.map

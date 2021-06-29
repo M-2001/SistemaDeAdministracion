@@ -6,13 +6,13 @@ const jwt_1 = require("../middleware/jwt");
 const Proveedor_1 = require("../controller/Proveedor");
 const router = express_1.Router();
 const proveedor = Proveedor_1.default;
-router.get('/', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.MostrarProveedors);
-router.post('/', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.AgregarProveedor);
-router.get('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.ObtenerProveedorPorID);
-router.put('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.ActualizarProveedor);
-router.delete('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.EliminarProveedor);
-router.post('/proveedores-paginated', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.MostrarProveedoresPaginados);
+router.get('/proveedores-paginated', proveedor.MostrarProveedoresPaginados);
 //estado del producto
-router.put('/status', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.EstadoProveedor);
+router.put('/status', jwt_1.CheckJwt, proveedor.EstadoProveedor);
+router.get('/', proveedor.MostrarProveedors);
+router.post('/', jwt_1.CheckJwt, proveedor.AgregarProveedor);
+router.get('/:id', proveedor.ObtenerProveedorPorID);
+router.put('/:id', jwt_1.CheckJwt, proveedor.ActualizarProveedor);
+router.delete('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], proveedor.EliminarProveedor);
 exports.default = router;
 //# sourceMappingURL=proveedor.js.map

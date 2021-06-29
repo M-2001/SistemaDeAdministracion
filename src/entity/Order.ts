@@ -9,7 +9,7 @@ export class Order {
     id ?: number; 
 
     @ManyToOne(type => Cliente, cliente => cliente.order)
-    cliente : Cliente[]
+    cliente : Cliente
 
     @Column()
     @CreateDateColumn()

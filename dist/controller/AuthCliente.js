@@ -1,22 +1,14 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
 const Cliente_1 = require("../entity/Cliente");
 const class_validator_1 = require("class-validator");
+const nodemailer_config_1 = require("../config/nodemailer.config");
 class AuthClienteController {
 }
 //login cliente
-AuthClienteController.Login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthClienteController.Login = async (req, res) => {
     const { email, password } = req.body;
     if (!(email && password)) {
         return res.status(400).json({ message: 'username & password are required' });
@@ -24,7 +16,7 @@ AuthClienteController.Login = (req, res) => __awaiter(void 0, void 0, void 0, fu
     const clienteRepository = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
-        cliente = yield clienteRepository.findOneOrFail({ where: { email } });
+        cliente = await clienteRepository.findOneOrFail({ where: { email } });
     }
     catch (e) {
         return res.status(400).json({ message: 'Username or password incorrect!' });
@@ -43,16 +35,16 @@ AuthClienteController.Login = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const refreshToken = jwt.sign({ clienteid: cliente.id, email: cliente.email }, process.env.JWTSECRETREFRESH, { expiresIn: '48h' });
         cliente.refreshToken = refreshToken;
         try {
-            yield clienteRepository.save(cliente);
+            await clienteRepository.save(cliente);
             res.json({ message: 'Ok', token: token, refreshToken });
         }
         catch (error) {
             return res.status(400).json({ message: 'somthing goes wrong!' });
         }
     }
-});
+};
 //passwordChange
-AuthClienteController.passwordChange = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthClienteController.passwordChange = async (req, res) => {
     const { id } = res.locals.jwtPayload;
     const { oldPassword, newPassword } = req.body;
     if (!(oldPassword && newPassword)) {
@@ -61,7 +53,7 @@ AuthClienteController.passwordChange = (req, res) => __awaiter(void 0, void 0, v
     const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
-        cliente = yield clienteRepo.findOneOrFail(id);
+        cliente = await clienteRepo.findOneOrFail(id);
     }
     catch (e) {
         res.status(400).json({ message: 'Something goes wrong! ' });
@@ -71,7 +63,7 @@ AuthClienteController.passwordChange = (req, res) => __awaiter(void 0, void 0, v
     }
     cliente.password = newPassword;
     const validateOps = { validationError: { target: false, value: false } };
-    const error = yield class_validator_1.validate(cliente, validateOps);
+    const error = await class_validator_1.validate(cliente, validateOps);
     if (error.length > 0) {
         res.status(400).json(error);
     }
@@ -79,9 +71,9 @@ AuthClienteController.passwordChange = (req, res) => __awaiter(void 0, void 0, v
     cliente.hashPassword();
     clienteRepo.save(cliente);
     res.json({ message: 'Password changed successfully! ' });
-});
+};
 //ForgotPassword
-AuthClienteController.forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthClienteController.forgotPassword = async (req, res) => {
     const { email } = req.body;
     if (!(email)) {
         return res.status(400).json({ message: 'email is require for change password' });
@@ -92,9 +84,12 @@ AuthClienteController.forgotPassword = (req, res) => __awaiter(void 0, void 0, v
     const clienteRespo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
-        cliente = yield clienteRespo.findOneOrFail({ where: { email } });
+        cliente = await clienteRespo.findOneOrFail({ where: { email } });
+        if (!cliente) {
+            return res.send({ ok: false });
+        }
         const token = jwt.sign({ id: cliente.id, email: cliente.email }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `http://localhost:9000/new-password/${token}`;
+        verifycationLink = `http://localhost:3000/reset-password/${token}`;
         cliente.resetPassword = token;
     }
     catch (e) {
@@ -102,89 +97,92 @@ AuthClienteController.forgotPassword = (req, res) => __awaiter(void 0, void 0, v
     }
     //TODO: sendEmail
     try {
-        // await transporter.sendMail({
-        // from : '"Forgot Password " <castlem791@gmail.com>',//sender address
-        // to: empl.email,
-        // subject: "Forgot Password",
-        //html: '<b>Please check on the following link , or paste this into your browser to complete the process:</b>
-        //<a href="${verifycationLink}">${verifycationLink}</a>',
-        //});
+        await nodemailer_config_1.transporter.sendMail({
+            from: '"Forgot Password " <castlem791@gmail.com>',
+            to: cliente.email,
+            subject: "Forgot Password",
+            html: `<b>Please check on the following link , or paste this into your browser to complete the process:</b>
+            <a href="${verifycationLink}">${verifycationLink}</a>`,
+        });
     }
     catch (error) {
         emailStatus = error;
         return res.status(401).json({ message: 'Something goes wrong!' });
     }
     try {
-        yield clienteRespo.save(cliente);
+        await clienteRespo.save(cliente);
     }
     catch (error) {
         emailStatus = error;
         return res.status(400).json({ message: 'Something goes wrong!' });
     }
-    res.json({ message, info: emailStatus, verifycationLink });
-});
+    res.json({ message, info: emailStatus });
+};
 //create new password to reset password
-AuthClienteController.createNewPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthClienteController.createNewPassword = async (req, res) => {
     const { newPassword } = req.body;
     const resetPassword = req.headers.reset;
+    console.log(newPassword, resetPassword);
     if (!(resetPassword && newPassword)) {
-        res.status(400).json({ message: 'all the fields are require' });
+        res.status(400).json({ message: 'Faltan datos importantes' });
     }
-    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let jwtPayload;
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
+        cliente = await clienteRepo.findOneOrFail({ where: { resetPassword } });
         jwtPayload = jwt.verify(resetPassword, process.env.JWTSECRETRESET);
-        cliente = yield clienteRepo.findOneOrFail({ where: { resetPassword } });
+        console.log(cliente);
     }
     catch (error) {
-        return res.status(401).json({ message: 'error' });
+        return res.status(401).json({ message: 'No se ah completado la accion' });
     }
     cliente.password = newPassword;
     const validationsOps = { validationError: { target: false, value: false } };
-    const errors = yield class_validator_1.validate(cliente, validationsOps);
+    const errors = await class_validator_1.validate(cliente, validationsOps);
     if (errors.length > 0) {
         return res.status(400).json({ error: errors });
     }
     try {
         cliente.hashPassword();
-        yield clienteRepo.save(cliente);
+        await clienteRepo.save(cliente);
     }
     catch (error) {
         return res.status(400).json({ message: error });
     }
-    res.json({ message: 'password changed!' });
-});
+    res.json({ message: 'Se actualizo tu contraseña', ok: true });
+};
 //activar usuario
-AuthClienteController.ActivarCuenta = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthClienteController.ActivarCuenta = async (req, res) => {
     const confirmacionCode = req.headers.confirm;
+    console.log(req.query);
     if (!(confirmacionCode)) {
         res.status(400).json({ message: 'all the fields are require' });
     }
     const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
-        cliente = yield clienteRepo.findOneOrFail({ where: { confirmacionCode } });
+        cliente = await clienteRepo.findOneOrFail({ where: { confirmacionCode } });
     }
     catch (error) {
         return res.status(401).json({ message: 'error' });
     }
     const validationsOps = { validationError: { target: false, value: false } };
-    const errors = yield class_validator_1.validate(cliente, validationsOps);
+    const errors = await class_validator_1.validate(cliente, validationsOps);
     if (errors.length > 0) {
         return res.status(400).json({ error: errors });
     }
     try {
         cliente.estado = true;
-        yield clienteRepo.save(cliente);
+        await clienteRepo.save(cliente);
     }
     catch (error) {
         return res.status(400).json({ message: error });
     }
-    res.json({ message: 'Usuario Activado!' });
-});
+    res.json({ message: 'Usuario Activado!', ok: true });
+};
 //refreshToken
-AuthClienteController.refreshToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+AuthClienteController.refreshToken = async (req, res) => {
     const refreshToken = req.headers.refresh;
     if (!(refreshToken)) {
         res.status(400).json({ message: 'something goes wrong!' });
@@ -196,13 +194,13 @@ AuthClienteController.refreshToken = (req, res) => __awaiter(void 0, void 0, voi
         const verifyResult = jwt.verify(refreshToken, process.env.JWTSECRETREFRESH);
         const { email } = verifyResult;
         console.log(verifyResult);
-        cliente = yield clienteRepo.findOneOrFail({ where: { email } });
+        cliente = await clienteRepo.findOneOrFail({ where: { email } });
     }
     catch (error) {
         return res.status(401).json({ message: 'somthing goes wrong!' });
     }
     const token = jwt.sign({ clienteid: cliente.id, email: cliente.email }, process.env.JWTSECRET, { expiresIn: '48h' });
     res.json({ ok: true, token });
-});
+};
 exports.default = AuthClienteController;
 //# sourceMappingURL=AuthCliente.js.map

@@ -49,6 +49,10 @@ __decorate([
 __decorate([
     typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
+], Employee.prototype, "email", void 0);
+__decorate([
+    typeorm_1.Column({ default: "" }),
+    __metadata("design:type", String)
 ], Employee.prototype, "direccion", void 0);
 __decorate([
     typeorm_1.Column({ default: "usuario.png" }),

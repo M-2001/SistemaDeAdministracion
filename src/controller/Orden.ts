@@ -7,6 +7,7 @@ import { Cliente } from '../entity/Cliente';
 import { transporter } from '../config/nodemailer.config';
 import ItemProducto from '../entity/ItemEmail';
 import { Cupon } from '../entity/Cupones';
+import { Employee } from '../entity/Employee';
 
 
 interface Product {
@@ -59,6 +60,8 @@ class OrdenController {
             res.json({ message: 'Algo ha salido mal!' })
         }
     }
+
+    //mostrar ordenes por clientes
     static MostrarOrdenCliente = async (req: Request, res: Response) => {
         const { clienteid } = res.locals.jwtPayload;
         let pagina = req.query.pagina || 1;
@@ -91,6 +94,8 @@ class OrdenController {
             return res.json({ message: 'Algo ha salido mal!',error })
         }
     }
+
+    //agregar Reservacion
     static AddReservacion = async (req: Request, res: Response) => {
         const { clienteid } = res.locals.jwtPayload;
         const ordenRepo = getRepository(Order);
@@ -381,6 +386,116 @@ class OrdenController {
             return res.status(404).json({ message: 'No hay registros con este id: ' + id });
         }
     };
+
+    //agregar Orden por cliente local
+    static AddOrdenClienteLocal = async (req: Request, res: Response)=>{
+        
+        const { id } = res.locals.jwtPayload;
+        const clienteRepo = getRepository(Cliente);
+        const employeeRepo = getRepository(Employee);
+        const ordenRepo = getRepository(Order);
+        const ordeDRepo = getRepository(DetalleOrden)
+        const proRepo = getRepository(Producto);
+
+        let employee : Employee;
+        let ClienteLocal : Cliente;
+        let ordenC: Order;
+        let items: Product[] = req.body;
+
+        let totalPrice: number = 0;
+        let totalDesc: number = 0;
+        let total: any;
+
+        //buscar employee con el token que recibe
+        try {
+            employee = await employeeRepo.findOneOrFail({id});
+
+        } catch (error) {
+            console.log('Ocurrio un error!');
+        }
+
+        //buscar cliente con el emailLocal
+        try {
+            ClienteLocal = await clienteRepo.findOne({where:{email : employee.email}});
+            if (!ClienteLocal) {
+                const Client = new Cliente();
+                Client.apellido = "Pc";
+                Client.nombre = "System-";
+                Client.email = employee.email;
+                Client.password = "SystemPc@password";
+
+                //encriptar contraeña
+                ClienteLocal.hashPassword();
+
+                const client = await clienteRepo.save(Client);
+                console.log(client);
+            }
+            console.log(ClienteLocal);
+
+            //res.json(ClienteLocal)
+                //Guardar Orden
+                let date = new Date();
+                let month = date.getMonth() + 1;
+                const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
+                const codigoO = 'SYSTEM_PC-' + codigoOrden + month;
+
+                const or = new Order();
+                or.cliente = ClienteLocal,
+                or.codigoOrden = codigoO,
+                or.status = 1
+                ordenC = await ordenRepo.save(or);
+                //console.log(ordenC);
+
+                for (let index = 0; index < items.length; index++) {
+                    let amount: number = 0;
+                    const item = items[index];
+                    const productoItem = await proRepo.findOneOrFail(item.id);
+
+                    let operacion = productoItem.costo_standar * item.qt;
+                    let Totaldesc = operacion * productoItem.descuento / 100;
+                    let totalPay = operacion - Totaldesc
+                    let qtyExist = productoItem.catidad_por_unidad - item.qt;
+
+                    amount += totalPay
+                    totalPrice += totalPay
+                    totalDesc += Totaldesc
+                    const OnlyTwoDecimals = amount.toFixed(2);
+                    console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
+
+                    try {
+                        //save Orden Detalle
+                            const saveOD = new DetalleOrden();
+                            saveOD.orden = ordenC,
+                            saveOD.producto = productoItem,
+                            saveOD.cantidad = item.qt,
+                            saveOD.totalUnidad = amount,
+                            saveOD.descuento = Totaldesc
+
+                            const Save = await ordeDRepo.save(saveOD);
+
+                            //actualizar producto
+                            try {
+                                productoItem.catidad_por_unidad = qtyExist;
+                                const saveProduct = await proRepo.save(productoItem)
+                                
+                            } catch (error) {
+                                return console.log('Error inesperado!!!');
+                            }
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+
+                ordenC.PrecioTotal = totalPrice;
+                ordenC.TotalDesc = totalDesc
+                const actualizarOrden = await ordenRepo.save(ordenC)
+                res.json({ ok:true,message:"Se guardo la compra!" });
+
+        } catch (error) {
+            console.log(error);
+        }
+        
+    }
 }
 
 export default OrdenController;
