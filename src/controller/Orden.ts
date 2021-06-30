@@ -389,14 +389,13 @@ class OrdenController {
 
     //agregar Orden por cliente local
     static AddOrdenClienteLocal = async (req: Request, res: Response)=>{
-        
+        console.log(req.body)
         const { id } = res.locals.jwtPayload;
         const clienteRepo = getRepository(Cliente);
         const employeeRepo = getRepository(Employee);
         const ordenRepo = getRepository(Order);
         const ordeDRepo = getRepository(DetalleOrden)
         const proRepo = getRepository(Producto);
-
         let employee : Employee;
         let ClienteLocal : Cliente;
         let ordenC: Order;
@@ -428,9 +427,7 @@ class OrdenController {
                 ClienteLocal.hashPassword();
 
                 const client = await clienteRepo.save(Client);
-                console.log(client);
             }
-            console.log(ClienteLocal);
 
             //res.json(ClienteLocal)
                 //Guardar Orden
