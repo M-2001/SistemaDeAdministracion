@@ -19,7 +19,7 @@ module.exports = {
       // "logging": false,
 
       "entities": [
-         "dist/entity/**/*.js"
+         "dist/entity/**/*.ts"
       ],
       "migrations": [
          "dist/migration/**/*.js"

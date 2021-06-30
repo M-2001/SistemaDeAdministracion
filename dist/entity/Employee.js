@@ -59,11 +59,11 @@ __decorate([
     __metadata("design:type", String)
 ], Employee.prototype, "imagen", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    typeorm_1.Column({ default: "empleado" }),
     __metadata("design:type", String)
 ], Employee.prototype, "role", void 0);
 __decorate([
-    typeorm_1.Column({ default: 0 }),
+    typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)
 ], Employee.prototype, "estado", void 0);
 __decorate([

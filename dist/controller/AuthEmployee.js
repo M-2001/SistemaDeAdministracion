@@ -24,9 +24,9 @@ AuthEmployeeController.Login = async (req, res) => {
     if (!emp.checkPassword(password)) {
         return res.send({ message: 'Code or password incorrect', ok: false });
     }
-    // if(emp.estado == false){
-    //     res.json({ok : false, message :'Access denied'});
-    // }   
+    if (emp.estado == false) {
+        return res.json({ ok: false, message: 'Access Denegado' });
+    }
     else {
         const token = jwt.sign({ id: emp.id, code: emp.codeAccess, role: emp.role }, process.env.JWTSECRET, {
             expiresIn: '48h'

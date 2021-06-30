@@ -55,7 +55,7 @@ class Server {
     middleware() {
         //this.app.set('view engine', 'ejs')
         //CORS
-        this.app.use(cors({ origin: ['http://localhost:3000', "http://localhost:3001"], credentials: true }));
+        this.app.use(cors({ origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app"], credentials: true }));
         //fileupload
         this.app.use(fileUpload());
         //Lectura del body
@@ -94,7 +94,7 @@ class Server {
     sockets() {
         this.io = new SocketIO.Server(this.httpServer, {
             cors: {
-                origin: ['http://localhost:3000', "http://localhost:3001"],
+                origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app"],
                 allowedHeaders: 'Content-Type',
                 methods: 'GET, POST',
                 credentials: true,

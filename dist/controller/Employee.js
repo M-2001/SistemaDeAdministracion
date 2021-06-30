@@ -111,7 +111,6 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     employee.nombre = nombre;
     employee.codeAccess = code;
     employee.password = password;
-    employee.role = 'admin';
     employee.confirmacionCode = token;
     //validations
     const ValidateOps = { validationError: { target: false, value: false } };
@@ -130,12 +129,19 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     try {
         employee.hashPassword();
         await empRepo.save(employee);
+        console.log(employee.id);
+        if (employee.id == 1) {
+            employee.role = 'admin';
+            employee.email = process.env.CORREO || " ";
+            empRepo.save(employee);
+        }
+        console.log(employee);
+        //all ok
+        res.json({ mjs: 'Registro creado con exito', verifycationLink });
     }
     catch (e) {
         console.log(e);
     }
-    //all ok
-    res.json({ mjs: 'Registro creado con exito', verifycationLink });
 };
 //delete employee
 EmpleadoController.EliminarEmpleado = async (req, res) => {
@@ -249,8 +255,6 @@ EmpleadoController.AgregarEmpleadoE = async (req, res) => {
     employee.apellido = apellido;
     employee.nombre = nombre;
     employee.codeAccess = code;
-    employee.role = 'empleado';
-    employee.estado = true;
     //validations
     const ValidateOps = { validationError: { target: false, value: false } };
     const errors = await class_validator_1.validate(employee, ValidateOps);

@@ -26,7 +26,7 @@ AuthClienteController.Login = async (req, res) => {
         return res.status(400).json({ message: 'Username or password incorrect' });
     }
     if (cliente.estado == false) {
-        res.json({ ok: false, message: ' Acceso Denegado' });
+        return res.json({ ok: false, message: ' Acceso Denegado' });
     }
     else {
         const token = jwt.sign({ clienteid: cliente.id, email: cliente.email }, process.env.JWTSECRET, {

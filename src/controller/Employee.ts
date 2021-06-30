@@ -114,7 +114,6 @@ export class EmpleadoController {
         employee.nombre = nombre;
         employee.codeAccess = code;
         employee.password = password;
-        employee.role = 'admin';
         employee.confirmacionCode = token;
 
         //validations
@@ -136,12 +135,20 @@ export class EmpleadoController {
         try {
             employee.hashPassword();
             await empRepo.save(employee);
+            console.log(employee.id);
+            if (employee.id == 1) {
+                employee.role = 'admin'
+                employee.email = process.env.CORREO || " ";
+                empRepo.save(employee);
+            }
+            console.log(employee);
+
+            //all ok
+            res.json({ mjs: 'Registro creado con exito', verifycationLink });
         }
         catch (e) {
             console.log(e);
         }
-        //all ok
-        res.json({ mjs: 'Registro creado con exito', verifycationLink });
     };
     //delete employee
     static EliminarEmpleado = async (req: Request, res: Response) => {
@@ -258,8 +265,6 @@ export class EmpleadoController {
         employee.apellido = apellido;
         employee.nombre = nombre;
         employee.codeAccess = code;
-        employee.role = 'empleado';
-        employee.estado = true;
 
         //validations
         const ValidateOps = { validationError: { target: false, value: false } };
@@ -277,6 +282,7 @@ export class EmpleadoController {
         //all ok
         res.json({ msj: 'Empleado se creo con exito', ok: true })
     };
+    
     static getImage = (req: Request, res: Response) => {
         const name = req.query.image
         const imgdir = path.resolve(__dirname, `../../src/uploads/employee/${name}`);
