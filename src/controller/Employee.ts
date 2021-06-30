@@ -141,8 +141,6 @@ export class EmpleadoController {
                 employee.email = process.env.CORREO || " ";
                 empRepo.save(employee);
             }
-            console.log(employee);
-
             //all ok
             res.json({ mjs: 'Registro creado con exito', verifycationLink });
         }

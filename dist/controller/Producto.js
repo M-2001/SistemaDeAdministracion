@@ -25,6 +25,7 @@ class ProductoController {
     }
 }
 ProductoController.MostrarProductos = async (req, res) => {
+    const search = req.query.search || "";
     try {
         const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
         const [productos, _] = await productoRepo.createQueryBuilder('producto')
@@ -35,6 +36,7 @@ ProductoController.MostrarProductos = async (req, res) => {
             .leftJoin('producto.categoria', 'cat')
             .take(3)
             .addSelect(['cat.categoria'])
+            .where("producto.nombreProducto like :name", { name: `%${search}%` })
             .getManyAndCount();
         if (productos.length > 0) {
             return res.json({ productos });

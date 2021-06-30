@@ -33,6 +33,7 @@
       "nodemailer": "^6.4.18",
       "nodemon": "^2.0.7",
       "paypal-rest-sdk": "^1.8.1",
+      "react-push-notification": "^1.3.0",
       "reflect-metadata": "^0.1.10",
       "socket.io": "^4.1.2",
       "typeorm": "^0.2.30"

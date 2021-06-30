@@ -35,6 +35,7 @@ OrdenController.MostrarOrdenPaginadas = async (req, res) => {
             .skip((pagina - 1) * take)
             .take(take)
             .where("orden.codigoOrden like :codeOrden", { codeOrden: `%${searchOrden}%` })
+            .orderBy("orden.id", "DESC")
             .getManyAndCount();
         if (ordenes.length > 0) {
             let totalPages = totalItems / take;
@@ -358,6 +359,7 @@ OrdenController.EstadoOrden = async (req, res) => {
 };
 //agregar Orden por cliente local
 OrdenController.AddOrdenClienteLocal = async (req, res) => {
+    console.log(req.body);
     const { id } = res.locals.jwtPayload;
     const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
@@ -394,9 +396,7 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
             //encriptar contraeña
             ClienteLocal.hashPassword();
             const client = await clienteRepo.save(Client);
-            console.log(client);
         }
-        console.log(ClienteLocal);
         //res.json(ClienteLocal)
         //Guardar Orden
         let date = new Date();
