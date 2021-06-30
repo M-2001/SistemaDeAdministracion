@@ -21,7 +21,7 @@ __decorate([
 ], Order.prototype, "id", void 0);
 __decorate([
     typeorm_1.ManyToOne(type => Cliente_1.Cliente, cliente => cliente.order),
-    __metadata("design:type", Array)
+    __metadata("design:type", Cliente_1.Cliente)
 ], Order.prototype, "cliente", void 0);
 __decorate([
     typeorm_1.Column(),

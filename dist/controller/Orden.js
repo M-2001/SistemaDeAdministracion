@@ -7,6 +7,7 @@ const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 const Cliente_1 = require("../entity/Cliente");
 const nodemailer_config_1 = require("../config/nodemailer.config");
 const Cupones_1 = require("../entity/Cupones");
+const Employee_1 = require("../entity/Employee");
 class OrdenController {
 }
 OrdenController.MostrarOrdenes = async (req, res) => {
@@ -53,6 +54,7 @@ OrdenController.MostrarOrdenPaginadas = async (req, res) => {
         res.json({ message: 'Algo ha salido mal!' });
     }
 };
+//mostrar ordenes por clientes
 OrdenController.MostrarOrdenCliente = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     let pagina = req.query.pagina || 1;
@@ -86,6 +88,7 @@ OrdenController.MostrarOrdenCliente = async (req, res) => {
         return res.json({ message: 'Algo ha salido mal!', error });
     }
 };
+//agregar Reservacion
 OrdenController.AddReservacion = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     const ordenRepo = typeorm_1.getRepository(Order_1.Order);
@@ -351,6 +354,103 @@ OrdenController.EstadoOrden = async (req, res) => {
     }
     catch (error) {
         return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+    }
+};
+//agregar Orden por cliente local
+OrdenController.AddOrdenClienteLocal = async (req, res) => {
+    const { id } = res.locals.jwtPayload;
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
+    const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
+    const ordeDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
+    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
+    let employee;
+    let ClienteLocal;
+    let ordenC;
+    let items = req.body;
+    let totalPrice = 0;
+    let totalDesc = 0;
+    let total;
+    try {
+        employee = await employeeRepo.findOne({ id });
+        if (employee.email == "") {
+            const adminEmail = await employeeRepo.findOne({ where: { role: 'admin' } });
+            console.log(adminEmail.email);
+            employee.email = adminEmail.email;
+        }
+    }
+    catch (error) {
+        console.log('Ocurrio un error!');
+    } //buscar employee con el token que recibe
+    //buscar cliente con el emailLocal
+    try {
+        ClienteLocal = await clienteRepo.findOne({ where: { email: employee.email } });
+        if (!ClienteLocal) {
+            const Client = new Cliente_1.Cliente();
+            Client.apellido = "Pc";
+            Client.nombre = "System-";
+            Client.email = employee.email;
+            Client.password = "SystemPc@password";
+            //encriptar contraeña
+            ClienteLocal.hashPassword();
+            const client = await clienteRepo.save(Client);
+            console.log(client);
+        }
+        console.log(ClienteLocal);
+        //res.json(ClienteLocal)
+        //Guardar Orden
+        let date = new Date();
+        let month = date.getMonth() + 1;
+        const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
+        const codigoO = 'SYSTEM_PC-' + codigoOrden + month;
+        const or = new Order_1.Order();
+        or.cliente = ClienteLocal,
+            or.codigoOrden = codigoO,
+            or.status = 1;
+        ordenC = await ordenRepo.save(or);
+        //console.log(ordenC);
+        for (let index = 0; index < items.length; index++) {
+            let amount = 0;
+            const item = items[index];
+            const productoItem = await proRepo.findOneOrFail(item.id);
+            let operacion = productoItem.costo_standar * item.qt;
+            let Totaldesc = operacion * productoItem.descuento / 100;
+            let totalPay = operacion - Totaldesc;
+            let qtyExist = productoItem.catidad_por_unidad - item.qt;
+            amount += totalPay;
+            totalPrice += totalPay;
+            totalDesc += Totaldesc;
+            const OnlyTwoDecimals = amount.toFixed(2);
+            console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
+            try {
+                //save Orden Detalle
+                const saveOD = new Detalles_Orden_1.DetalleOrden();
+                saveOD.orden = ordenC,
+                    saveOD.producto = productoItem,
+                    saveOD.cantidad = item.qt,
+                    saveOD.totalUnidad = amount,
+                    saveOD.descuento = Totaldesc;
+                const Save = await ordeDRepo.save(saveOD);
+                //actualizar producto
+                try {
+                    productoItem.catidad_por_unidad = qtyExist;
+                    const saveProduct = await proRepo.save(productoItem);
+                }
+                catch (error) {
+                    return console.log('Error inesperado!!!');
+                }
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        ordenC.PrecioTotal = totalPrice;
+        ordenC.TotalDesc = totalDesc;
+        const actualizarOrden = await ordenRepo.save(ordenC);
+        res.json({ ok: true, message: "Se guardo la compra!" });
+    }
+    catch (error) {
+        console.log(error);
     }
 };
 exports.default = OrdenController;
