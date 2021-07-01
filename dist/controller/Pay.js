@@ -18,7 +18,7 @@ class PayController {
 }
 PayController.Pay = async (req, res) => {
     let items = req.body;
-    let CODIGO_CUPON = req.query.code;
+    let CODIGO_CUPON = req.query.CODIGO_CUPON;
     Items = items;
     //let CODE_CUPON = CODIGO_CUPON;
     const proRepo = typeorm_1.getRepository(Producto_1.Producto);
@@ -85,7 +85,7 @@ PayController.Pay = async (req, res) => {
     if (cuponExist) {
         const Totaldesct = totalPrice * cuponExist.descuento / 100;
         const Totalprice = totalPrice - Totaldesct;
-        urlSuccess = "https://client-systempc.vercel.app/pay?code=" + CODIGO_CUPON;
+        urlSuccess = "https://client-systempc.vercel.app/pay?CODIGO_CUPON=" + CODIGO_CUPON;
         total = Totalprice.toFixed(2);
     }
     else {
@@ -148,7 +148,7 @@ PayController.PaySuccess = async (req, res) => {
     //var params = new URLSearchParams(location.search);
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
-    const CODIGO_CUPON = req.query.code;
+    const CODIGO_CUPON = req.query.CODIGO_CUPON;
     let totalPrice = 0;
     let totalDesc = 0;
     let total;
