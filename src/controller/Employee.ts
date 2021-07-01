@@ -125,7 +125,7 @@ export class EmpleadoController {
         }
         //verificar si el token existe
         try {
-            verifycationLink = `https://systempcs.herokuapp.com/api/confirmRegister/${token}`;
+            verifycationLink = `https://system-pc.netlify.app/confirmRegister/${token}`;
 
         } catch (e) {
             console.log(e);

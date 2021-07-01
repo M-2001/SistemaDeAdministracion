@@ -89,7 +89,7 @@ AuthClienteController.forgotPassword = async (req, res) => {
             return res.send({ ok: false });
         }
         const token = jwt.sign({ id: cliente.id, email: cliente.email }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `https://systempcs.herokuapp.com/api/reset-password/${token}`;
+        verifycationLink = `https://client-systempc.vercel.app/reset-password/${token}`;
         cliente.resetPassword = token;
     }
     catch (e) {

@@ -60,7 +60,7 @@ class ClienteController {
             return res.status(400).json({ errors });
         }
         try {
-            verifycationLink = `https://systempcs.herokuapp.com/api/active/${token}`;
+            verifycationLink = `https://client-systempc.vercel.app/active/${token}`;
 
         } catch (e) {
             return res.json({ error: 'something goes wrong!' });

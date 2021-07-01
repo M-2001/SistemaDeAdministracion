@@ -84,7 +84,7 @@ AuthEmployeeController.forgotPassword = async (req, res) => {
     try {
         empl = await emplRespo.findOneOrFail({ where: { email: email } });
         token = jwt.sign({ id: empl.id, code: empl.codeAccess }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `https://systempcs.herokuapp.com/api/reset-password/${token}`;
+        verifycationLink = `https://system-pc.netlify.app/reset-password/${token}`;
     }
     catch (e) {
         return res.json({ ok: false, message: 'no se encontro to correo en los registros' });
