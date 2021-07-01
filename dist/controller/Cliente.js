@@ -42,7 +42,7 @@ ClienteController.RegistroCliente = async (req, res) => {
         return res.status(400).json({ errors });
     }
     try {
-        verifycationLink = `http://localhost:3000/active/${token}`;
+        verifycationLink = `https://systempcs.herokuapp.com/api/active/${token}`;
     }
     catch (e) {
         return res.json({ error: 'something goes wrong!' });

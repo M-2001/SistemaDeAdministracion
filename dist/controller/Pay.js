@@ -85,11 +85,11 @@ PayController.Pay = async (req, res) => {
     if (cuponExist) {
         const Totaldesct = totalPrice * cuponExist.descuento / 100;
         const Totalprice = totalPrice - Totaldesct;
-        urlSuccess = "http://localhost:3000/pay?code=" + CODIGO_CUPON;
+        urlSuccess = "https://systempcs.herokuapp.com/api/pay?code=" + CODIGO_CUPON;
         total = Totalprice.toFixed(2);
     }
     else {
-        urlSuccess = "http://localhost:3000/pay";
+        urlSuccess = "https://systempcs.herokuapp.com/api/pay";
         total = totalPrice.toFixed(2);
     }
     //try to pay
@@ -101,7 +101,7 @@ PayController.Pay = async (req, res) => {
             },
             "redirect_urls": {
                 "return_url": urlSuccess,
-                "cancel_url": "http://localhost:5000/pay-checkout/cancel"
+                "cancel_url": "https://systempcs.herokuapp.com/api/pay-checkout/cancel"
             },
             "transactions": [{
                     "amount": {

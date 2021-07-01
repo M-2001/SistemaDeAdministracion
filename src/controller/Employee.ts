@@ -125,7 +125,7 @@ export class EmpleadoController {
         }
         //verificar si el token existe
         try {
-            verifycationLink = `http://localhost:9000/confirmRegister/${token}`;
+            verifycationLink = `https://systempcs.herokuapp.com/api/confirmRegister/${token}`;
 
         } catch (e) {
             console.log(e);

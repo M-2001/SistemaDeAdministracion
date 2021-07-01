@@ -89,7 +89,7 @@ AuthClienteController.forgotPassword = async (req, res) => {
             return res.send({ ok: false });
         }
         const token = jwt.sign({ id: cliente.id, email: cliente.email }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `http://localhost:3000/reset-password/${token}`;
+        verifycationLink = `https://systempcs.herokuapp.com/api/reset-password/${token}`;
         cliente.resetPassword = token;
     }
     catch (e) {
