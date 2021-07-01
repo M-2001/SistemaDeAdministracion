@@ -250,7 +250,7 @@ export class EmpleadoController {
     //create new employeeE 
     static AgregarEmpleadoE = async (req: Request, res: Response) => {
 
-        const { apellido, nombre, code } = req.body;
+        const { apellido, nombre, code, password } = req.body;
         const empRepo = getRepository(Employee);
         const codeExist = await empRepo.findOne({
             where: { codeAccess: code }
@@ -263,6 +263,7 @@ export class EmpleadoController {
         employee.apellido = apellido;
         employee.nombre = nombre;
         employee.codeAccess = code;
+        employee.password = password;
 
         //validations
         const ValidateOps = { validationError: { target: false, value: false } };
@@ -273,12 +274,12 @@ export class EmpleadoController {
         //TODO: HASH PASSWORD
         try {
             await empRepo.save(employee);
+            //all ok
+            res.json({ msj: 'Empleado se creo con exito', ok: true })
         }
         catch (e) {
             return res.send({ msj: 'Algo salio mal Intenta nuevamente!' });
         }
-        //all ok
-        res.json({ msj: 'Empleado se creo con exito', ok: true })
     };
     
     static getImage = (req: Request, res: Response) => {
