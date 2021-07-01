@@ -250,7 +250,7 @@ export class EmpleadoController {
     //create new employeeE 
     static AgregarEmpleadoE = async (req: Request, res: Response) => {
 
-        const { apellido, nombre, code, password } = req.body;
+        const { apellido, nombre, code } = req.body;
         const empRepo = getRepository(Employee);
         const codeExist = await empRepo.findOne({
             where: { codeAccess: code }
@@ -263,7 +263,7 @@ export class EmpleadoController {
         employee.apellido = apellido;
         employee.nombre = nombre;
         employee.codeAccess = code;
-        employee.password = password;
+        employee.password = "";
 
         //validations
         const ValidateOps = { validationError: { target: false, value: false } };

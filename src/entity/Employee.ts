@@ -2,7 +2,6 @@ import {Entity, PrimaryGeneratedColumn, Column, Unique} from "typeorm";
 
 import * as bcrypt from 'bcryptjs'
 import { IsEmail, IsNotEmpty, IsOptional} from "class-validator";
-import { METHODS } from "http";
 
 @Entity("empleado")
 @Unique(['codeAccess'])
