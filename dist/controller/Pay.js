@@ -303,6 +303,7 @@ PayController.PaySuccess = async (req, res) => {
         let direccionLocal = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
         let date = new Date();
         const infoCliente = await clienteRepo.findOneOrFail(clienteid.id);
+        console.log(clienteid);
         let subject = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `;
         console.log(subject);
         console.log(direccionLocal, date, infoCliente);

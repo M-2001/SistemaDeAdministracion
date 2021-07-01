@@ -338,6 +338,7 @@ class PayController{
             let direccionLocal : string = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
             let date = new Date();
             const infoCliente = await clienteRepo.findOneOrFail(clienteid.id)
+            console.log(clienteid);
             let subject : string = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `
             console.log(subject);
             console.log(direccionLocal, date, infoCliente);

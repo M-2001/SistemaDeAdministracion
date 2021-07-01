@@ -7,7 +7,7 @@ exports.transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: process.env.CORREO,
+        user: 'castlem791@gmail.com',
         pass: 'plbadgpbmtpzhwbp',
     },
     tls: {
