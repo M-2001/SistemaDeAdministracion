@@ -40,7 +40,7 @@ class PayController{
                 //verificar CODE_CUPON
                 if (CODIGO_CUPON) {
                     try {
-                        cuponExist = await cuponRepo.findOneOrFail({where: { codigo :CODIGO_CUPON}});
+                        cuponExist = await cuponRepo.findOneOrFail({where: { codigo : CODIGO_CUPON}});
                         if (cuponExist.status == true) {
                             return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
                         } else {
