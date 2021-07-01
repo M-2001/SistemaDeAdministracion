@@ -242,7 +242,7 @@ EmpleadoController.ImagenPerfilEmpleado = async (req, res) => {
 };
 //create new employeeE 
 EmpleadoController.AgregarEmpleadoE = async (req, res) => {
-    const { apellido, nombre, code } = req.body;
+    const { apellido, nombre, code, password } = req.body;
     const empRepo = typeorm_1.getRepository(Employee_1.Employee);
     const codeExist = await empRepo.findOne({
         where: { codeAccess: code }
@@ -254,6 +254,7 @@ EmpleadoController.AgregarEmpleadoE = async (req, res) => {
     employee.apellido = apellido;
     employee.nombre = nombre;
     employee.codeAccess = code;
+    employee.password = password;
     //validations
     const ValidateOps = { validationError: { target: false, value: false } };
     const errors = await class_validator_1.validate(employee, ValidateOps);
@@ -263,12 +264,12 @@ EmpleadoController.AgregarEmpleadoE = async (req, res) => {
     //TODO: HASH PASSWORD
     try {
         await empRepo.save(employee);
+        //all ok
+        res.json({ msj: 'Empleado se creo con exito', ok: true });
     }
     catch (e) {
         return res.send({ msj: 'Algo salio mal Intenta nuevamente!' });
     }
-    //all ok
-    res.json({ msj: 'Empleado se creo con exito', ok: true });
 };
 EmpleadoController.getImage = (req, res) => {
     const name = req.query.image;
