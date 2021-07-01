@@ -28,7 +28,7 @@ class PayController{
     static Pay = async( req : Request, res: Response) =>{
 
             let items : Product[] = req.body;
-            let CODIGO_CUPON = req.query.code;
+            let CODIGO_CUPON = req.query.CODIGO_CUPON;
             Items = items;
             //let CODE_CUPON = CODIGO_CUPON;
             const proRepo =  getRepository(Producto);
@@ -165,7 +165,7 @@ class PayController{
         
         const payerId : any = req.query.PayerID;
         const paymentId : any = req.query.paymentId;
-        const CODIGO_CUPON : any = req.query.code;
+        const CODIGO_CUPON : any = req.query.CODIGO_CUPON;
         let totalPrice : number = 0;
         let totalDesc : number = 0;
         let total : any;
