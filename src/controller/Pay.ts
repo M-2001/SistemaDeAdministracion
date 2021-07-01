@@ -97,7 +97,7 @@ class PayController{
             if (cuponExist) {
                 const Totaldesct = totalPrice * cuponExist.descuento/100;
                 const Totalprice = totalPrice - Totaldesct;
-                urlSuccess = "https://client-systempc.vercel.app/pay?code=" + CODIGO_CUPON;
+                urlSuccess = "https://client-systempc.vercel.app/pay?CODIGO_CUPON=" + CODIGO_CUPON;
                 total = Totalprice.toFixed(2)
             } else {
                 urlSuccess = "https://client-systempc.vercel.app/pay";
