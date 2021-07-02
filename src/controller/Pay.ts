@@ -319,7 +319,6 @@ class PayController{
             
             const actualizarOrden = await ordenRepo.save(ordenC);
 
-
             cuponExist.status = true; 
             const statusCupon = await cuponRepo.save(cuponExist);
             //res.json({itemEmail});
@@ -328,7 +327,6 @@ class PayController{
             ordenC.TotalDesc = totalDesc 
             const actualizarOrden = await ordenRepo.save(ordenC)
             total = totalPrice.toFixed(2);
-            //res.json({itemEmail});
         }
         
 
@@ -337,8 +335,7 @@ class PayController{
         try {
             let direccionLocal : string = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
             let date = new Date();
-            const infoCliente = await clienteRepo.findOneOrFail(clienteid.id)
-            console.log(clienteid);
+            const infoCliente = await clienteRepo.findOneOrFail(clienteid)
             let subject : string = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `
             console.log(subject);
             console.log(direccionLocal, date, infoCliente);

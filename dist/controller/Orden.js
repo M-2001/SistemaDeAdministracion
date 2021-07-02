@@ -140,7 +140,8 @@ OrdenController.AddReservacion = async (req, res) => {
                             console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                             let itemString = item.qt.toString();
                             let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
-                            itemEmail.push(itm);
+                            console.log(itm);
+                            //itemEmail.push(itm)
                             try {
                                 //save Orden Detalle
                                 const saveOD = new Detalles_Orden_1.DetalleOrden();
@@ -161,7 +162,6 @@ OrdenController.AddReservacion = async (req, res) => {
                     }
                 }
                 //Guardar Orden
-                console.log(cuponExist);
             }
             catch (error) {
                 return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
@@ -237,14 +237,12 @@ OrdenController.AddReservacion = async (req, res) => {
     try {
         let direccionLocal = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
         let date = new Date();
-        const infoCliente = await clienteRepo.findOneOrFail(clienteid.id);
+        const infoCliente = await clienteRepo.findOneOrFail(clienteid);
         let subject = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Reservacion Exitosa!!!"} `;
-        console.log(subject);
-        console.log(direccionLocal, date, infoCliente);
         let content = itemEmail.reduce((a, b) => {
             return a + '<tr><td>' + b.cantidad + '</td><td>' + b.producto + '</td><td>' + '$' + b.precioOriginal + '</td><td>' + '$' + b.descuento + '</td><td>' + '$' + b.totalNto + '</td></tr>';
         }, '');
-        let descTotal = itemEmail.map((a) => a.descuento).reduce((a, b) => a + b);
+        let descTotal = itemEmail.map((a) => a.descuento).reduce((a, b) => a + b, 0);
         console.log(descTotal);
         await nodemailer_config_1.transporter.sendMail({
             from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
@@ -293,7 +291,7 @@ OrdenController.AddReservacion = async (req, res) => {
         });
     }
     catch (error) {
-        return console.log('Algo salio mal al intentar enviar email!!!');
+        return console.log(error);
     }
 };
 //estado Orden

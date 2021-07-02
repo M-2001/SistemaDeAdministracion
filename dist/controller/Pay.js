@@ -296,14 +296,12 @@ PayController.PaySuccess = async (req, res) => {
         ordenC.TotalDesc = totalDesc;
         const actualizarOrden = await ordenRepo.save(ordenC);
         total = totalPrice.toFixed(2);
-        //res.json({itemEmail});
     }
     //try to send email buy
     try {
         let direccionLocal = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
         let date = new Date();
-        const infoCliente = await clienteRepo.findOneOrFail(clienteid.id);
-        console.log(clienteid);
+        const infoCliente = await clienteRepo.findOneOrFail(clienteid);
         let subject = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `;
         console.log(subject);
         console.log(direccionLocal, date, infoCliente);
