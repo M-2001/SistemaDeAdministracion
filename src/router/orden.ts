@@ -16,5 +16,5 @@ router.get('/order-paginated',[CheckJwt], order.MostrarOrdenPaginadas)
 router.get('/order-client',CheckJwt,order.MostrarOrdenCliente)
 router.post('/add-reservation',[CheckJwt, checkRoleU(['user'])], order.AddReservacion)
 router.post('/local-order',CheckJwt, order.AddOrdenClienteLocal)
-router.post('/order-status/:id', order.EstadoOrden)
+router.post('/order-status/:id',CheckJwt, order.EstadoOrden)
 export default router;

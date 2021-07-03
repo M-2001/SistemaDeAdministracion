@@ -17,7 +17,7 @@ router.post('/file-product/:id', CheckJwt, producto.ImagenProducto);
 //eliminar image de producto
 router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto
-router.put('/status', CheckJwt, producto.EstadoProducto);
+router.put('/status', [CheckJwt,checkRole(['admin'])], producto.EstadoProducto);
 
 router.get('/bestSellers', producto.ProductosMasVendidos);
 

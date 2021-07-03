@@ -14,6 +14,6 @@ router.get('/order-paginated', [jwt_1.CheckJwt], order.MostrarOrdenPaginadas);
 router.get('/order-client', jwt_1.CheckJwt, order.MostrarOrdenCliente);
 router.post('/add-reservation', [jwt_1.CheckJwt, roleUser_1.checkRoleU(['user'])], order.AddReservacion);
 router.post('/local-order', jwt_1.CheckJwt, order.AddOrdenClienteLocal);
-router.post('/order-status/:id', order.EstadoOrden);
+router.post('/order-status/:id', jwt_1.CheckJwt, order.EstadoOrden);
 exports.default = router;
 //# sourceMappingURL=orden.js.map

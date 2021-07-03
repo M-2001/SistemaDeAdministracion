@@ -27,7 +27,7 @@ class AuthEmployeeController{
         }
 
         if(emp.estado == false){
-            return res.json({ok : false, message :'Access Denegado'});
+            return res.json({ok : false, message :'Acceso Denegado'});
         }   
         else{
             const token =  jwt.sign({id: emp.id, code: emp.codeAccess,role:emp.role}, process.env.JWTSECRET,{

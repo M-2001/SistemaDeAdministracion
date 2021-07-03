@@ -8,8 +8,8 @@ const marca = MarcaController;
 
 router.get('/', marca.MostrarMarcas);
 router.get('/marcas-paginated', marca.MostrarMarcasPaginadas)
-router.post('/', CheckJwt, marca.AgregarMarca);
-router.put('/status', CheckJwt, marca.EstadoMarca);
+router.post('/', [CheckJwt, checkRole(['admin'])], marca.AgregarMarca);
+router.put('/status', [CheckJwt,checkRole(['admin'])], marca.EstadoMarca);
 router.get('/:id', marca.ObtenerMarcaPorID);
 router.put('/:id', CheckJwt, marca.ActualizarMarca);
 router.delete('/:id', [CheckJwt, checkRole(['admin'])], marca.EliminarMarca);
