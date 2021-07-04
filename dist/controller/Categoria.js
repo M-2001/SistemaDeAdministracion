@@ -5,21 +5,23 @@ const typeorm_1 = require("typeorm");
 const Categoria_1 = require("../entity/Categoria");
 class CategoriaController {
 }
+//mostrar categorias
 CategoriaController.MostrarCategorias = async (_, res) => {
     try {
         const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
         const categoria = await categoriaRepo.find();
         if (categoria.length > 0) {
-            res.json(categoria);
+            res.json({ ok: true, categoria });
         }
         else {
-            res.json({ message: 'No se encontraron resultados' });
+            res.json({ ok: false, message: 'No se encontraron resultados' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal' });
+        res.json({ ok: false, message: 'Algo ha salido mal' });
     }
 };
+//Mostrar categorias paginadas
 CategoriaController.MostrarCategoriasPaginadas = async (req, res) => {
     let pagina = req.query.pagina || 1;
     let category = req.query.categoria || "";
@@ -43,13 +45,14 @@ CategoriaController.MostrarCategoriasPaginadas = async (req, res) => {
             res.json({ ok: true, categorias, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
         }
         else {
-            res.json({ message: 'No se encontraron resultados!' });
+            res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal!' });
+        res.json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
+//agregar una nueva categoria
 CategoriaController.AgregarCategoria = async (req, res) => {
     const { categoria } = req.body;
     try {
@@ -57,7 +60,7 @@ CategoriaController.AgregarCategoria = async (req, res) => {
         const categoryExist = await categoriaRepo.findOne({ where: { categoria: categoria } });
         console.log(categoryExist);
         if (categoryExist) {
-            return res.status(400).json({ message: 'Ya existe una categoria con ese nombre' });
+            return res.status(400).json({ ok: false, message: 'Ya existe una categoria con ese nombre' });
         }
         const category = new Categoria_1.Categoria();
         category.categoria = categoria;
@@ -65,27 +68,29 @@ CategoriaController.AgregarCategoria = async (req, res) => {
         const ValidateOps = { validationError: { target: false, value: false } };
         const errors = await class_validator_1.validate(category, ValidateOps);
         if (errors.length > 0) {
-            return res.status(400).json({ errors });
+            return res.status(400).json({ ok: false, errors });
         }
         await categoriaRepo.save(category);
+        //all ok 
+        res.json({ ok: true, message: 'Se ha agregado una nueva categoria' });
     }
     catch (error) {
-        res.status(400).json({ message: 'Algo ha salio mal!' });
+        res.status(400).json({ ok: false, message: 'Algo ha salio mal!' });
     }
-    //all ok 
-    res.json({ message: 'Se ha agregado una nueva categoria' });
 };
+//obtener categoria por ID
 CategoriaController.ObtenerCategoriaPorID = async (req, res) => {
     const { id } = req.params;
     try {
         const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
         const categoria = await categoriaRepo.findOneOrFail({ where: { id } });
-        res.json({ categoria });
+        res.json({ ok: true, categoria });
     }
     catch (error) {
-        return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+        return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
     }
 };
+//actualizar categoria
 CategoriaController.ActualizarCategoria = async (req, res) => {
     let category;
     const { id } = req.params;
@@ -96,19 +101,20 @@ CategoriaController.ActualizarCategoria = async (req, res) => {
         category.categoria = categoria;
     }
     catch (error) {
-        return res.status(404).json({ message: 'No se han encontrado resultados ' });
+        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados ' });
     }
     const ValidateOps = { validationError: { target: false, value: false } };
     const errors = await class_validator_1.validate(category, ValidateOps);
     //Try to save data Category
     try {
         await categoriaRepo.save(category);
+        res.json({ ok: true, message: 'Se actualizo el registro!' });
     }
     catch (error) {
-        return res.status(409).json({ message: 'Algo ha salido mal!' });
+        return res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
     }
-    res.json({ messge: 'Se actualizo el registro!' });
 };
+//eliminar categoria
 CategoriaController.EliminarCategoria = async (req, res) => {
     let category;
     const { id } = req.params;
@@ -117,16 +123,16 @@ CategoriaController.EliminarCategoria = async (req, res) => {
         category = await categoriaRepo.findOneOrFail({ where: { id } });
     }
     catch (error) {
-        return res.status(404).json({ message: 'No se han encontrado resultados ' });
+        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados ' });
     }
     //Try to delete Category
     try {
         await categoriaRepo.remove(category);
+        res.json({ ok: true, messge: 'Categoria ha sido eliminada!' });
     }
     catch (error) {
-        return res.send({ message: 'No puedes eliminar esta categoria porque podria haber registros vinculados' });
+        return res.send({ ok: false, message: 'No puedes eliminar esta categoria porque podria haber registros vinculados' });
     }
-    res.json({ messge: 'Categoria ha sido eliminada!', ok: true });
 };
 //estado categoria
 CategoriaController.EstadoCategoria = async (req, res) => {
@@ -142,10 +148,10 @@ CategoriaController.EstadoCategoria = async (req, res) => {
             categoria.status = true;
         }
         const categoriaStatus = await categoriaRepo.save(categoria);
-        res.json({ ok: true, categoria: categoriaStatus.status });
+        res.json({ ok: true, message: 'Estado de categoria actualizado!' });
     }
     catch (error) {
-        console.log(error);
+        res.json({ ok: false, message: 'Algo salio mal!' });
     }
 };
 exports.default = CategoriaController;

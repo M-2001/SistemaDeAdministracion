@@ -11,11 +11,11 @@ const SocketServer = Server.instance;
 
 SocketServer.start(()=>{
     app.use(cors({origin: ['https://client-systempc.vercel.app',"https://system-pc.netlify.app"], credentials: true}))
-    console.log('Servidor corriendo en puerto: ' + SocketServer.port);
+    console.log('===> Servidor corriendo en puerto: ' + SocketServer.port);
     createConnection().then(async connection => {
         if (connection) {
-            return console.log('Conectado a la base de datos con exito!!!');
+            return console.log('===> Conectado a la base de datos con exito!!!');
         }
-    }).catch(error => console.log(error));
+    }).catch(error => console.log('===> Hubo un error al intentar conectar con la base de datos!'));
 });
 

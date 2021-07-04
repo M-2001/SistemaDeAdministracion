@@ -5,21 +5,23 @@ const typeorm_1 = require("typeorm");
 const Marca_1 = require("../entity/Marca");
 class MarcaController {
 }
+//mostrar marcas
 MarcaController.MostrarMarcas = async (_, res) => {
     try {
         const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
         const marca = await marcaRepo.find();
         if (marca.length > 0) {
-            res.json(marca);
+            res.json({ ok: true, marca });
         }
         else {
-            res.json({ message: 'No se encontraron resultados' });
+            res.json({ ok: false, message: 'No se encontraron resultados' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal' });
+        res.json({ ok: false, message: 'Algo ha salido mal' });
     }
 };
+//mostrar marcas paginadas
 MarcaController.MostrarMarcasPaginadas = async (req, res) => {
     let pagina = req.query.pagina || 1;
     let mark = req.query.marca || '';
@@ -42,21 +44,22 @@ MarcaController.MostrarMarcasPaginadas = async (req, res) => {
             res.json({ ok: true, marcas, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
         }
         else {
-            res.json({ message: 'No se encontraron resultados!' });
+            res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal!' });
+        res.json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
+//agregar una nueva marca
 MarcaController.AgregarMarca = async (req, res) => {
     const { marca } = req.body;
     try {
         const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
         const marcaExist = await marcaRepo.findOne({ where: { marca: marca } });
-        console.log(marcaExist);
+        //console.log(marcaExist);
         if (marcaExist) {
-            return res.status(400).json({ message: 'Ya existe una marca con ese nombre' });
+            return res.status(400).json({ ok: false, message: 'Ya existe una marca con ese nombre' });
         }
         const marc = new Marca_1.Marca();
         marc.marca = marca;
@@ -64,27 +67,29 @@ MarcaController.AgregarMarca = async (req, res) => {
         const ValidateOps = { validationError: { target: false, value: false } };
         const errors = await class_validator_1.validate(marc, ValidateOps);
         if (errors.length > 0) {
-            return res.status(400).json({ errors });
+            return res.status(400).json({ ok: false, errors });
         }
         await marcaRepo.save(marc);
+        //all ok 
+        res.json({ ok: true, message: 'Se ha agregado una nueva marca' });
     }
     catch (error) {
-        res.status(400).json({ message: 'Algo ha salio mal!' });
+        res.status(400).json({ ok: false, message: 'Algo ha salio mal!' });
     }
-    //all ok 
-    res.json({ message: 'Se ha agregado una nueva marca' });
 };
+//mostrar marca por ID
 MarcaController.ObtenerMarcaPorID = async (req, res) => {
     const { id } = req.params;
     try {
         const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
         const marca = await marcaRepo.findOneOrFail({ where: { id } });
-        res.json({ marca });
+        res.json({ ok: true, marca });
     }
     catch (error) {
-        return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+        return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
     }
 };
+//actualizar marca
 MarcaController.ActualizarMarca = async (req, res) => {
     let marc;
     const { id } = req.params;
@@ -95,17 +100,18 @@ MarcaController.ActualizarMarca = async (req, res) => {
         marc.marca = marca;
     }
     catch (error) {
-        return res.status(404).json({ message: 'No se han encontrado resultados con el id: ' + id });
+        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados con el id: ' + id });
     }
     //Try to save data Category
     try {
         await marcaRepo.save(marc);
+        res.json({ ok: true, messge: 'Se actualizo el registro!' });
     }
     catch (error) {
-        return res.status(409).json({ message: 'Algo ha salido mal!' });
+        return res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
     }
-    res.json({ messge: 'Se actualizo el registro!' });
 };
+//eliminar una marca
 MarcaController.EliminarMarca = async (req, res) => {
     let marca;
     const { id } = req.params;
@@ -114,17 +120,18 @@ MarcaController.EliminarMarca = async (req, res) => {
         marca = await marcaRepo.findOneOrFail({ where: { id } });
     }
     catch (error) {
-        return res.status(404).json({ message: 'No se han encontrado resultados ' });
+        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados ' });
     }
-    //Try to delete Category
+    //Try to delete marca
     try {
         await marcaRepo.remove(marca);
+        res.json({ ok: true, messge: 'Marca ha sido eliminada!' });
     }
     catch (error) {
-        return res.send({ message: 'No puedes eliminar esta marca porque podria haber registros vinculados' });
+        return res.send({ ok: false, message: 'No puedes eliminar esta marca porque podria haber registros vinculados' });
     }
-    res.json({ messge: 'Marca ha sido eliminada!', ok: true });
 };
+//Cambiar estado de una marca
 MarcaController.EstadoMarca = async (req, res) => {
     let marca;
     const id = req.body;
@@ -138,10 +145,10 @@ MarcaController.EstadoMarca = async (req, res) => {
             marca.status = true;
         }
         const marcaStatus = await marcaRepo.save(marca);
-        res.json({ ok: true, marca: marcaStatus.status });
+        res.json({ ok: true, message: 'Estado de marca actualizado!' });
     }
     catch (error) {
-        console.log(error);
+        res.json({ ok: false, message: 'Algo salio mal!' });
     }
 };
 exports.default = MarcaController;

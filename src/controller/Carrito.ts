@@ -5,13 +5,17 @@ import { Order } from '../entity/Order';
 import OrdenDetalle from './OrdenDetalle';
 import { DetalleOrden } from '../entity/Detalles_Orden';
 
+//interface para recibir parametros del body
 interface Product {
     id: number,
     qty: number
 }
 
 let Items : any
+
 class CarritoController{
+
+    //Agregar productos al carrito
     static AgregarProductoCarrito = async (req: Request, res : Response) => {
 
         let items : Product[] = req.body;
@@ -33,31 +37,16 @@ class CarritoController{
                     const OnlyTwoDecimals = amount.toFixed(2);
                     console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
             }
-            //req.body.map(async (p : Product, _ : any )=>{
-                
-                // try {
-                    
-                //     let operacion =  productoItem.costo_standar * qty;
-                //     let Totaldesc = operacion * productoItem.descuento
-                //     let totalPay =  operacion - Totaldesc
-                //     amount += totalPay
-                //     totalPrice =+ totalPay
-                //     const OnlyTwoDecimals = amount.toFixed(2);
-                //     const parseAmount = parseInt(OnlyTwoDecimals.replace('.', ''),10);
-                //     console.log(OnlyTwoDecimals);
-                //     console.log(productoItem);
-                // } catch (error) {
-                //     console.log(error);
-                // }
-            //});
+            //all ok
+            let total = totalPrice.toFixed(2)
+            res.json({ok: true, total, Items})
             
         } catch (error) {
-            console.log('Ocurrio un error');
+            return res.status(400).json({ok: false, message:'Algo salio mal!'})
         }
-        //all ok
-        let total = totalPrice.toFixed(2)
-        res.json({total, Items})
     };
+
+    //guardar orden detalle
     static guardarOrden_DetalleOrden = async ( req : Request, res : Response) => {
             const {clienteid} = res.locals.jwtPayload;
             const ordenRepo = getRepository(Order);
@@ -96,8 +85,6 @@ class CarritoController{
                     productoItem.catidad_por_unidad = qtyExist;
                     
                     const saveProduct = await proRepo.save(productoItem)
-    
-                    console.log(saveProduct);
                 
                     // totalToPay += operacion
                     // console.log(totalToPay);
@@ -105,7 +92,7 @@ class CarritoController{
 
             
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message:'Algo salio mal!'})
         }
         res.json({ok : true, totalToPay});
     }

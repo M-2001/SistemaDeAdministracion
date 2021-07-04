@@ -7,6 +7,7 @@ const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 let Items;
 class CarritoController {
 }
+//Agregar productos al carrito
 CarritoController.AgregarProductoCarrito = async (req, res) => {
     let items = req.body;
     Items = items;
@@ -25,29 +26,15 @@ CarritoController.AgregarProductoCarrito = async (req, res) => {
             const OnlyTwoDecimals = amount.toFixed(2);
             console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
         }
-        //req.body.map(async (p : Product, _ : any )=>{
-        // try {
-        //     let operacion =  productoItem.costo_standar * qty;
-        //     let Totaldesc = operacion * productoItem.descuento
-        //     let totalPay =  operacion - Totaldesc
-        //     amount += totalPay
-        //     totalPrice =+ totalPay
-        //     const OnlyTwoDecimals = amount.toFixed(2);
-        //     const parseAmount = parseInt(OnlyTwoDecimals.replace('.', ''),10);
-        //     console.log(OnlyTwoDecimals);
-        //     console.log(productoItem);
-        // } catch (error) {
-        //     console.log(error);
-        // }
-        //});
+        //all ok
+        let total = totalPrice.toFixed(2);
+        res.json({ ok: true, total, Items });
     }
     catch (error) {
-        console.log('Ocurrio un error');
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
-    //all ok
-    let total = totalPrice.toFixed(2);
-    res.json({ total, Items });
 };
+//guardar orden detalle
 CarritoController.guardarOrden_DetalleOrden = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     const ordenRepo = typeorm_1.getRepository(Order_1.Order);
@@ -79,13 +66,12 @@ CarritoController.guardarOrden_DetalleOrden = async (req, res) => {
             const Save = await ordeDRepo.save(saveOD);
             productoItem.catidad_por_unidad = qtyExist;
             const saveProduct = await proRepo.save(productoItem);
-            console.log(saveProduct);
             // totalToPay += operacion
             // console.log(totalToPay);
         });
     }
     catch (error) {
-        console.log(error);
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     res.json({ ok: true, totalToPay });
 };

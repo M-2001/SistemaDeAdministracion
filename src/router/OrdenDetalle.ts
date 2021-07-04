@@ -6,7 +6,7 @@ const router = Router();
 const ordenDte = OrdenDetalle;
 
 router.post('/or-detalles', ordenDte.MostrarDteOrdenPaginadas);
-router.get('/details', ordenDte.MostrarDteOrderByOrderId)
+router.post('/details', ordenDte.MostrarDteOrderByOrderId)
 
 
 export default router;

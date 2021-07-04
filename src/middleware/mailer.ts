@@ -12,9 +12,8 @@ export const  transporter =  nodemailer.createTransport({
         rejectUnauthorized: false
     }
 });
-transporter.verify().then((connected)=>{
-    if (connected) {
-        console.log('Servidor listo para enviar correos!!!');
-    }
-    console.log('Sucedio un error al intentar connectar con el servdor de correos!!!');
-})
+transporter.verify((err, success) =>{
+    err 
+    ? console.log('===> Algo salio mal al intentar conectar al servidor de correos')
+    : console.log(`===> Servidor listo para enviar emails`);
+});

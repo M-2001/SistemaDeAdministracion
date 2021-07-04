@@ -16,16 +16,17 @@ export class EmpleadoController {
         try {
             const empl = await empleadoRepo.find();
             if (empl.length > 0) {
-                res.send({ empty: false });
+                res.json({ ok: true, empl });
             }
             else {
-                res.send({ message: 'Not results!', empty: true });
+                res.json({ok: false, message: 'No se encontraron resultados!', });
             }
         }
         catch (e) {
-            res.status(500).json({ message: 'error en el servidor' });
+            res.status(400).json({ message: 'Algo ha fallado!' });
         }
     };
+
     //empleados Paginados
     static MostrarEmpleadosPaginados = async (req: Request, res: Response) => {
         let pagina = req.query.pagina || 1;
@@ -55,12 +56,13 @@ export class EmpleadoController {
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
                 res.json({ ok: true, empleados, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({ message: 'No se encontraron resultados!' })
+                res.json({ok: false, message: 'No se encontraron resultados!' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal!' })
+            return res.json({ok: false, message: 'Algo ha salido mal!' })
         }
     }
+
     //getEmployeeByID
     static getEmpleadoByID = async (req: Request, res: Response) => {
         const { id } = req.params;
@@ -68,29 +70,32 @@ export class EmpleadoController {
         try {
             const employee = await employeeRepo.findOneOrFail({ select: [`id`,`email`, `apellido`, `nombre`, `codeAccess`, `telefono`, `direccion`, `imagen`, 'role', `estado`], where: { id } });
             if (employee) {
-                res.send({ ok: true, employee })
+                res.send({ ok: true, employee });
             }
         }
         catch (e) {
-            res.status(404).json({ message: 'No hay registros con este id: ' + id });
+            res.status(404).json({ok: false, message: 'No hay registros con este id: ' + id });
         }
     };
+
+    //Check si el usuario existe
     static checkIfExistUser = async (req: Request, res: Response) => {
         const { code } = req.params;
         const employeeRepo = getRepository(Employee);
         try {
             const employee = await employeeRepo.findOneOrFail({ select: [`password`,'id'], where: { codeAccess: code } });
             if (employee.password === '') {
-                return res.send({ ok: true,userId:employee.id,newUser: true })
+                return res.json({ ok: true, newUser: true })
             }
             if (employee.password !== "") {
-                return res.send({ ok: true, newUser: false })
+                return res.json({ ok: true, newUser: false })
             }
         }
         catch (e) {
-            res.status(404).json({ message: 'No hay registros con este codigo: ' + code });
+            return res.status(404).json({ok: false, message: 'No hay registros con este codigo: ' + code });
         }
     };
+
     //create new employee de tipo Admin
     static AgregarEmpleadoA = async (req: Request, res: Response) => {
 
@@ -106,7 +111,7 @@ export class EmpleadoController {
             where: { codeAccess: code }
         });
         if (emailExist) {
-            return res.status(400).json({ msj: 'Ya existe un regitro con el codigo: ' + code })
+            return res.status(400).json({ok: false, message: 'Ya existe un regitro con el codigo: ' + code })
         }
         //el registro es creado si no existe
         employee = new Employee();
@@ -121,14 +126,14 @@ export class EmpleadoController {
         const errors = await validate(employee, ValidateOps);
 
         if (errors.length > 0) {
-            return res.status(400).json({ message: 'Algo salio mal!' });
+            return res.status(400).json({ok: false, message: 'Algo salio mal!' });
         }
         //verificar si el token existe
         try {
             verifycationLink = `https://system-pc.netlify.app/confirmRegister/${token}`;
 
         } catch (e) {
-            console.log(e);
+            return res.status(400).json({ok:false, message:'Algo ha fallado!'});
         }
 
         //TODO: HASH PASSWORD
@@ -142,12 +147,13 @@ export class EmpleadoController {
                 empRepo.save(employee);
             }
             //all ok
-            res.json({ mjs: 'Registro creado con exito', verifycationLink });
+            res.json({ok: true, message: 'Registro creado con exito', verifycationLink });
         }
         catch (e) {
-            console.log(e);
+            return res.status(400).json({ok: false, message:'Algo ha fallado!'})
         }
     };
+
     //delete employee
     static EliminarEmpleado = async (req: Request, res: Response) => {
         const { id } = req.params;
@@ -160,12 +166,13 @@ export class EmpleadoController {
                 fs.unlinkSync(imgdir)
             }
             //delete 
-            res.status(201).json({ message: 'Empleado eliminado' });
+            res.status(201).json({ok: true, message: 'Empleado eliminado' });
         }
         catch (e) {
-            res.status(404).json({ message: 'No hay registros con este id: ' + id });
+            res.status(404).json({ok:false, message: 'No hay registros con este id: ' + id });
         }
     };
+
     //Editar Employee
     static EditarEmpleado = async (req: Request, res: Response) => {
         let employee:Employee;
@@ -182,7 +189,7 @@ export class EmpleadoController {
             employee.email = email
 
         } catch (error) {
-            return res.status(404).json({ message: 'No se han encontrado resultados ' })
+            return res.status(404).json({ok: false, message: 'No se han encontrado resultados ' })
         }
 
         const ValidateOps = { validationError: { target: false, value: false } };
@@ -190,37 +197,37 @@ export class EmpleadoController {
 
         //try to save employee
         try {
+            //all is ok
             await emplRepo.save(employee)
+            res.json({ok: true, message: 'El registro se ha actualizado'});
         } catch (error) {
-            return res.status(409).json({ message: 'Algo ha salido mal!' });
+            return res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
         }
-
-        res.json({ message: 'El registro se ha actualizado', ok: true });
     }
+
     //subir imagen perfil
     static ImagenPerfilEmpleado = async (req: Request, res: Response) => {
         const { id } = res.locals.jwtPayload;
         const employeeRepo = getRepository(Employee);
         let employee: Employee;
         if (req.files === undefined || req.files.foto === undefined) {
-           return  res.status(400).json({ ok: false, message: 'Ningun archivo selecionando' });
+            return  res.status(400).json({ ok: false, message: 'Ningun archivo selecionando' });
         } else {
             let foto = req.files.foto as UploadedFile;
             let fotoName = foto.name.split('.')
-            console.log(fotoName);
             let ext = fotoName[fotoName.length - 1];
             //extensiones permitidas 
             const extFile = ['png', 'jpeg', 'jpg'];
             if (extFile.indexOf(ext) < 0) {
                 return res.status(400)
-                    .json({ message: 'Las estensiones permitidas son ' + extFile.join(', ') })
+                    .json({ok: false, message: 'Las estensiones permitidas son ' + extFile.join(', ') })
             }
             else {
                 //cambiar nombre del archivo
                 var nombreFoto = `${id}-${new Date().getMilliseconds()}.${ext}`
                 foto.mv(`src/uploads/employee/${nombreFoto}`, (err) => {
                     if (err) {
-                        return res.status(500).json({ ok: false, err });
+                        return res.status(500).json({ ok: false, message:'Algo salio mal al intentar cargar imagen' });
                     }
                 });
                 try {
@@ -232,21 +239,21 @@ export class EmpleadoController {
                     if (fs.existsSync(imgdir)) {
                         fs.unlinkSync(imgdir)
                     }
-                    console.log(employee);
                 }
                 catch (e) {
-                    return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+                    return res.status(404).json({ok: false, message: 'No hay registros con este id: ' + id });
                 }
                 //try to save employee
                 try {
                     await employeeRepo.createQueryBuilder().update(Employee).set({ imagen: nombreFoto }).where({ id }).execute();
-                    return  res.json({ message: 'La imagen se ha guardado.' });
+                    return  res.json({ok: true, message: 'La imagen se ha guardado.' });
                 } catch (error) {
-                    return res.status(409).json({ message: 'Algo ha salido mal!' });
+                    return res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
                 }
             }
         }
     }
+
     //create new employeeE 
     static AgregarEmpleadoE = async (req: Request, res: Response) => {
 
@@ -255,8 +262,9 @@ export class EmpleadoController {
         const codeExist = await empRepo.findOne({
             where: { codeAccess: code }
         });
+
         if (codeExist) {
-            return res.send({ msj: 'Ya existe un empleado con el codigo : ' + code })
+            return res.json({ok: false, message: 'Ya existe un empleado con el codigo : ' + code })
         }
 
         const employee = new Employee();
@@ -269,19 +277,20 @@ export class EmpleadoController {
         const ValidateOps = { validationError: { target: false, value: false } };
         const errors = await validate(employee, ValidateOps);
         if (errors.length > 0) {
-            return res.status(400).json({ errors });
+            return res.status(400).json({ ok: false, message:'Algo salio mal' });
         }
-        //TODO: HASH PASSWORD
+        //try to save employee
         try {
             await empRepo.save(employee);
             //all ok
-            res.json({ msj: 'Empleado se creo con exito', ok: true })
+            res.json({ok: true,  message: 'Empleado se creo con exito'})
         }
         catch (e) {
-            return res.send({ msj: 'Algo salio mal Intenta nuevamente!' });
+            return res.status(400).json({ok: false, message: 'Algo salio mal Intenta nuevamente!' });
         }
     };
     
+    //get image employee
     static getImage = (req: Request, res: Response) => {
         const name = req.query.image
         const imgdir = path.resolve(__dirname, `../../src/uploads/employee/${name}`);

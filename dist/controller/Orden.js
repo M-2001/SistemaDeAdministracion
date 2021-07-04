@@ -5,19 +5,20 @@ const Order_1 = require("../entity/Order");
 const Producto_1 = require("../entity/Producto");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 const Cliente_1 = require("../entity/Cliente");
-const nodemailer_config_1 = require("../config/nodemailer.config");
+const mailer_1 = require("../middleware/mailer");
 const Cupones_1 = require("../entity/Cupones");
 const Employee_1 = require("../entity/Employee");
 class OrdenController {
 }
+//mostrar ordens 
 OrdenController.MostrarOrdenes = async (req, res) => {
     try {
         const ordenRepo = typeorm_1.getRepository(Order_1.Order);
         const orders = await ordenRepo.find();
-        return res.send({ ok: true, orders });
+        return res.json({ ok: true, orders });
     }
     catch (_a) {
-        return res.send({ error: false, message: "error en el servidor" });
+        return res.send({ ok: false, message: "error en el servidor" });
     }
 };
 //mostrar ordenes Paginadas
@@ -47,12 +48,11 @@ OrdenController.MostrarOrdenPaginadas = async (req, res) => {
             res.json({ ok: true, ordenes, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
         }
         else {
-            res.json({ message: 'No se encontraron resultados!' });
+            res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        console.log(error);
-        res.json({ message: 'Algo ha salido mal!' });
+        res.json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
 //mostrar ordenes por clientes
@@ -81,12 +81,11 @@ OrdenController.MostrarOrdenCliente = async (req, res) => {
             return res.json({ ok: true, ordenes, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
         }
         else {
-            return res.json({ message: 'No se encontraron resultados!' });
+            return res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        console.log(error);
-        return res.json({ message: 'Algo ha salido mal!', error });
+        return res.json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
 //agregar Reservacion
@@ -137,11 +136,9 @@ OrdenController.AddReservacion = async (req, res) => {
                             totalPrice += totalPay;
                             totalDesc += Totaldesc;
                             const OnlyTwoDecimals = amount.toFixed(2);
-                            console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                             let itemString = item.qt.toString();
                             let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
-                            console.log(itm);
-                            //itemEmail.push(itm)
+                            itemEmail.push(itm);
                             try {
                                 //save Orden Detalle
                                 const saveOD = new Detalles_Orden_1.DetalleOrden();
@@ -153,18 +150,18 @@ OrdenController.AddReservacion = async (req, res) => {
                                 await ordeDRepo.save(saveOD);
                             }
                             catch (error) {
-                                console.log(error);
+                                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
                             }
                         }
                         catch (error) {
-                            return console.log('Algo salio mal!!!');
+                            return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
                         }
                     }
                 }
                 //Guardar Orden
             }
             catch (error) {
-                return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
+                return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
             }
         }
         else {
@@ -190,7 +187,6 @@ OrdenController.AddReservacion = async (req, res) => {
                 totalPrice += totalPay;
                 totalDesc += Totaldesc;
                 const OnlyTwoDecimals = amount.toFixed(2);
-                console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                 let itemString = item.qt.toString();
                 let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
                 itemEmail.push(itm);
@@ -205,18 +201,17 @@ OrdenController.AddReservacion = async (req, res) => {
                     const Save = await ordeDRepo.save(saveOD);
                 }
                 catch (error) {
-                    console.log(error);
+                    return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
                 }
             }
         }
     }
     catch (error) {
-        return console.log('Ocurrio un error inesperado!!!');
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     if (cuponExist) {
         const Totaldesc = totalPrice * cuponExist.descuento / 100;
         const Totalprice = totalPrice - Totaldesc;
-        console.log(Totaldesc, Totalprice);
         descuentoCupon = Totaldesc;
         total = Totalprice.toFixed(2);
         ordenC.PrecioTotal = Totalprice;
@@ -224,7 +219,7 @@ OrdenController.AddReservacion = async (req, res) => {
         const actualizarOrden = await ordenRepo.save(ordenC);
         cuponExist.status = true;
         const statusCupon = await cuponRepo.save(cuponExist);
-        res.json({ itemEmail });
+        res.json({ ok: true, message: "Se guardo tu reservacion" });
     }
     else {
         ordenC.PrecioTotal = totalPrice;
@@ -243,8 +238,7 @@ OrdenController.AddReservacion = async (req, res) => {
             return a + '<tr><td>' + b.cantidad + '</td><td>' + b.producto + '</td><td>' + '$' + b.precioOriginal + '</td><td>' + '$' + b.descuento + '</td><td>' + '$' + b.totalNto + '</td></tr>';
         }, '');
         let descTotal = itemEmail.map((a) => a.descuento).reduce((a, b) => a + b, 0);
-        console.log(descTotal);
-        await nodemailer_config_1.transporter.sendMail({
+        await mailer_1.transporter.sendMail({
             from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
             to: infoCliente.email,
             subject: subject,
@@ -291,7 +285,7 @@ OrdenController.AddReservacion = async (req, res) => {
         });
     }
     catch (error) {
-        return console.log(error);
+        res.json({ ok: false, message: "Algo ha fallado en el servidor!" });
     }
 };
 //estado Orden
@@ -305,7 +299,6 @@ OrdenController.EstadoOrden = async (req, res) => {
     let itemsOrden;
     try {
         const order = await OrdenRepo.findOneOrFail({ where: { id } });
-        console.log(order);
         let orden = order.id;
         if (order.status == 1 || order.status == 2) {
             return res.json({ ok: false, message: 'La orden ya fue completada!!!' });
@@ -334,25 +327,24 @@ OrdenController.EstadoOrden = async (req, res) => {
                             productoItem.catidad_por_unidad = qtyExits;
                             const producto = await proRepo.save(productoItem);
                             //res.json({message : 'Exito!', producto});
-                            console.log(producto);
                         }
                         catch (error) {
-                            console.log(error);
+                            return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
                         }
                     }
                 }
                 else {
-                    res.json({ message: 'No se encontraron resultados!' });
+                    res.json({ ok: false, message: 'No se encontraron resultados!' });
                 }
             }
             catch (error) {
-                console.log(error);
+                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
             }
-            return res.json({ ok: true, OrdenComplete });
+            res.json({ ok: true, message: ' La orden se completo!' });
         }
     }
     catch (error) {
-        return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+        return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
     }
 };
 //agregar Orden por cliente local
@@ -380,8 +372,9 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
         }
     }
     catch (error) {
-        console.log('Ocurrio un error!');
-    } //buscar employee con el token que recibe
+        return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
+    }
+    //buscar employee con el token que recibe
     //buscar cliente con el emailLocal
     try {
         ClienteLocal = await clienteRepo.findOne({ where: { email: employee.email } });
@@ -419,7 +412,6 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
             totalPrice += totalPay;
             totalDesc += Totaldesc;
             const OnlyTwoDecimals = amount.toFixed(2);
-            console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
             try {
                 //save Orden Detalle
                 const saveOD = new Detalles_Orden_1.DetalleOrden();
@@ -439,7 +431,7 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
                 }
             }
             catch (error) {
-                console.log(error);
+                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
             }
         }
         ordenC.PrecioTotal = totalPrice;
@@ -448,7 +440,7 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
         res.json({ ok: true, message: "Se guardo la compra!" });
     }
     catch (error) {
-        console.log(error);
+        return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
     }
 };
 exports.default = OrdenController;

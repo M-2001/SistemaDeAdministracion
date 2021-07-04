@@ -6,6 +6,8 @@ import OrdenController from './Orden';
 
 
 class OrdenDetalle {
+
+    //mostrar detalles de ordenes paginados
     static MostrarDteOrdenPaginadas = async ( req : Request, res : Response ) => {
         let pagina  = req.query.pagina || 1;
         pagina = Number(pagina);
@@ -31,12 +33,14 @@ class OrdenDetalle {
                 let prevPage : number = pagina <= 1 ? pagina : pagina -1
                 res.json({ok: true, ordenesD, totalItems, totalPages, currentPage : pagina, nextPage, prevPage})
             } else {
-                res.json({message : 'No se encontraron resultados!'})
+                res.json({ok: false, message : 'No se encontraron resultados!'})
             }
         } catch (error) {
-            res.json({message : 'Algo ha salido mal!'})
+            res.json({ok: false, message : 'Algo ha salido mal!'})
         }
     };
+
+    //Mostrar detalles de ordenes por orden ID
     static MostrarDteOrderByOrderId = async ( req : Request, res : Response ) => {
         const {orden} = req.body;
         try {
@@ -51,10 +55,10 @@ class OrdenDetalle {
             if (ordenesD.length > 0) {
                 res.json({ok: true, ordenesD})
             } else {
-                res.json({message : 'No se encontraron resultados!'})
+                res.json({ok: false, message : 'No se encontraron resultados!'})
             }
         } catch (error) {
-            res.json({message : 'Algo ha salido mal!'})
+            return res.status(400).json({ok: false, message : 'Algo ha salido mal!'})
         }
     }
 }

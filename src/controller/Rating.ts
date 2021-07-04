@@ -21,11 +21,11 @@ class RatingController {
         //try so save rating
         try {
             await ratingRepo.save(rating)
+            //all is ok
+            res.json({ok: true, message: 'Rating agregado con exito' });
         } catch (error) {
-            res.status(409).json({ message: 'something goes wrong' });
+            return res.status(400).json({ message: 'Algo salio mal!' });
         }
-        //all is ok
-        res.json({ message: 'Rating agregado con exito', rating });
     };
 
     //mostrar rating paginados
@@ -48,14 +48,13 @@ class RatingController {
             //     return producto
             // });
             if (rating.length > 0) {
-                res.json({ rating })
+                res.json({ok: true, rating });
             } else {
-                res.json({ message: 'No se encontraron resultados' })
+                res.json({ok: false, message: 'No se encontraron resultados' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal' })
+            return res.json({ok: false, message: 'Algo ha salido mal' })
         }
-
     };
 
     //Mostrar rating pajinado
@@ -84,10 +83,10 @@ class RatingController {
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
                 res.json({ ok: true, ratings, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({ message: 'No se encontraron resultados!' })
+                res.json({ok: false, message: 'No se encontraron resultados!' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal!' })
+            return res.status(400).json({ok: false, message: 'Algo ha salido mal!' })
         }
     };
 
@@ -119,10 +118,10 @@ class RatingController {
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
                 res.json({ ok: true, ratings, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({ message: 'No se encontraron productos!' })
+                res.json({ok: false, message: 'No se encontraron productos!' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal!' })
+            return res.status(400).json({ message: 'Algo ha salido mal!' })
         }
     }
 
@@ -142,23 +141,21 @@ class RatingController {
                 .getOneOrFail();
 
             rating.ratingNumber = ratingNumber,
-                rating.titulo = titulo,
-                rating.comentario = comentario
+            rating.titulo = titulo,
+            rating.comentario = comentario
 
             console.log(rating);
             if ((rating.cliente.id === clienteid)) {
                 await ratingRepo.save(rating);
-                // await ratingRepo.createQueryBuilder().update(Rating).set({ratingNumber, titulo, comentario}).where({id}).execute();
+                res.json({ok: true, message: 'Rating actualizado' });
             }
             else {
-                return res.json({ message: 'No puedes modificar este comentario' })
+                return res.json({ok: false, message: 'No puedes modificar este rating' });
             }
 
         } catch (error) {
-            return res.status(404).json({ message: 'No se han encontrado resultados con el id: ' + id })
+            return res.status(404).json({ok: false, message: 'No se han encontrado resultados con el id: ' + id })
         }
-
-        res.json({ messge: 'Datos actulizados!' });
     };
 
     //eliminar ratin hechos por el usuario logado
@@ -178,15 +175,14 @@ class RatingController {
             console.log(rating);
             if ((rating.cliente.id === clienteid)) {
                 await ratingRepo.delete(id);
+                res.json({ok: true, message: 'Rating Eliminado!' });
             }
             else {
-                return res.json({ message: 'No puedes eliminar rating ageno' })
+                return res.json({ok: false, message: 'No puedes eliminar rating de otros usuarios' })
             }
         } catch (error) {
-            return res.status(404).json({ message: 'No se han encontrado resultados con el id: ' + id })
+            return res.status(404).json({ok:false, message: 'No se han encontrado resultados con el id: ' + id })
         }
-
-        res.json({ messge: 'Rating Eliminado!' });
     };
 
     //mostrar rating id
@@ -201,12 +197,12 @@ class RatingController {
             where r.id = '${id}'`)
 
             if (rating.length > 0) {
-                res.json({ rating })
+                res.json({ ok: true, rating });
             } else {
-                res.json({ message: 'No se encontraron resultados con el id: ' + id })
+                res.json({ok: false, message: 'No se encontraron resultados con el id: ' + id })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal' })
+            return res.status(400).json({ok: false, message: 'Algo ha salido mal' });
         }
     };
 

@@ -41,14 +41,13 @@ class ProductoController {
                 .getManyAndCount()
 
             if (productos.length > 0) {
-                return res.json({ productos })
+                return res.json({ok: true, productos })
             } else {
-                return res.json({ message: 'No se encontraron resultados' })
+                return res.json({ok:false, message: 'No se encontraron resultados' })
             }
         } catch (error) {
-            return res.json({ message: 'No se encontraron resultados' })
+            return res.json({ok:false, message: 'Algo esta fallando' });
         }
-
     };
 
     //mostrar productos paginados
@@ -88,7 +87,6 @@ class ProductoController {
                         prod.status = false;
                         prod.catidad_por_unidad = 1;
                         productoRepo.save(producto);
-                        console.log(prod.status);
                     }
                 }
 
@@ -99,14 +97,13 @@ class ProductoController {
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
             } else {
-                res.json({ message: 'No se encontraron resultados', empty: true })
+                res.json({ok:false, message: 'No se encontraron resultados' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal' })
+            res.json({ok:false, message: 'Algo ha salido mal' })
         }
-
     };
 
     //mostrar productos por categorias
@@ -137,12 +134,12 @@ class ProductoController {
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage});
             } else {
-                res.json({ message: 'No se encontraron resultados con categoria: ' + categoria, empty: true })
+                res.json({ok: false, message: 'No se encontraron resultados con categoria: ' + categoria })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal' })
+            res.json({ok: false, message: 'Algo ha salido mal!' })
         }
     };
 
@@ -174,12 +171,12 @@ class ProductoController {
                 }
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
-                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
+                res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage});
             } else {
-                res.json({ message: 'No se encontraron resultados', empty: true })
+                res.json({ok: false, message: 'No se encontraron resultados' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal' })
+            res.json({ok: false, message: 'Algo ha salido mal' })
         }
     };
 
@@ -198,12 +195,12 @@ class ProductoController {
                 .getOneOrFail()
 
             if (!producto) {
-                res.status(500).json({ msj: "Error al procesar la peticion" })
+                res.status(400).json({ok: false, message: "Error al procesar la peticion" })
                 return;
             }
-            res.json({ producto })
+            res.json({ok: true, producto })
         } catch (error) {
-            return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+            return res.status(404).json({ok: false, message: 'No hay registros con este id: ' + id });
         }
     };
 
@@ -217,7 +214,7 @@ class ProductoController {
             where: { codigo_Producto: codigo_producto }
         });
         if (codeProductExist) {
-            return res.status(400).json({ msj: 'Ya existe un producto con el codigo ' + codigo_producto, ok: false, error: 'code' })
+            return res.status(400).json({ok: false, message: 'Ya existe un producto con el codigo ' + codigo_producto })
         }
 
         const producto = new Producto();
@@ -235,17 +232,17 @@ class ProductoController {
         const ValidateOps = { validationError: { target: false, value: false } };
         const errors = await validate(producto, ValidateOps);
         if (errors.length > 0) {
-            return res.status(400).json({ errors });
+            return res.status(400).json({ok: false, message: 'Algo salio mal!' });
         }
         //try to save a product
         try {
             await prodRepo.save(producto);
+            //all ok
+            res.json({ ok: true, message: 'Producto creado con exito' })
         }
         catch (e) {
-            res.status(409).json({ message: 'something goes wrong' });
+            res.status(409).json({ok: false, message: 'Algo esta fallando!' });
         }
-        //all ok
-        res.json({ mjs: 'Producto creado con exito', producto, ok: true })
     };
 
     //edit a product
@@ -267,23 +264,24 @@ class ProductoController {
             producto.categoria = categoria;
 
         } catch (error) {
-            return res.status(404).json({ message: 'No se han encontrado resultados ' })
+            return res.status(404).json({ok: false, message: 'No se encontro resultado ' })
         }
 
         const ValidateOps = { validationError: { target: false, value: false } };
         const errors = await validate(producto, ValidateOps);
         if (errors.length > 0) {
-            return res.status(400).json({ errors });
+            return res.status(400).json({ok: false, message: 'Algo salio mal!' });
         }
         //try to save producto
         try {
             await prodRepo.save(producto)
+            //all ok
+            res.json({ok: true, message: 'Producto actualizado con exito!'});
         } catch (error) {
-            return res.status(409).json({ message: 'Algo ha salido mal!', });
+            return res.status(409).json({ok: true, message: 'Algo ha salido mal!', });
         }
-
-        res.json({ messge: 'Producto actualizado con exito!', ok: true, producto });
     }
+
     //delete product
     static EliminarProducto = async (req: Request, res: Response) => {
         const { id } = req.params;
@@ -297,15 +295,16 @@ class ProductoController {
                     fs.unlinkSync(imgdir)
                 }
             } catch (error) {
-                return res.send({ message: 'No puedes eliminar este producto porque podria haber registros vinculados' });
+                return res.send({ok: false, message: 'No puedes eliminar este producto porque podria haber registros vinculados' });
             }
             //delete 
-            res.json({ messge: 'Se elimino el producto!', ok: true });
+            res.json({ok: true, message: 'Se elimino el producto!' });
         }
         catch (e) {
-            res.status(404).json({ message: 'No hay registros con este id: ' + id });
+            return res.status(404).json({ok: false, message: 'No hay registros con este id: ' + id });
         }
     };
+
     //subir imagen producto
     static ImagenProducto = async (req: Request, res: Response) => {
 
@@ -317,20 +316,19 @@ class ProductoController {
         } else {
             let foto = req.files.foto as UploadedFile;
             let fotoName = foto.name.split('.')
-            console.log(fotoName);
             let ext = fotoName[fotoName.length - 1];
             //extensiones permitidas 
             const extFile = ['png', 'jpeg', 'jpg', 'git'];
             if (extFile.indexOf(ext) < 0) {
                 return res.status(400)
-                    .json({ message: 'Las estensiones permitidas son ' + extFile.join(', ') })
+                    .json({ok:false, message: 'Las estensiones permitidas son ' + extFile.join(', ') })
             }
             else {
                 //cambiar nombre del archivo
                 var nombreFoto = `${id}-${new Date().getMilliseconds()}.${ext}`
                 foto.mv(`src/uploads/productos/${nombreFoto}`, (err) => {
                     if (err) {
-                        return res.status(500).json({ ok: false, err });
+                        return res.status(500).json({ ok: false, message:'No se ha podido cargar la imagen!' });
                     }
                 });
                 try {
@@ -339,21 +337,21 @@ class ProductoController {
                     if (fs.existsSync(imgdir)) {
                         fs.unlinkSync(imgdir)
                     }
-                    console.log(product);
                 }
                 catch (e) {
-                    res.status(404).json({ message: 'No hay registros con este id: ' + id });
+                    res.status(404).json({ok:false, message: 'No hay registros con este id: ' + id });
                 }
                 //try to save product
                 try {
                     await productRepo.createQueryBuilder().update(Producto).set({ image: nombreFoto }).where({ id }).execute();
                 } catch (error) {
-                    res.status(409).json({ message: 'Algo ha salido mal!' });
+                    res.status(409).json({ok:false, message: 'Algo ha salido mal!' });
                 }
             }
-            res.json({ message: 'La imagen se ha guardado.' });
+            res.json({ok:true, message: 'La imagen se ha guardado.' });
         }
     };
+
     //eliminar imagen Producto
     static EliminarImagenProducto = async (req: Request, res: Response) => {
         const { id } = req.params;
@@ -364,18 +362,17 @@ class ProductoController {
             if (fs.existsSync(imgdir)) {
                 fs.unlinkSync(imgdir)
             }
-            console.log(product);
         }
         catch (e) {
-            res.status(404).json({ message: 'No hay registros con este id: ' + id });
+            return res.status(404).json({ok: false, message: 'No hay registros con este id: ' + id });
         }
         //try to save product
         try {
             await productRepo.createQueryBuilder().update(Producto).set({ image: "producto.png" }).where({ id }).execute();
+            res.json({ok: true, message: 'imagen de producto eliminada' })
         } catch (error) {
-            res.status(409).json({ message: 'Algo ha salido mal!' });
+            res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
         }
-        res.json({ message: 'imagen de producto eliminada' })
     }
     //getProductoById
     static getProductoById = async (id: string) => {
@@ -383,6 +380,7 @@ class ProductoController {
         const producto = await ordenRepo.findOneOrFail(id);
         return producto
     }
+
     //estado producto
     static EstadoProducto = async (req: Request, res: Response) => {
         let producto: Producto;
@@ -394,7 +392,7 @@ class ProductoController {
             producto.status = !producto.status
 
             await proRepo.save(producto)
-            res.json({ ok: true })
+            res.json({ ok: true, mesaage: 'Estado de producto ha cambiado!' })
 
         } catch (error) {
             res.json({ ok: false, message: 'No se pudo completar la accion solicitada' })
@@ -403,6 +401,7 @@ class ProductoController {
     //productos mas vendidos
 
 
+    //get image producto
     static getImage = (req: Request, res: Response) => {
         const name = req.query.image
         const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${name}`);
@@ -411,6 +410,7 @@ class ProductoController {
             return;
         }
     }
+
     //productos mas vendidos
     static ProductosMasVendidos = async (req: Request, res: Response) => {
         const productoRepo = getRepository(Producto)
@@ -458,9 +458,10 @@ class ProductoController {
             });
 
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok:false, message:'Algo ha fallado!'})
         }
     }
+
     //productos mas vendidos
     static ProductosConMasRatings = async (req: Request, res: Response) => {
         const productoRepo = getRepository(Producto)
@@ -507,7 +508,7 @@ class ProductoController {
                 res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false })
             });
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok:false, message:'Algo ha fallado!'})
         }
     }
 }

@@ -14,9 +14,9 @@ module.exports = {
    // "port": 3306,
    // "username": "root",
    // "password": "admind",
-   // "database": "system-pc",
+   // "database": process.env.DATABASE,
    // "synchronize": true,
-   // "logging": false,
+   // "logging": false, 
 
    "entities": [
       "dist/entity/**/*.js"

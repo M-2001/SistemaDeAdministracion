@@ -4,7 +4,7 @@ const Producto_1 = require("../entity/Producto");
 const typeorm_1 = require("typeorm");
 const Order_1 = require("../entity/Order");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
-const nodemailer_config_1 = require("../config/nodemailer.config");
+const mailer_1 = require("../middleware/mailer");
 const PaypalSdk = require("paypal-rest-sdk");
 const Cliente_1 = require("../entity/Cliente");
 const Cupones_1 = require("../entity/Cupones");
@@ -16,6 +16,7 @@ PaypalSdk.configure({
 let Items;
 class PayController {
 }
+//metodo de pago paypal
 PayController.Pay = async (req, res) => {
     let items = req.body;
     let CODIGO_CUPON = req.query.CODIGO_CUPON;
@@ -31,7 +32,7 @@ PayController.Pay = async (req, res) => {
             try {
                 cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
                 if (cuponExist.status == true) {
-                    return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
+                    return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                 }
                 else {
                     try {
@@ -45,16 +46,15 @@ PayController.Pay = async (req, res) => {
                             amount += totalPay;
                             totalPrice += totalPay;
                             const OnlyTwoDecimals = amount.toFixed(2);
-                            console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                         }
                     }
                     catch (error) {
-                        return console.log('Algo salio mal!!!');
+                        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
                     }
                 }
             }
             catch (error) {
-                return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
+                return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
             }
         }
         else {
@@ -69,16 +69,15 @@ PayController.Pay = async (req, res) => {
                     amount += totalPay;
                     totalPrice += totalPay;
                     const OnlyTwoDecimals = amount.toFixed(2);
-                    console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                 }
             }
             catch (error) {
-                return console.log('Algo salio mal!!!');
+                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
             }
         }
     }
     catch (error) {
-        return console.log('Algo salio mal');
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     let urlSuccess;
     let total;
@@ -113,8 +112,7 @@ PayController.Pay = async (req, res) => {
         };
         PaypalSdk.payment.create(create_payment, function (error, payment) {
             if (error) {
-                //throw error;
-                console.log('Esto no funciona');
+                throw error;
             }
             else {
                 if (create_payment.payer.payment_method === "paypal") {
@@ -132,9 +130,10 @@ PayController.Pay = async (req, res) => {
         });
     }
     catch (error) {
-        return console.log('Algo salio mal!!!');
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
 };
+//metodo que da continuidad al metodo de pago paypal se encarga de guardar ordenes y detalles de ordenes en base de datos
 PayController.PaySuccess = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     const ordenRepo = typeorm_1.getRepository(Order_1.Order);
@@ -145,7 +144,6 @@ PayController.PaySuccess = async (req, res) => {
     let items = Items;
     let ordenC;
     let cuponExist;
-    //var params = new URLSearchParams(location.search);
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
     const CODIGO_CUPON = req.query.CODIGO_CUPON;
@@ -160,7 +158,7 @@ PayController.PaySuccess = async (req, res) => {
             try {
                 cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
                 if (cuponExist.status == true) {
-                    return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
+                    return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                 }
                 else {
                     let date = new Date();
@@ -186,7 +184,6 @@ PayController.PaySuccess = async (req, res) => {
                             totalDesc += Totaldesc;
                             const OnlyTwoDecimals = amount.toFixed(2);
                             const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'), 10);
-                            console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                             let itemString = item.qt.toString();
                             let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
                             itemEmail.push(itm);
@@ -201,7 +198,7 @@ PayController.PaySuccess = async (req, res) => {
                                 const Save = await ordeDRepo.save(saveOD);
                             }
                             catch (error) {
-                                console.log(error);
+                                return res.status(400).json({ ok: false, message: 'Algo salio mal al intentar guardar detalles de Orden!' });
                             }
                             //actualizar producto
                             try {
@@ -209,18 +206,17 @@ PayController.PaySuccess = async (req, res) => {
                                 const saveProduct = await proRepo.save(productoItem);
                             }
                             catch (error) {
-                                return console.log('Error inesperado!!!');
+                                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
                             }
                         }
                         catch (error) {
-                            return console.log('Algo salio mal!!!');
+                            return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
                         }
-                        console.log(productoItem);
                     }
                 }
             }
             catch (error) {
-                return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
+                return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
             }
         }
         else {
@@ -247,7 +243,6 @@ PayController.PaySuccess = async (req, res) => {
                 totalDesc += Totaldesc;
                 const OnlyTwoDecimals = amount.toFixed(2);
                 const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'), 10);
-                console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                 let itemString = item.qt.toString();
                 let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
                 itemEmail.push(itm);
@@ -262,7 +257,7 @@ PayController.PaySuccess = async (req, res) => {
                     const Save = await ordeDRepo.save(saveOD);
                 }
                 catch (error) {
-                    console.log(error);
+                    return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
                 }
                 //actualizar producto
                 try {
@@ -270,18 +265,17 @@ PayController.PaySuccess = async (req, res) => {
                     const saveProduct = await proRepo.save(productoItem);
                 }
                 catch (error) {
-                    return console.log('Error inesperado!!!');
+                    return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
                 }
             }
         }
     }
     catch (error) {
-        return console.log('Ocurrio un error inesperado!!!');
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     if (cuponExist) {
         const Totaldesct = totalPrice * cuponExist.descuento / 100;
         const Totalprice = totalPrice - Totaldesct;
-        console.log(Totaldesct, Totalprice);
         descuentoCupon = Totaldesct;
         total = Totalprice.toFixed(2);
         ordenC.PrecioTotal = Totalprice;
@@ -303,14 +297,11 @@ PayController.PaySuccess = async (req, res) => {
         let date = new Date();
         const infoCliente = await clienteRepo.findOneOrFail(clienteid);
         let subject = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `;
-        console.log(subject);
-        console.log(direccionLocal, date, infoCliente);
         let content = itemEmail.reduce((a, b) => {
             return a + '<tr><td>' + b.cantidad + '</td><td>' + b.producto + '</td><td>' + '$' + b.precioOriginal + '</td><td>' + '$' + b.descuento + '</td><td>' + '$' + b.totalNto + '</td></tr>';
         }, '');
         let descTotal = itemEmail.map((a) => a.descuento).reduce((a, b) => a + b);
-        console.log(descTotal);
-        await nodemailer_config_1.transporter.sendMail({
+        await mailer_1.transporter.sendMail({
             from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
             to: infoCliente.email,
             subject: subject,
@@ -373,16 +364,15 @@ PayController.PaySuccess = async (req, res) => {
         };
         PaypalSdk.payment.execute(paymentId, execute_payment, function (error, payment) {
             if (error) {
-                console.log(error.response);
                 throw error;
             }
             else {
-                res.json({ message: 'Gracias por su compra', ok: true });
+                res.json({ ok: true, message: 'Gracias por su compra' });
             }
         });
     }
     catch (error) {
-        console.log(error);
+        return res.status(400).json({ ok: false, message: 'Algo ha fallado a hacer la compra' });
     }
 };
 exports.default = PayController;

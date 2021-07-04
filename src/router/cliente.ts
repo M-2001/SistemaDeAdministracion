@@ -7,7 +7,7 @@ const router = Router();
 const cliente = ClienteController;
 
 router.get('/', cliente.getClientes)
-router.get('/best-client',[CheckJwt, checkRole(['admin'])], cliente.MejoresClientes)
+router.get('/best-client', CheckJwt, cliente.MejoresClientes)
 router.post('/', cliente.RegistroCliente);
 router.get('/image', cliente.getImage)
 router.post('/photo/:id', CheckJwt, cliente.ImagenPerfilCliente);

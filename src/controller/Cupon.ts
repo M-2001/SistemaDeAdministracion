@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { Cupon } from '../entity/Cupones';
 import { Cliente } from '../entity/Cliente';
-import { transporter } from '../config/nodemailer.config';
-
+import { transporter } from '../middleware/mailer';
 
 class CuponController {
+
     //crear cupon de descuento
     static CrearCupon = async (req: Request, res: Response) => {
         let newCupon;
@@ -21,19 +21,19 @@ class CuponController {
 
             const cupon = new Cupon();
             cupon.codigo = codigo,
-                cupon.descuento = descuento,
-                cupon.fechaExp = new Date(fechaExp)
+            cupon.descuento = descuento,
+            cupon.fechaExp = new Date(fechaExp)
 
             newCupon = await cuponRepo.save(cupon);
             //all is ok
-            res.json({ ok: true, message: 'Cupon Creado con exito', newCupon });
-            console.log(newCupon);
+            res.json({ ok: true, message: 'Cupon Creado con exito!'});
 
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
         }
     }
-
+    
+    //cambiar estado cupon
     static EstadoCupon = async (req: Request, res: Response) => {
         let cupon: Cupon;
         const id = req.body;
@@ -44,13 +44,14 @@ class CuponController {
             cupon.status = !cupon.status
 
             await cuponRepo.save(cupon)
-            res.json({ ok: true })
+            res.json({ ok: true, message: 'Estado de cupon actualizado!' })
 
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
         }
     };
 
+    //mostrar cupones
     static MostrarCupones = async (req: Request, res: Response) => {
         let cupon;
         const cuponRepo = getRepository(Cupon);
@@ -61,10 +62,10 @@ class CuponController {
                 res.json({ ok: true, cupon })
             }
             else {
-                res.json({ message: ' No se encontraron resultados' })
+                res.json({ok: false, message: ' No se encontraron resultados' })
             }
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
         }
     }
 
@@ -86,10 +87,10 @@ class CuponController {
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
                 res.json({ ok: true, cupones, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
             } else {
-                res.json({ message: 'No se encontraron resultados!' })
+                res.json({ok:false, message: 'No se encontraron resultados!' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal!' })
+            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
         }
     }
     //eliminar Cupon
@@ -105,10 +106,10 @@ class CuponController {
         //Try to delete Category
         try {
             await cuponRepo.remove(cupon)
+            res.json({ok: true, message: 'Cupon ha sido eliminado!' });
         } catch (error) {
             return res.status(409).json({ message: 'Algo ha salido mal!' });
         }
-        res.json({ message: 'Cupon ha sido eliminado!', ok: true });
     };
 
     //enviar Cupon
@@ -125,15 +126,15 @@ class CuponController {
                 try {
                     cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
                     if (cuponExist.status == true) {
-                        return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
+                        return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                     } else {
                         try {
                             cliente = await clienteRepo.findOne({ where: { email } });
                             if (!cliente) {
-                                return res.status(400).json({ messge: 'El cliente con el email: ' + email + ' no existe!!!' })
+                                return res.status(400).json({ok: true, message: 'El cliente con el email: ' + email + ' no existe!!!' })
                             }
                         } catch (error) {
-                            console.log(error);
+                            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
                         }
 
                         //Try send email 
@@ -158,25 +159,25 @@ class CuponController {
                                 </body>
                                 </html>`
                             });
-                            res.json({ message: "Email enviado con exito!!!" });
+                            res.json({ok: true, message: "Email enviado con exito!!!" });
                         } catch (error) {
-                            console.log('Algo salio mal al enviar email!!!');
+                            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
                         }
-                        console.log('vamos bien loco');
                     }
                 }
                 catch (error) {
-                    return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
+                    return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
                 }
             } else {
-                return res.status(405).json({ message: 'Debe enviar un codigo de cupon!!!' })
+                return res.status(405).json({ok: false, message: 'Debe enviar un codigo de cupon!!!' })
             }
 
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
         }
     }
 
+    //mostrar cupon 
     static MostrarCupon = async (req: Request, res: Response) => {
         const codeCoupon = req.query.code
         const cpRepo = getRepository(Cupon)
@@ -193,7 +194,7 @@ class CuponController {
                 return res.send({ok:true})
             }
         } catch (error) {
-            return res.send({error,message:"Error en el servidor"})
+            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
         }
     }
 }

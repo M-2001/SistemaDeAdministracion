@@ -8,10 +8,11 @@ import { json } from "body-parser";
 
 class AuthEmployeeController{
         
+    //login employee
     static Login = async(req: Request, res: Response)=>{
         const{code, password}= req.body;
         if(!(code && password)){
-            return res.status(400).json({message:'code & password are required'});
+            return res.status(400).json({ok: false, message:'code & password are required'});
         }
         const empRepository = getRepository(Employee);
         let emp : Employee;
@@ -19,11 +20,11 @@ class AuthEmployeeController{
             emp = await empRepository.findOneOrFail({where:{codeAccess : code}});
         }
         catch(e){
-            return res.send({message:'Code or password incorrect!',ok:false})
+            return res.send({ok:false, message:'Code or password incorrect!'})
         }
         //check password
         if (!emp.checkPassword(password)){
-            return res.send({message:'Code or password incorrect',ok:false});
+            return res.send({ok: false, message:'Code or password incorrect'});
         }
 
         if(emp.estado == false){
@@ -33,23 +34,16 @@ class AuthEmployeeController{
             const token =  jwt.sign({id: emp.id, code: emp.codeAccess,role:emp.role}, process.env.JWTSECRET,{
             expiresIn : '48h'
         }); 
-        res.json({message:'Ok', token : token,ok:true/*refreshToken,*/});
+        res.json({ok: true, token});
         }
-        //const refreshToken = jwt.sign({id: emp.id,username:emp.email}, config.jwtSecretRefresh,{expiresIn : '48h'});
-
-        // user.refreshToken = refreshToken;
-        // try {
-        //     await empRepository.save(emp);
-        // } catch (error) {
-        //     return res.status(400).json({message: 'somthing goes wrong!'})
-        // }
+        
     };
 
     static passwordChange = async(req : Request, res :Response)=>{
         const {id} = res.locals.jwtPayload;
         const{oldPassword, newPassword}= req.body;
         if(!(oldPassword && newPassword)){
-            res.status(400).json({message: 'Contraseña antigua y nueva son requeridas!'});
+            return res.status(400).json({ok: false, message: 'Contraseña antigua y nueva son requeridas!'});
         }
         const emplRepo = getRepository(Employee);
         let empl : Employee;
@@ -57,21 +51,21 @@ class AuthEmployeeController{
             empl = await emplRepo.findOneOrFail(id)
         }
         catch(e){
-            res.status(400).json({message:'Algo salio mal! '});
+            res.status(400).json({ok: false, message:'Algo salio mal! '});
         }
         if (!empl.checkPassword(oldPassword)){
-            return res.status(400).json({message:'Varifica tu contraseña antigua! '});
+            return res.status(400).json({ok: false, message:'Varifica tu contraseña antigua! '});
         }
         empl.password = newPassword;
         const validateOps = {validationError:{target:false, value: false}};
         const error= await validate(empl, validateOps);
         if (error.length>0){
-            res.status(400).json(error)
+            res.status(400).json({ok: false, message:'Algo esta fallando'})
         }
         //hash password
         empl.hashPassword();
         emplRepo.save(empl);
-        res.json({message:'Contraseña cambiada con exito! '});
+        res.json({ok: true, message:'Contraseña cambiada con exito! '});
     };
 
     //ForgotPassword
@@ -93,7 +87,7 @@ class AuthEmployeeController{
             verifycationLink = `https://system-pc.netlify.app/reset-password/${token}`;
 
         }catch(e){
-            return res.json({ok:false,message:'no se encontro to correo en los registros'});
+            return res.json({ok:false, message:'no se encontro to correo en los registros'});
         }
         //TODO: sendEmail
         try{
@@ -106,16 +100,16 @@ class AuthEmployeeController{
             });
         }catch(error){
             emailStatus = error;
-            return res.status(401).json({message:'Something goes wrong!'});
+            return res.status(401).json({ok: false, message:'Algo salio mal!!'});
         }
         try{
             empl.resetPassword = token
             await emplRespo.save(empl);
         }catch(error){
             emailStatus = error;
-            return res.status(400).json({message:'Something goes wrong!'})
+            return res.status(400).json({ok: false, message:'Algo salio mal!'})
         }
-        res.json({message, ok:true,emailStatus});
+        res.json({ok: true, message, emailStatus});
     };
 
     //resetPassword
@@ -123,7 +117,7 @@ class AuthEmployeeController{
         const {newPassword} = req.body;
         const resetPassword = req.headers.reset as string;
         if(!(resetPassword && newPassword)){
-            return res.status(400).json({message:'all the fields are require'});
+            return res.status(400).json({ok: false, message:'Todos los campos son requeridos!'});
         }
         const emplRepo = getRepository(Employee);
         let jwtPayload;
@@ -131,10 +125,9 @@ class AuthEmployeeController{
         try {
             empl = await emplRepo.findOneOrFail({ where: { resetPassword } });
             jwtPayload = jwt.verify(resetPassword, process.env.JWTSECRETRESET);
-            console.log(empl)
 
         } catch (error) {
-            return res.status(401).json({ message: 'No se ah completado la accion' })
+            return res.status(401).json({ok: false, message: 'No se ah completado la accion' })
         }
         empl.password = newPassword;
 
@@ -142,23 +135,23 @@ class AuthEmployeeController{
         const errors = await validate(empl, validationsOps);
 
         if(errors.length > 0){
-            return res.status(400).json({error:errors})
+            return res.status(400).json({ok: false, message:"Algo salio mal"})
         }
         try{
             empl.hashPassword();
             await emplRepo.save(empl);
             
         }catch(error){
-            return res.status(400).json({message:error});
+            return res.status(400).json({ok: false, message:'Algo esta fallando, intenta nuevamente'});
         }
-        res.json({message:'password changed!',ok:true})
+        res.json({ok: true, message:'password changed!'})
     }
 
     //activar cuenta administrador
     static ActivarCuenta = async(req: Request, res: Response)=>{
         const confirmacionCode = req.headers.confirm as string;
         if(!(confirmacionCode)){
-            res.status(400).json({message:'all the fields are require'});
+            res.status(400).json({ok: false, message:'Todos los campos son requeridos'});
         }
         const emplRepo = getRepository(Employee);
         let employee : Employee;
@@ -166,25 +159,26 @@ class AuthEmployeeController{
             employee = await emplRepo.findOneOrFail({where: {confirmacionCode}});
 
         }catch(error){
-            return res.status(401).json({message: 'error'})
+            return res.status(401).json({ok: false, message:'Alho esta fallando!'})
         }
 
         const validationsOps = {validationError:{target: false, value: false}};
         const errors = await validate(employee, validationsOps);
 
         if(errors.length > 0){
-            return res.status(400).json({error:errors})
+            return res.status(400).json({ok: false, message:'algo salio mal!'})
         }
         try{
             employee.estado = true
             await emplRepo.save(employee);
             
         }catch(error){
-            return res.status(400).json({message: error});
+            return res.status(400).json({ok: false, message: 'Algo esta fallando, intenta nuevamente!'});
         }
-        res.json({message:'Registro Activado!'})
+        res.json({ok: true, message:'Registro Activado!'})
     };
     
+    //agregar contreña cuenta empleado
     static addNewPassword = async (req: Request, res: Response)=>{
         const id = req.params
         const { password } = req.body
@@ -196,10 +190,10 @@ class AuthEmployeeController{
                 employee.password = password
                 employee.hashPassword()
                 await emplRepo.save(employee)
-                return res.send({message:"Se guardo la contraseña",ok:true})
+                return res.send({ok: true, message:"Se guardo la contraseña"})
             }
         } catch (error) {
-            return res.status(400).json({ message: error });
+            return res.status(400).json({ ok: false, message: ' Algo esta fallando, intenta nuevamente!' });
         }
 
     }

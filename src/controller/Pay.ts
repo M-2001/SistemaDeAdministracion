@@ -4,7 +4,7 @@ import { Producto } from '../entity/Producto';
 import { getRepository } from 'typeorm';
 import { Order } from '../entity/Order';
 import { DetalleOrden } from '../entity/Detalles_Orden';
-import { transporter } from '../config/nodemailer.config';
+import { transporter } from '../middleware/mailer';
 import PaypalSdk = require('paypal-rest-sdk');
 import { Cliente } from '../entity/Cliente';
 import { Cupon } from '../entity/Cupones';
@@ -16,6 +16,7 @@ PaypalSdk.configure({
     'client_secret': 'EBEvKMxyW2YpshzcQbycRzHJIirGDcvs8tG_u_VD56FWzZzzNOrl_NUcgdI8bSlmvt-g4CKAL8MGANvD'
 });
 
+//interfaz para recibir parametro del body
 interface Product {
     id ?: string,
     qt: number
@@ -24,7 +25,8 @@ interface Product {
 let Items : any;
 
 class PayController{
-
+    
+    //metodo de pago paypal
     static Pay = async( req : Request, res: Response) =>{
 
             let items : Product[] = req.body;
@@ -42,7 +44,7 @@ class PayController{
                     try {
                         cuponExist = await cuponRepo.findOneOrFail({where: { codigo : CODIGO_CUPON}});
                         if (cuponExist.status == true) {
-                            return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
+                            return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
                         } else {
                             try {
                                 for (let index = 0; index < items.length; index++) {
@@ -58,14 +60,13 @@ class PayController{
                                     totalPrice += totalPay
                                     const OnlyTwoDecimals = amount.toFixed(2);
                                     
-                                    console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                             }
                             } catch (error) {
-                                return console.log('Algo salio mal!!!');
+                                return res.status(400).json({ok: false, message:'Algo salio mal!'})
                             }
                         }
                     } catch (error) {
-                        return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!'});
+                        return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!'});
                     }
                 } else {
                     try {
@@ -81,16 +82,15 @@ class PayController{
                             totalPrice += totalPay
                             const OnlyTwoDecimals = amount.toFixed(2);
 
-                            console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
                     }
                     } catch (error) {
-                        return console.log('Algo salio mal!!!');
+                        return res.status(400).json({ok: false, message:'Algo salio mal!'})
                     }
                     
                     
                 }
             } catch (error) {
-                return console.log('Algo salio mal');
+                return res.status(400).json({ok: false, message:'Algo salio mal!'})
             }
             let urlSuccess : any;
             let total : string;
@@ -126,9 +126,7 @@ class PayController{
                 }
                 PaypalSdk.payment.create(create_payment, function(error: any, payment : any){
                     if (error) {
-                        //throw error;
-
-                        console.log('Esto no funciona');
+                        throw error;
 
                     } else {
                         if(create_payment.payer.payment_method === "paypal"){
@@ -145,10 +143,11 @@ class PayController{
                     }
                 });
             } catch (error) {
-                return console.log('Algo salio mal!!!');
+                return res.status(400).json({ok: false, message:'Algo salio mal!'})
             }
     }
 
+    //metodo que da continuidad al metodo de pago paypal se encarga de guardar ordenes y detalles de ordenes en base de datos
     static PaySuccess = async(req : Request, res : Response) => {
         const {clienteid} = res.locals.jwtPayload;
         const ordenRepo = getRepository(Order);
@@ -161,7 +160,6 @@ class PayController{
         let ordenC: Order;
         let cuponExist: Cupon;
 
-        //var params = new URLSearchParams(location.search);
         
         const payerId : any = req.query.PayerID;
         const paymentId : any = req.query.paymentId;
@@ -181,7 +179,7 @@ class PayController{
                 try {
                     cuponExist = await cuponRepo.findOneOrFail({where:{codigo : CODIGO_CUPON}});
                     if(cuponExist.status == true){
-                        return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
+                        return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
                     } else {
                         let date = new Date();
                         let month = date.getMonth() + 1;
@@ -209,7 +207,6 @@ class PayController{
                                 totalDesc += Totaldesc
                                 const OnlyTwoDecimals = amount.toFixed(2);
                                 const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
-                                console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
 
                                 let itemString : string = item.qt.toString()
                                 
@@ -228,7 +225,7 @@ class PayController{
                     
                                     const Save = await ordeDRepo.save(saveOD);
                                 } catch (error) {
-                                    console.log(error);
+                                    return res.status(400).json({ok: false, message:'Algo salio mal al intentar guardar detalles de Orden!'})
                                 }
                                 //actualizar producto
                                 try {
@@ -236,16 +233,15 @@ class PayController{
                                     const saveProduct = await proRepo.save(productoItem)
                                     
                                 } catch (error) {
-                                    return console.log('Error inesperado!!!');
+                                    return res.status(400).json({ok: false, message:'Algo salio mal!'})
                                 }
                             } catch (error) {
-                                return console.log('Algo salio mal!!!');
+                                return res.status(400).json({ok: false, message:'Algo salio mal!'})
                             }
-                                console.log(productoItem);
                         }
                     }
                 } catch (error) {
-                    return res.status(400).json({message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!'});
+                    return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!'});
                 }
             } else {
                 //guardar Orden sin cupon
@@ -273,7 +269,6 @@ class PayController{
                     totalDesc += Totaldesc
                     const OnlyTwoDecimals = amount.toFixed(2);
                     const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
-                    console.log(OnlyTwoDecimals, productoItem.nombreProducto, Totaldesc);
 
                     let itemString : string = item.qt.toString()
                     
@@ -291,7 +286,7 @@ class PayController{
         
                         const Save = await ordeDRepo.save(saveOD);
                     } catch (error) {
-                        console.log(error);
+                        return res.status(400).json({ok: false, message:'Algo salio mal!'})
                     }
                     //actualizar producto
                     try {
@@ -299,18 +294,18 @@ class PayController{
                         const saveProduct = await proRepo.save(productoItem)
                         
                     } catch (error) {
-                        return console.log('Error inesperado!!!');
+                        return res.status(400).json({ok: false, message:'Algo salio mal!'})
                     }
                     }
             }
         } catch (error) {
-            return console.log('Ocurrio un error inesperado!!!');
+            return res.status(400).json({ok: false, message:'Algo salio mal!'})
         }
 
         if (cuponExist) {
             const Totaldesct = totalPrice * cuponExist.descuento/100;
             const Totalprice = totalPrice - Totaldesct;
-            console.log(Totaldesct, Totalprice);
+
             descuentoCupon = Totaldesct;
             total = Totalprice.toFixed(2)
 
@@ -337,8 +332,6 @@ class PayController{
             let date = new Date();
             const infoCliente = await clienteRepo.findOneOrFail(clienteid)
             let subject : string = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Gracias por su Compra!!!"} `
-            console.log(subject);
-            console.log(direccionLocal, date, infoCliente);
             
 
             let content = itemEmail.reduce((a,b) => {
@@ -346,7 +339,6 @@ class PayController{
             }, '');
 
             let descTotal = itemEmail.map((a) => a.descuento ).reduce((a,b)=>a+b)
-                console.log(descTotal);
             
 
             await transporter.sendMail({
@@ -412,14 +404,13 @@ class PayController{
         };
         PaypalSdk.payment.execute(paymentId, execute_payment, function (error: any, payment: any) {
             if (error) {
-                console.log(error.response);
                 throw error;
             } else {
-                res.json({ message : 'Gracias por su compra',ok:true});
+                res.json({ok: true, message : 'Gracias por su compra'});
             }
         });
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message: 'Algo ha fallado a hacer la compra'});
         }
     }
 }

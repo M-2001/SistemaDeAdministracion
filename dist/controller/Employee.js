@@ -16,14 +16,14 @@ EmpleadoController.getEmpleados = async (_, res) => {
     try {
         const empl = await empleadoRepo.find();
         if (empl.length > 0) {
-            res.send({ empty: false });
+            res.json({ ok: true, empl });
         }
         else {
-            res.send({ message: 'Not results!', empty: true });
+            res.json({ ok: false, message: 'No se encontraron resultados!', });
         }
     }
     catch (e) {
-        res.status(500).json({ message: 'error en el servidor' });
+        res.status(400).json({ message: 'Algo ha fallado!' });
     }
 };
 //empleados Paginados
@@ -54,11 +54,11 @@ EmpleadoController.MostrarEmpleadosPaginados = async (req, res) => {
             res.json({ ok: true, empleados, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
         }
         else {
-            res.json({ message: 'No se encontraron resultados!' });
+            res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal!' });
+        return res.json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
 //getEmployeeByID
@@ -72,23 +72,24 @@ EmpleadoController.getEmpleadoByID = async (req, res) => {
         }
     }
     catch (e) {
-        res.status(404).json({ message: 'No hay registros con este id: ' + id });
+        res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
     }
 };
+//Check si el usuario existe
 EmpleadoController.checkIfExistUser = async (req, res) => {
     const { code } = req.params;
     const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
     try {
         const employee = await employeeRepo.findOneOrFail({ select: [`password`, 'id'], where: { codeAccess: code } });
         if (employee.password === '') {
-            return res.send({ ok: true, userId: employee.id, newUser: true });
+            return res.json({ ok: true, newUser: true });
         }
         if (employee.password !== "") {
-            return res.send({ ok: true, newUser: false });
+            return res.json({ ok: true, newUser: false });
         }
     }
     catch (e) {
-        res.status(404).json({ message: 'No hay registros con este codigo: ' + code });
+        return res.status(404).json({ ok: false, message: 'No hay registros con este codigo: ' + code });
     }
 };
 //create new employee de tipo Admin
@@ -103,7 +104,7 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
         where: { codeAccess: code }
     });
     if (emailExist) {
-        return res.status(400).json({ msj: 'Ya existe un regitro con el codigo: ' + code });
+        return res.status(400).json({ ok: false, message: 'Ya existe un regitro con el codigo: ' + code });
     }
     //el registro es creado si no existe
     employee = new Employee_1.Employee();
@@ -116,14 +117,14 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     const ValidateOps = { validationError: { target: false, value: false } };
     const errors = await class_validator_1.validate(employee, ValidateOps);
     if (errors.length > 0) {
-        return res.status(400).json({ message: 'Algo salio mal!' });
+        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     //verificar si el token existe
     try {
         verifycationLink = `https://system-pc.netlify.app/confirmRegister/${token}`;
     }
     catch (e) {
-        console.log(e);
+        return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
     }
     //TODO: HASH PASSWORD
     try {
@@ -136,10 +137,10 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
             empRepo.save(employee);
         }
         //all ok
-        res.json({ mjs: 'Registro creado con exito', verifycationLink });
+        res.json({ ok: true, message: 'Registro creado con exito', verifycationLink });
     }
     catch (e) {
-        console.log(e);
+        return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
     }
 };
 //delete employee
@@ -154,10 +155,10 @@ EmpleadoController.EliminarEmpleado = async (req, res) => {
             fs.unlinkSync(imgdir);
         }
         //delete 
-        res.status(201).json({ message: 'Empleado eliminado' });
+        res.status(201).json({ ok: true, message: 'Empleado eliminado' });
     }
     catch (e) {
-        res.status(404).json({ message: 'No hay registros con este id: ' + id });
+        res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
     }
 };
 //Editar Employee
@@ -175,18 +176,19 @@ EmpleadoController.EditarEmpleado = async (req, res) => {
         employee.email = email;
     }
     catch (error) {
-        return res.status(404).json({ message: 'No se han encontrado resultados ' });
+        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados ' });
     }
     const ValidateOps = { validationError: { target: false, value: false } };
     const errors = await class_validator_1.validate(employee, ValidateOps);
     //try to save employee
     try {
+        //all is ok
         await emplRepo.save(employee);
+        res.json({ ok: true, message: 'El registro se ha actualizado' });
     }
     catch (error) {
-        return res.status(409).json({ message: 'Algo ha salido mal!' });
+        return res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
     }
-    res.json({ message: 'El registro se ha actualizado', ok: true });
 };
 //subir imagen perfil
 EmpleadoController.ImagenPerfilEmpleado = async (req, res) => {
@@ -199,20 +201,19 @@ EmpleadoController.ImagenPerfilEmpleado = async (req, res) => {
     else {
         let foto = req.files.foto;
         let fotoName = foto.name.split('.');
-        console.log(fotoName);
         let ext = fotoName[fotoName.length - 1];
         //extensiones permitidas 
         const extFile = ['png', 'jpeg', 'jpg'];
         if (extFile.indexOf(ext) < 0) {
             return res.status(400)
-                .json({ message: 'Las estensiones permitidas son ' + extFile.join(', ') });
+                .json({ ok: false, message: 'Las estensiones permitidas son ' + extFile.join(', ') });
         }
         else {
             //cambiar nombre del archivo
             var nombreFoto = `${id}-${new Date().getMilliseconds()}.${ext}`;
             foto.mv(`src/uploads/employee/${nombreFoto}`, (err) => {
                 if (err) {
-                    return res.status(500).json({ ok: false, err });
+                    return res.status(500).json({ ok: false, message: 'Algo salio mal al intentar cargar imagen' });
                 }
             });
             try {
@@ -224,18 +225,17 @@ EmpleadoController.ImagenPerfilEmpleado = async (req, res) => {
                 if (fs.existsSync(imgdir)) {
                     fs.unlinkSync(imgdir);
                 }
-                console.log(employee);
             }
             catch (e) {
-                return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+                return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
             }
             //try to save employee
             try {
                 await employeeRepo.createQueryBuilder().update(Employee_1.Employee).set({ imagen: nombreFoto }).where({ id }).execute();
-                return res.json({ message: 'La imagen se ha guardado.' });
+                return res.json({ ok: true, message: 'La imagen se ha guardado.' });
             }
             catch (error) {
-                return res.status(409).json({ message: 'Algo ha salido mal!' });
+                return res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
             }
         }
     }
@@ -248,7 +248,7 @@ EmpleadoController.AgregarEmpleadoE = async (req, res) => {
         where: { codeAccess: code }
     });
     if (codeExist) {
-        return res.send({ msj: 'Ya existe un empleado con el codigo : ' + code });
+        return res.json({ ok: false, message: 'Ya existe un empleado con el codigo : ' + code });
     }
     const employee = new Employee_1.Employee();
     employee.apellido = apellido;
@@ -259,18 +259,19 @@ EmpleadoController.AgregarEmpleadoE = async (req, res) => {
     const ValidateOps = { validationError: { target: false, value: false } };
     const errors = await class_validator_1.validate(employee, ValidateOps);
     if (errors.length > 0) {
-        return res.status(400).json({ errors });
+        return res.status(400).json({ ok: false, message: 'Algo salio mal' });
     }
-    //TODO: HASH PASSWORD
+    //try to save employee
     try {
         await empRepo.save(employee);
         //all ok
-        res.json({ msj: 'Empleado se creo con exito', ok: true });
+        res.json({ ok: true, message: 'Empleado se creo con exito' });
     }
     catch (e) {
-        return res.send({ msj: 'Algo salio mal Intenta nuevamente!' });
+        return res.status(400).json({ ok: false, message: 'Algo salio mal Intenta nuevamente!' });
     }
 };
+//get image employee
 EmpleadoController.getImage = (req, res) => {
     const name = req.query.image;
     const imgdir = path.resolve(__dirname, `../../src/uploads/employee/${name}`);

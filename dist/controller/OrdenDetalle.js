@@ -4,6 +4,7 @@ const typeorm_1 = require("typeorm");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 class OrdenDetalle {
 }
+//mostrar detalles de ordenes paginados
 OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
     let pagina = req.query.pagina || 1;
     pagina = Number(pagina);
@@ -29,13 +30,14 @@ OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
             res.json({ ok: true, ordenesD, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
         }
         else {
-            res.json({ message: 'No se encontraron resultados!' });
+            res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal!' });
+        res.json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
+//Mostrar detalles de ordenes por orden ID
 OrdenDetalle.MostrarDteOrderByOrderId = async (req, res) => {
     const { orden } = req.body;
     try {
@@ -51,11 +53,11 @@ OrdenDetalle.MostrarDteOrderByOrderId = async (req, res) => {
             res.json({ ok: true, ordenesD });
         }
         else {
-            res.json({ message: 'No se encontraron resultados!' });
+            res.json({ ok: false, message: 'No se encontraron resultados!' });
         }
     }
     catch (error) {
-        res.json({ message: 'Algo ha salido mal!' });
+        return res.status(400).json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
 exports.default = OrdenDetalle;

@@ -5,20 +5,22 @@ import { getRepository } from 'typeorm';
 
 class ProveedorController {
 
+    //Mostrar proveedores
     static MostrarProveedors = async (_: Request, res: Response) => {
         try {
             const proveedorRepo = getRepository(Proveedor);
             const proveedor = await proveedorRepo.find()
             if (proveedor.length > 0) {
-                res.json(proveedor)
+                res.json({ok: true, proveedor})
             } else {
-                res.json({ message: 'No se encontraron resultados' })
+                res.json({ok: false, message: 'No se encontraron resultados' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal' })
+            res.json({ok: false, message: 'Algo ha salido mal' })
         }
     };
 
+    //Mostrar proveedores paginados
     static MostrarProveedoresPaginados = async (req: Request, res: Response) => {
         let pagina = req.query.pagina || 1;
         let provider = req.query.proveedor || '';
@@ -39,23 +41,24 @@ class ProveedorController {
                 let nextPage: number = pagina >= totalPages ? pagina : pagina + 1
                 let prevPage: number = pagina <= 1 ? pagina : pagina - 1
                 res.json({ ok: true, proveedores, totalItems, totalPages, currentPage: pagina, nextPage, prevPage })
-                console.log(proveedores.length);
+                
             } else {
-                res.json({ message: 'No se encontraron resultados!' })
+                res.json({ok: false, message: 'No se encontraron resultados!' })
             }
         } catch (error) {
-            res.json({ message: 'Algo ha salido mal!' })
+            res.json({ok: false, message: 'Algo ha salido mal!' })
         }
     }
 
+    //Agregar un nuevo proveedor
     static AgregarProveedor = async (req: Request, res: Response) => {
         const { nombre, email, telefono, direccion } = req.body;
         try {
             const proveedorRepo = getRepository(Proveedor);
             const proveedorExist = await proveedorRepo.findOne({ where: { nombre_proveedor: nombre } });
-            console.log(proveedorExist);
+            
             if (proveedorExist) {
-                return res.status(400).json({ message: 'Ya existe una proveedor con ese nombre' })
+                return res.status(400).json({ok: false, message: 'Ya existe una proveedor con ese nombre' })
             }
             const proveedor = new Proveedor()
             proveedor.nombre_proveedor = nombre;
@@ -68,27 +71,30 @@ class ProveedorController {
             const errors = await validate(proveedor, ValidateOps);
 
             if (errors.length > 0) {
-                return res.status(400).json({ errors });
+                return res.status(400).json({ok: false, errors });
             }
             await proveedorRepo.save(proveedor);
+            //all ok 
+            res.json({ok: true, message: 'Se agrego un nuevo proveedor' });
+
         } catch (error) {
-            res.status(400).json({ message: 'Algo ha salio mal!' });
+            res.status(400).json({ok: false, message: 'Algo ha salio mal!' });
         }
-        //all ok 
-        res.json({ message: 'Se agrego un nuevo proveedor' });
     };
 
+    //Obtener proveedor por ID
     static ObtenerProveedorPorID = async (req: Request, res: Response) => {
         const { id } = req.params;
         try {
             const proveedorRepo = getRepository(Proveedor)
             const proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
-            res.json({ proveedor })
+            res.json({ok: true, proveedor })
         } catch (error) {
-            return res.status(404).json({ message: 'No hay registros con este id: ' + id });
+            return res.status(404).json({ok: false, message: 'No hay registros con este id: ' + id });
         }
     };
 
+    //Actualizar un proveedor
     static ActualizarProveedor = async (req: Request, res: Response) => {
         let proveedor;
         const { id } = req.params;
@@ -102,19 +108,21 @@ class ProveedorController {
                 proveedor.direccion = direccion
 
         } catch (error) {
-            return res.status(404).json({ message: 'No se han encontrado resultados con el id: ' + id })
+            return res.status(404).json({ok: false, message: 'No se han encontrado resultados con el id: ' + id })
         }
         const ValidateOps = { validationError: { target: false, value: false } };
         const errors = await validate(proveedor, ValidateOps);
         //Try to save data Category
         try {
             await proveedorRepo.save(proveedor)
+            //all is ok
+            res.json({ok: true, message: 'Se actualizo el registro!' });
         } catch (error) {
-            return res.status(409).json({ message: 'Algo ha salido mal!' });
+            return res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
         }
-        res.json({ messge: 'Se actualizo el registro!' });
     };
 
+    //eliminar un proveedor
     static EliminarProveedor = async (req: Request, res: Response) => {
         let proveedor:Proveedor;
         const { id } = req.params;
@@ -122,17 +130,19 @@ class ProveedorController {
         try {
             proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
         } catch (error) {
-            return res.status(404).json({ message: 'No se han encontrado resultados ' })
+            return res.status(404).json({ok: false, message: 'No se han encontrado resultados ' })
         }
-        //Try to delete Category
+        //intentar eliminar proveedor
         try {
             await proveedorRepo.remove(proveedor)
+            //all is ok
+            res.json({ok:true, meassge: 'Proveedor ha sido eliminado!'});
         } catch (error) {
-            return res.send({ message: 'No puedes eliminar este proveedor porque hay registros implicados' });
+            return res.send({ok: false, message: 'No puedes eliminar este proveedor porque hay registros implicados' });
         }
-        res.json({ messge: 'Proveedor ha sido eliminada!',ok:true });
     };
-    //estado proveedor
+
+    //Cambiar estado proveedor
     static EstadoProveedor = async (req: Request, res: Response) => {
         let proveedor:Proveedor;
         const id = req.body;
@@ -147,11 +157,11 @@ class ProveedorController {
             }
 
             const proveedorStatus = await proveedorRepo.save(proveedor)
-            res.json({ ok: true, proveedor: proveedorStatus.status })
+            res.json({ ok: true, message:'Estado de proveedor actualizado!' })
 
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({ok: false, message:'ALgo salio mal!'});
         }
-    };
+    }; 
 }
 export default ProveedorController;
