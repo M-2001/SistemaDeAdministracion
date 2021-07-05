@@ -179,6 +179,7 @@ class CuponController {
 
     //mostrar cupon 
     static MostrarCupon = async (req: Request, res: Response) => {
+        
         const codeCoupon = req.query.code
         const cpRepo = getRepository(Cupon)
         let cuponExist:Cupon;
@@ -194,7 +195,7 @@ class CuponController {
                 return res.send({ok:true})
             }
         } catch (error) {
-            return res.status(400).json({ok: false, message: 'Algo salio mal!'})
+            return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + codeCoupon + ' no es valido!!!'});
         }
     }
 }

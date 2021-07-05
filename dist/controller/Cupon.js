@@ -190,7 +190,7 @@ CuponController.MostrarCupon = async (req, res) => {
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + codeCoupon + ' no es valido!!!' });
     }
 };
 exports.default = CuponController;
