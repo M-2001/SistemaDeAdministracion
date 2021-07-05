@@ -231,9 +231,9 @@ ProductoController.AgregarProducto = async (req, res) => {
     }
     //try to save a product
     try {
-        await prodRepo.save(producto);
+        const newProduct = await prodRepo.save(producto);
         //all ok
-        res.json({ ok: true, message: 'Producto creado con exito' });
+        res.json({ ok: true, message: 'Producto creado con exito', newProduct });
     }
     catch (e) {
         res.status(409).json({ ok: false, message: 'Algo esta fallando!' });
