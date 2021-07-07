@@ -12,7 +12,7 @@ export class Cupon {
     @Column()
     codigo : string;
 
-    @Column({type: 'decimal', precision: 19 , scale: 2})
+    @Column()
     descuento : number;
 
     @Column()

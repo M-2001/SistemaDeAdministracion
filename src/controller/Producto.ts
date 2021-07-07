@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import { DetalleOrden } from '../entity/Detalles_Orden';
 import { Rating } from '../entity/Rating';
 import { resolve } from 'url';
+import { Employee } from '../entity/Employee';
 
 class ProductoController {
 
@@ -83,9 +84,8 @@ class ProductoController {
 
                 for (let i = 0; i < producto.length; i++) {
                     const prod = producto[i];
-                    if (prod.catidad_por_unidad <= 1) {
+                    if (prod.catidad_por_unidad == 0) {
                         prod.status = false;
-                        prod.catidad_por_unidad = 1;
                         productoRepo.save(producto);
                     }
                 }
@@ -207,7 +207,7 @@ class ProductoController {
     //create new product
     static AgregarProducto = async (req: Request, res: Response) => {
 
-        const { codigo_producto, nombre_producto, descripcion, costo_standar, cantidad_unidad, descuento, proveedor, marca, categoria } = req.body;
+        const { codigo_producto, nombre_producto, descripcion, proveedor, marca, categoria } = req.body;
 
         const prodRepo = getRepository(Producto);
         const codeProductExist = await prodRepo.findOne({
@@ -221,12 +221,13 @@ class ProductoController {
         producto.codigo_Producto = codigo_producto;
         producto.nombreProducto = nombre_producto;
         producto.descripcion = descripcion;
-        producto.costo_standar = costo_standar;
-        producto.catidad_por_unidad = cantidad_unidad;
-        producto.descuento = descuento;
+        // producto.precioCompra = precioCompra;
+        // producto.costo_standar = costo_standar;
+        // producto.descuento = descuento;
         producto.proveedor = proveedor;
         producto.marca = marca;
         producto.categoria = categoria;
+        producto.status = false;
 
         //validations
         const ValidateOps = { validationError: { target: false, value: false } };
@@ -236,12 +237,30 @@ class ProductoController {
         }
         //try to save a product
         try {
-            const newProduct = await prodRepo.save(producto);
-            //all ok
-            res.json({ ok: true, message: 'Producto creado con exito', newProduct })
+            const nuevoProducto = await prodRepo.save(producto);
+            
+            //declaraciones de IVA
+            let PorcentajeTotal: number = 1.00;
+            let PorcentajeIVA: number = 0.13;
+            let TotalIva = PorcentajeTotal + PorcentajeIVA;
+            
+            //Actualizar precio producto Con IVA incluido
+
+            const newPriceWithIVA = nuevoProducto.costo_standar * TotalIva;
+            const newPrice = newPriceWithIVA.toFixed(2);
+            nuevoProducto.costo_standar = parseFloat(newPrice);
+
+            //Intentar guardar el nuevo precio del producto con IVA incluido
+            try {
+                const newProduct = await prodRepo.save(nuevoProducto);
+                //all ok
+                res.json({ ok: true, message: 'Producto guardado con Exito!', newProduct });
+            } catch (error) {
+                console.log('Error al aplicar IVA!!!');
+            }
         }
         catch (e) {
-            res.status(409).json({ok: false, message: 'Algo esta fallando!' });
+            res.status(409).json({ok: false, message: 'Algo esta fallando!',e });
         }
     };
 
@@ -249,15 +268,13 @@ class ProductoController {
     static EditarProducto = async (req: Request, res: Response) => {
         let producto;
         const { id } = req.params;
-        const { nombre_producto, descripcion, costo_standar, cantidad_unidad, descuento, proveedor, marca, categoria } = req.body;
+        const { nombre_producto, descripcion, descuento, proveedor, marca, categoria } = req.body;
         const prodRepo = getRepository(Producto);
 
         try {
             producto = await prodRepo.findOneOrFail(id);
             producto.nombreProducto = nombre_producto;
             producto.descripcion = descripcion;
-            producto.costo_standar = costo_standar;
-            producto.catidad_por_unidad = cantidad_unidad;
             producto.descuento = descuento;
             producto.proveedor = proveedor;
             producto.marca = marca;
@@ -289,7 +306,11 @@ class ProductoController {
         try {
             const producto = await prodRepo.findOneOrFail(id);
             try {
-                await prodRepo.remove(producto)
+                if (producto.catidad_por_unidad != 0) {
+                    return res.status(400).json({ok: false, message:'No se puede eliminar un producto con articulos en stock!'})
+                }
+                producto.status = false
+                await prodRepo.save(producto)
                 const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
                 if (fs.existsSync(imgdir)) {
                     fs.unlinkSync(imgdir)
@@ -374,6 +395,7 @@ class ProductoController {
             res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
         }
     }
+
     //getProductoById
     static getProductoById = async (id: string) => {
         const ordenRepo = getRepository(Producto);
@@ -398,8 +420,6 @@ class ProductoController {
             res.json({ ok: false, message: 'No se pudo completar la accion solicitada' })
         }
     };
-    //productos mas vendidos
-
 
     //get image producto
     static getImage = (req: Request, res: Response) => {
@@ -510,6 +530,95 @@ class ProductoController {
         } catch (error) {
             return res.status(400).json({ok:false, message:'Algo ha fallado!'})
         }
+    }
+
+    //agregarProductoStock
+    static AgregarProductoStock = async (req: Request, res: Response)=>{
+        const {id} = res.locals.jwtPayload;
+        const {idp} = req.params;
+        const {cantidadProducto, precioCompra, beneficio} = req.body;
+
+        let producto : Producto;
+        let empleado : Employee;
+
+        const productoRepo = getRepository(Producto);
+        const empleadoRepo = getRepository(Employee);
+        try {
+            empleado = await empleadoRepo.findOneOrFail(id)
+            let fecha = new Date();
+            let getFullDate = (fecha.toLocaleString('en-us', {weekday : 'short', day:'numeric' ,month : 'long', year:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit', hour12: true, }));
+            let modificadoPor = empleado.nombre + " " + empleado.apellido + `, con role: ${empleado.role}, en la fecha: ${getFullDate}`
+            try {
+                //buscar producto
+                producto = await productoRepo.findOne(idp)
+                if (!producto) {
+                    return res.status(400).json({ok: false, message: 'No se encontro resultado con el id: ' + idp });
+                } else {
+
+                    //declaracion porcentaje de ganancia mediante el mercado
+                    let PorcentajeBeneficio = beneficio/100;
+
+                    //declaraciones de IVA
+                    let PorcentajeTotal: number = 1.00;
+                    let PorcentajeIVA: number = 0.13;
+                    let TotalIva = PorcentajeTotal + PorcentajeIVA;
+
+                    //generar precio de venta de acuerdo al precio de compra y margen de beneficio
+
+                    let porcentaje = 1 - PorcentajeBeneficio;
+                    let PorcentajeBeno = parseFloat(porcentaje.toFixed(2))
+
+                    let CalcPrecioVenta = precioCompra / PorcentajeBeno;
+                    let costo_standar = parseFloat(CalcPrecioVenta.toFixed(2))
+
+                    //Obtener el precio sin IVA para posteriomente aplicar porcentaje de ganancia
+                    // let PrecioSinIVA = precioCompra/TotalIva;
+                    // let PrecioSinIVA1 = parseFloat(PrecioSinIVA.toFixed(2))
+                    // console.log(PrecioSinIVA1);
+
+
+                    //const newPriceWithIVA = PrecioSinIVA * TotalIva;
+                    // let precioSinIVA = PrecioSinIVA1 * PorcentajeGan;
+                    // let precioSinIVA1 = parseFloat(precioSinIVA.toFixed(2));
+                    // console.log(precioSinIVA1);
+
+                    // let newPriceSinIVA = PrecioSinIVA1 + precioSinIVA1;
+                    // let NewPrice = parseFloat(newPriceSinIVA.toFixed(2));
+                    // console.log(NewPrice);
+
+                    // let newPriceWithIVA = NewPrice * TotalIva
+                    // console.log(parseFloat(newPriceWithIVA.toFixed(2)));
+
+                    
+                    // const newPrice = costo_estandar.toFixed(2);
+
+                    //let costo_standar = parseFloat(newPriceWithIVA.toFixed(2));
+                    //Intentar guardar cantidad producto
+                    if (producto.catidad_por_unidad == 0) {
+                        producto.catidad_por_unidad = cantidadProducto;
+                        producto.precioCompra = precioCompra;
+                        producto.costo_standar = costo_standar;
+                        producto.ActualizadoPor = modificadoPor;
+                        producto.status = true;
+    
+                        const Product = await productoRepo.save(producto)
+
+                        //Actualizar precio producto Con IVA incluido
+
+                        //Intentar guardar el nuevo precio del producto con IVA incluido
+                            //all ok
+                            res.json({ok: true, producto})
+                        
+                    } else {
+                        res.status(400).json({ok: false, message: 'Aun hay producto en stock'});
+                    }
+                } 
+            } catch (error) {
+                console.log(error);
+            }
+        } catch (error) {
+            return res.status(400).json({ok: false, message: 'Administrador no encontrado'})
+        } 
     }
 }
 export default ProductoController;

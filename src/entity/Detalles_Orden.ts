@@ -24,6 +24,9 @@ export class DetalleOrden {
     @Column({type: 'double', default: 0})
     descuento : number;
 
+    @Column({type:'decimal', precision: 19, scale:2})
+    impuesto: number;
+
     @Column()
     @CreateDateColumn()
     fecha : Date;
