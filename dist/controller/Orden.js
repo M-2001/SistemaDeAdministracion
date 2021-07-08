@@ -99,11 +99,16 @@ OrdenController.AddReservacion = async (req, res) => {
     let CODIGO_CUPON = req.query.CODIGO_CUPON;
     let cuponExist;
     let ordenC;
+    let SaveDtO;
     let items = req.body;
     let totalPrice = 0;
     let totalDesc = 0;
     let total;
     let descuentoCupon = 0.00;
+    ////declaraciones de IVA
+    let PorcentajeTotal = 1.00;
+    let PorcentajeIVA = 0.13;
+    let TotalIva = PorcentajeTotal + PorcentajeIVA;
     const itemEmail = [];
     try {
         //verificar CODE_CUPON
@@ -114,6 +119,7 @@ OrdenController.AddReservacion = async (req, res) => {
                     return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                 }
                 else {
+                    console.log(cuponExist);
                     let date = new Date();
                     let month = date.getMonth() + 1;
                     const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
@@ -122,11 +128,15 @@ OrdenController.AddReservacion = async (req, res) => {
                     or.cliente = clienteid;
                     or.codigoOrden = codigoO;
                     or.status = 0;
-                    ordenC = await ordenRepo.save(or);
+                    //ordenC = await ordenRepo.save(or);
                     for (let index = 0; index < items.length; index++) {
                         let amount = 0;
+                        let totalIVA = 0.00;
                         const item = items[index];
                         const productoItem = await proRepo.findOneOrFail(item.id);
+                        let descuentoProducto = cuponExist.descuento / items.length;
+                        let descProducto = parseFloat(descuentoProducto.toFixed(2));
+                        console.log(`Descuento producto: ${descProducto}`);
                         try {
                             let operacion = productoItem.costo_standar * item.qt;
                             let Totaldesc = 0.00;
@@ -137,24 +147,35 @@ OrdenController.AddReservacion = async (req, res) => {
                             totalDesc += Totaldesc;
                             const OnlyTwoDecimals = amount.toFixed(2);
                             let itemString = item.qt.toString();
-                            let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
-                            itemEmail.push(itm);
+                            // let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals }
+                            // itemEmail.push(itm)
+                            ////declaraciones de IVA
+                            let precioSinIVA = amount / TotalIva;
+                            let preciossinIva = precioSinIVA.toFixed(2);
+                            let newPreciosSinIVA = parseFloat(preciossinIva);
+                            console.log(precioSinIVA);
+                            totalIVA += newPreciosSinIVA * PorcentajeIVA;
+                            let TotalIVA = totalIVA.toFixed(2);
+                            let TotIVA = parseFloat(TotalIVA);
                             try {
                                 //save Orden Detalle
+                                let totalDesto = parseFloat(Totaldesc.toFixed(2));
                                 const saveOD = new Detalles_Orden_1.DetalleOrden();
-                                saveOD.orden = ordenC,
-                                    saveOD.producto = productoItem,
-                                    saveOD.cantidad = item.qt,
-                                    saveOD.totalUnidad = amount,
-                                    saveOD.descuento = Totaldesc;
-                                await ordeDRepo.save(saveOD);
+                                // saveOD.orden = ordenC,
+                                // saveOD.producto = productoItem,
+                                // saveOD.cantidad = item.qt,
+                                // saveOD.totalUnidad = newPreciosSinIVA,
+                                // saveOD.impuesto = TotIVA,
+                                // saveOD.descuento = totalDesto
+                                console.log(saveOD);
+                                // SaveDtO = await ordeDRepo.save(saveOD);
                             }
                             catch (error) {
-                                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+                                return res.status(401).json({ ok: false, message: 'Algo salio mal!' });
                             }
                         }
                         catch (error) {
-                            return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
+                            return res.status(400).json({ ok: false, message: 'Algo ha fallado!', error });
                         }
                     }
                 }
@@ -177,6 +198,7 @@ OrdenController.AddReservacion = async (req, res) => {
             ordenC = await ordenRepo.save(or);
             for (let index = 0; index < items.length; index++) {
                 let amount = 0;
+                let totalIVA = 0.00;
                 const item = items[index];
                 const productoItem = await proRepo.findOneOrFail(item.id);
                 let operacion = productoItem.costo_standar * item.qt;
@@ -190,15 +212,24 @@ OrdenController.AddReservacion = async (req, res) => {
                 let itemString = item.qt.toString();
                 let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals };
                 itemEmail.push(itm);
+                let precioSinIVA = amount / TotalIva;
+                let preciossinIva = precioSinIVA.toFixed(2);
+                let newPreciosSinIVA = parseFloat(preciossinIva);
+                console.log(precioSinIVA);
+                totalIVA += newPreciosSinIVA * PorcentajeIVA;
+                let TotalIVA = totalIVA.toFixed(2);
+                let TotIVA = parseFloat(TotalIVA);
                 try {
                     //save Orden Detalle
+                    let totalDesto = parseFloat(Totaldesc.toFixed(2));
                     const saveOD = new Detalles_Orden_1.DetalleOrden();
                     saveOD.orden = ordenC,
                         saveOD.producto = productoItem,
                         saveOD.cantidad = item.qt,
-                        saveOD.totalUnidad = amount,
-                        saveOD.descuento = Totaldesc;
-                    const Save = await ordeDRepo.save(saveOD);
+                        saveOD.totalUnidad = newPreciosSinIVA,
+                        saveOD.impuesto = TotIVA,
+                        saveOD.descuento = totalDesto;
+                    SaveDtO = await ordeDRepo.save(saveOD);
                 }
                 catch (error) {
                     return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
@@ -207,18 +238,29 @@ OrdenController.AddReservacion = async (req, res) => {
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res.status(403).json({ ok: false, message: 'Algo salio mal!' });
     }
     if (cuponExist) {
-        const Totaldesc = totalPrice * cuponExist.descuento / 100;
-        const Totalprice = totalPrice - Totaldesc;
-        descuentoCupon = Totaldesc;
-        total = Totalprice.toFixed(2);
-        ordenC.PrecioTotal = Totalprice;
-        ordenC.TotalDesc = Totaldesc;
-        const actualizarOrden = await ordenRepo.save(ordenC);
+        //declaraciones de IVA
+        // const totalPriceSinIVA = SaveDtO.totalUnidad;
+        // const impuesto = SaveDtO.impuesto;
+        // let totalDesc = cuponExist.descuento/100
+        // const cuponDesc = totalDesc.toFixed(2)
+        // let desCupon = parseFloat(cuponDesc)
+        // const Totaldesc = totalPriceSinIVA * desCupon;
+        // const TotalDesc1 = Totaldesc.toFixed(2)
+        // const TotalDesc2 = parseFloat(TotalDesc1)
+        // const Totalprice = totalPriceSinIVA - TotalDesc2;
+        // let totalAPagar = Totalprice + impuesto;
+        // let total1 = totalAPagar.toFixed(2)
+        // let total2 = parseFloat(total1)
+        // descuentoCupon = Totaldesc;
+        // total = Totalprice.toFixed(2)
+        // ordenC.PrecioTotal = total2;
+        // ordenC.TotalDesc = TotalDesc2;
+        //const actualizarOrden = await ordenRepo.save(ordenC);
         cuponExist.status = true;
-        const statusCupon = await cuponRepo.save(cuponExist);
+        //const statusCupon = await cuponRepo.save(cuponExist);
         res.json({ ok: true, message: "Se guardo tu reservacion" });
     }
     else {
@@ -285,7 +327,7 @@ OrdenController.AddReservacion = async (req, res) => {
         });
     }
     catch (error) {
-        res.json({ ok: false, message: "Algo ha fallado en el servidor!" });
+        //res.json({ ok:false, message:"Algo ha fallado en el servidor!" });
     }
 };
 //estado Orden
