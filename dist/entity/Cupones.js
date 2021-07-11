@@ -22,7 +22,7 @@ __decorate([
     __metadata("design:type", String)
 ], Cupon.prototype, "codigo", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
+    typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Cupon.prototype, "descuento", void 0);
 __decorate([

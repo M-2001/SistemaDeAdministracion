@@ -24,6 +24,9 @@ export class Order {
     @Column()
     codigoOrden : string
 
+    @Column({type:'decimal', precision:19, scale:2, default: 0})
+    BeneficioVenta: number;
+
     @Column()
     status: number
     

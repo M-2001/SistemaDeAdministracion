@@ -13,6 +13,8 @@ router.get('/products-paginate', producto.ProductosPaginados);
 router.get('/product-categoria', producto.MostrarProductosCategoria);
 router.get('/product-marca', producto.MostrarProductosMarca);
 router.post('/file-product/:id', jwt_1.CheckJwt, producto.ImagenProducto);
+//agregar producto a stock
+router.post('/add-stock/:idp', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.AgregarProductoStock);
 //eliminar image de producto
 router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto
@@ -22,7 +24,7 @@ router.get('/bestSellers', producto.ProductosMasVendidos);
 router.get('/more-ratings', producto.ProductosConMasRatings);
 router.post('/', jwt_1.CheckJwt, producto.AgregarProducto);
 router.get('/:id', producto.ObtenerProductoPorID);
-router.put('/:id', producto.EditarProducto);
+router.put('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EditarProducto);
 router.delete('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EliminarProducto);
 exports.default = router;
 //# sourceMappingURL=producto.js.map

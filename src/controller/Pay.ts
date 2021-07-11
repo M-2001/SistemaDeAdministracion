@@ -51,13 +51,20 @@ class PayController{
                                     let amount: number = 0;
                                     const item = items[index];
                                     const productoItem = await proRepo.findOneOrFail(item.id);
+
+                                    //dividir el descuento del cupon entre los items que vienen del request
+                                    let descuentoProducto = cuponExist.descuento / items.length;
+                                    let descProducto = parseFloat(descuentoProducto.toFixed(2))
                         
                                     let operacion = productoItem.costo_standar * item.qt;
-                                    let Totaldesc = 0.00;
-                                    let totalPay =  operacion;
+                                    let totaldesc = operacion * descProducto / 100
+                                    let Totaldesc = parseFloat(totaldesc.toFixed(2));
+
+                                    let totalPay =  operacion - Totaldesc;
     
                                     amount += totalPay
                                     totalPrice += totalPay
+                                    
                                     const OnlyTwoDecimals = amount.toFixed(2);
                                     
                             }
@@ -95,10 +102,10 @@ class PayController{
             let urlSuccess : any;
             let total : string;
             if (cuponExist) {
-                const Totaldesct = totalPrice * cuponExist.descuento/100;
-                const Totalprice = totalPrice - Totaldesct;
+                // const Totaldesct = totalPrice * cuponExist.descuento/100;
+                // const Totalprice = totalPrice - Totaldesct;
                 urlSuccess = "https://client-systempc.vercel.app/pay?CODIGO_CUPON=" + CODIGO_CUPON;
-                total = Totalprice.toFixed(2)
+                total = totalPrice.toFixed(2)
             } else {
                 urlSuccess = "https://client-systempc.vercel.app/pay";
                 total = totalPrice.toFixed(2);
@@ -159,6 +166,7 @@ class PayController{
         let items = Items;
         let ordenC: Order;
         let cuponExist: Cupon;
+        let SaveDtO : DetalleOrden;
 
         
         const payerId : any = req.query.PayerID;
@@ -167,8 +175,14 @@ class PayController{
         let totalPrice : number = 0;
         let totalDesc : number = 0;
         let total : any;
+        let BeneficioTotal: number = 0;
         let descuentoCupon: number = 0.00;
-        
+        let ParseTotal : number;
+
+        ////declaraciones de IVA
+        let PorcentajeTotal: number = 1.00;
+        let PorcentajeIVA: number = 0.13;
+        let TotalIva = PorcentajeTotal + PorcentajeIVA;        
 
         const itemEmail : ItemProducto[] = [];
 
@@ -181,6 +195,7 @@ class PayController{
                     if(cuponExist.status == true){
                         return res.status(400).json({ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!'});
                     } else {
+
                         let date = new Date();
                         let month = date.getMonth() + 1;
                         const codigoOrden = Math.floor(Math.random()* 90000) + 10000;
@@ -192,41 +207,76 @@ class PayController{
                         or.status = 2
                         ordenC = await ordenRepo.save(or);
 
+
                         for (let index = 0; index < items.length; index++) {
                             let amount: number = 0;
+                            let totalIVA: number = 0.00;
                             const item = items[index];
                             const productoItem = await proRepo.findOneOrFail(item.id);
+
+                            //dividir el descuento del cupon entre los items que vienen del request
+                            let descuentoProducto = cuponExist.descuento / items.length;
+                            let descProducto = parseFloat(descuentoProducto.toFixed(2))
+
                             try {
                                 let operacion = productoItem.costo_standar * item.qt;
-                                let Totaldesc = 0.00;
-                                let totalPay =  operacion;
+
+                                //CalculoNeto
+                                let neto = operacion / TotalIva
+                                let Neto = neto.toFixed(2);
+
+                                let totaldesc = operacion * descProducto / 100;
+                                let Totaldesc = parseFloat(totaldesc.toFixed(2));
+
+                                let totalPay =  operacion - Totaldesc;
                                 let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                                 amount += totalPay
                                 totalPrice += totalPay
                                 totalDesc += Totaldesc
                                 const OnlyTwoDecimals = amount.toFixed(2);
-                                const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
 
                                 let itemString : string = item.qt.toString()
-                                
-                                let itm  = {codigoOrden: ordenC.codigoOrden, cantidad : itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals}
-            
-                                itemEmail.push(itm)
+
+                                //declaraciones de IVA
+                                let precioSinIVA = amount / TotalIva;
+                                let newPreciosSinIVA = parseFloat(precioSinIVA.toFixed(2))
+
+                                totalIVA += newPreciosSinIVA 
+
+                                let totIVA = amount - newPreciosSinIVA;
+                                let TotIVA = parseFloat(totIVA.toFixed(2));
+
+                                let beneficioLocal = totalPay - productoItem.precioCompra * item.qt;                    
+
+                                let beneficioSinIVA = beneficioLocal / TotalIva;
+                                let BeneficioLocal = parseFloat(beneficioSinIVA.toFixed(2))
+                
+                                BeneficioTotal += BeneficioLocal;
 
                                 try {
                                     //save Orden Detalle
+                                    let totalDesto = parseFloat(Totaldesc.toFixed(2))
                                     const saveOD = new DetalleOrden();
                                     saveOD.orden = ordenC,
                                     saveOD.producto = productoItem,
                                     saveOD.cantidad = item.qt,
-                                    saveOD.totalUnidad = amount,
-                                    saveOD.descuento = Totaldesc
+                                    saveOD.totalUnidad = newPreciosSinIVA,
+                                    saveOD.impuesto = TotIVA,
+                                    saveOD.descuento = totalDesto,
+                                    saveOD.beneficioLocal = BeneficioLocal
                     
-                                    const Save = await ordeDRepo.save(saveOD);
+                                    SaveDtO = await ordeDRepo.save(saveOD);
                                 } catch (error) {
                                     return res.status(400).json({ok: false, message:'Algo salio mal al intentar guardar detalles de Orden!'})
                                 }
+                                let totalProducto = SaveDtO.totalUnidad + SaveDtO.impuesto;
+                                ParseTotal = parseFloat(totalProducto.toFixed(2));
+
+                                let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: descProducto, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal }
+
+                                itemEmail.push(itm)
+
                                 //actualizar producto
                                 try {
                                     productoItem.catidad_por_unidad = qtyExist;
@@ -255,39 +305,74 @@ class PayController{
                 or.codigoOrden = codigoO;
                 or.status = 2
                 ordenC = await ordenRepo.save(or);
+                
                 for (let index = 0; index < items.length; index++) {
                     let amount: number = 0;
+                    let totalIVA : number = 0.00;
                     const item = items[index];
                     const productoItem = await proRepo.findOneOrFail(item.id);
+
+                    //calcular operacion de precio por la cantidad de producto
                     let operacion = productoItem.costo_standar * item.qt;
-                    let Totaldesc = operacion * productoItem.descuento/100;
+
+                    //Calcular precio Nto
+                    let neto = operacion / TotalIva
+                    let Neto = neto.toFixed(2)
+
+                    let totaldesc = operacion * productoItem.descuento / 100;
+                    let Totaldesc = parseFloat(totaldesc.toFixed(2))
                     let totalPay =  operacion - Totaldesc;
                     let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                     amount += totalPay
+
                     totalPrice += totalPay
+
                     totalDesc += Totaldesc
+
                     const OnlyTwoDecimals = amount.toFixed(2);
                     const parseAmount = parseInt(OnlyTwoDecimals.replace('.', '.'),10);
 
                     let itemString : string = item.qt.toString()
-                    
-                    let itm  = {codigoOrden: ordenC.codigoOrden, cantidad : itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals}
 
-                    itemEmail.push(itm)
+                    let precioSinIVA = amount / TotalIva;
+                    let newPreciosSinIVA = parseFloat(precioSinIVA.toFixed(2))
+                    
+
+                    totalIVA += newPreciosSinIVA
+                    
+                    let totIVA = amount - newPreciosSinIVA;
+                    let TotIVA = parseFloat(totIVA.toFixed(2));
+                    
+                    //calculo beneficio local
+                    let beneficioLocal = totalPay - productoItem.precioCompra * item.qt;                    
+
+                    let beneficioSinIVA = beneficioLocal / TotalIva;
+                    let BeneficioLocal = parseFloat(beneficioSinIVA.toFixed(2))
+
+                    BeneficioTotal += BeneficioLocal;
+
                     try {
                         //save Orden Detalle
+                        let totalDesto = parseFloat(Totaldesc.toFixed(2))
                         const saveOD = new DetalleOrden();
                         saveOD.orden = ordenC,
                         saveOD.producto = productoItem,
                         saveOD.cantidad = item.qt,
-                        saveOD.totalUnidad = amount,
-                        saveOD.descuento = Totaldesc
+                        saveOD.totalUnidad = newPreciosSinIVA,
+                        saveOD.impuesto = TotIVA,
+                        saveOD.descuento = totalDesto,
+                        saveOD.beneficioLocal = BeneficioLocal
         
-                        const Save = await ordeDRepo.save(saveOD);
+                        SaveDtO = await ordeDRepo.save(saveOD);
                     } catch (error) {
                         return res.status(400).json({ok: false, message:'Algo salio mal!'})
                     }
+                    let totalProducto = SaveDtO.totalUnidad + SaveDtO.impuesto;
+                    ParseTotal = parseFloat(totalProducto.toFixed(2))
+                    let itm  = {codigoOrden: ordenC.codigoOrden, cantidad : itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: productoItem.descuento, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal}
+
+                    itemEmail.push(itm)
                     //actualizar producto
                     try {
                         productoItem.catidad_por_unidad = qtyExist;
@@ -303,28 +388,25 @@ class PayController{
         }
 
         if (cuponExist) {
-            const Totaldesct = totalPrice * cuponExist.descuento/100;
-            const Totalprice = totalPrice - Totaldesct;
 
-            descuentoCupon = Totaldesct;
-            total = Totalprice.toFixed(2)
-
-            ordenC.PrecioTotal = Totalprice;
-            ordenC.TotalDesc = Totaldesct;
+            ordenC.PrecioTotal = totalPrice;
+            ordenC.TotalDesc = totalDesc;
+            ordenC.BeneficioVenta = BeneficioTotal;
             
             const actualizarOrden = await ordenRepo.save(ordenC);
+            total = totalPrice.toFixed(2)
 
             cuponExist.status = true; 
             const statusCupon = await cuponRepo.save(cuponExist);
-            //res.json({itemEmail});
+            
         } else{
-            ordenC.PrecioTotal = totalPrice;
-            ordenC.TotalDesc = totalDesc 
+            ordenC.PrecioTotal = totalPrice,
+            ordenC.TotalDesc = totalDesc, 
+            ordenC.BeneficioVenta = BeneficioTotal
             const actualizarOrden = await ordenRepo.save(ordenC)
             total = totalPrice.toFixed(2);
         }
         
-
         //try to send email buy
 
         try {
@@ -335,11 +417,12 @@ class PayController{
             
 
             let content = itemEmail.reduce((a,b) => {
-                return a + '<tr><td>' + b.cantidad + '</td><td>' + b.producto + '</td><td>' + '$'+b.precioOriginal + '</td><td>' + '$'+b.descuento + '</td><td>' + '$'+ b.totalNto + '</td></tr>';
+                return a + '<tr><td>' + b.producto + '</td><td>' + b.cantidad + '</td><td>' + '$' + b.precioOriginal + '</td><td>' +  b.descuento + '%' + '</td><td>' + '$' + b.IVA  + '</td><td>' + '$' + b.totalNto + '</td><td>' + '$' + b.totalProducto +'</td></tr>';
             }, '');
 
             let descTotal = itemEmail.map((a) => a.descuento ).reduce((a,b)=>a+b)
             
+            let TotalIVA = itemEmail.map((a)=>a.IVA).reduce((a, b)=> a + b, 0)
 
             await transporter.sendMail({
                 from : `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
@@ -364,11 +447,13 @@ class PayController{
                 <table style = "border: hidden" >
                     <thead class="tablahead" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
                     <tr>
-                    <th id="cantidad">Cantidad</th>
-                    <th id="producto">Producto</th>
-                    <th id="precioO">Precio Original</th>
-                    <th id="desc">Descuento por producto</th>
-                    <th id="TotalNto">Total Nto</th>
+                    <th id="Descripcion">Descripcion</th>
+                    <th id="UDS">Uds</th>
+                    <th id="Precio">Precio</th>
+                    <th id="desc">DescProducto</th>
+                    <th id="Iva">IVA 13%</th>
+                    <th id="TotalNto">TotalNto</th>
+                    <th id="Total">Total</th>
                     </tr>
                 </thead>
                 <tbody id="bodytabla">
@@ -379,10 +464,10 @@ class PayController{
                 </table>
                 <p>Descuento Total : $${totalDesc}</p>
 
-                <p>Descuento en Cupon : $${descuentoCupon}</p>
+                <p>IVA: $${parseFloat(TotalIVA.toFixed(2))}</p>
 
                 <p>Total compra: $${total}</p>
-                <a href="${"Link tienda"}">Visitanos pronto !!!</a>
+                <a href="https://client-systempc.vercel.app">Visitanos pronto !</a>
                 </div>
                 </body>
                 </html>`

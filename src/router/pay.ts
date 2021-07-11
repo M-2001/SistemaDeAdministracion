@@ -14,7 +14,7 @@ const router = Router();
 const pay = PayController;
 
 
-router.post('/success',CheckJwt, pay.PaySuccess);
+router.post('/success', CheckJwt, pay.PaySuccess);
 router.get('/cancel', (req: Request, res: Response)=>res.send('Canceled'))
 
 router.post('/',CheckJwt, pay.Pay)

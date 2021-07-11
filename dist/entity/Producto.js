@@ -51,17 +51,25 @@ __decorate([
     __metadata("design:type", Categoria_1.Categoria)
 ], Producto.prototype, "categoria", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
+    __metadata("design:type", Number)
+], Producto.prototype, "precioCompra", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "costo_standar", void 0);
 __decorate([
-    typeorm_1.Column(),
+    typeorm_1.Column({ default: 0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "catidad_por_unidad", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
+    typeorm_1.Column({ default: 0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "descuento", void 0);
+__decorate([
+    typeorm_1.Column({ default: "" }),
+    __metadata("design:type", String)
+], Producto.prototype, "ActualizadoPor", void 0);
 __decorate([
     typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)

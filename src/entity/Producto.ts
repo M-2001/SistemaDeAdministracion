@@ -35,14 +35,20 @@ export class Producto {
     @ManyToOne(() => Categoria, (categoria : Categoria) => categoria.producto)
     categoria?: Categoria;
 
-    @Column({type: 'decimal', precision: 19 , scale: 2})
+    @Column({type: 'decimal', precision:19, scale: 2, default: 0.00})
+    precioCompra: number;
+
+    @Column({type: 'decimal', precision: 19 , scale: 2, default: 0.00})
     costo_standar : number;
 
-    @Column()
+    @Column({default: 0})
     catidad_por_unidad : number;
 
-    @Column({type: 'decimal', precision: 19 , scale: 2})
+    @Column({default: 0})
     descuento : number;
+
+    @Column({default:""})
+    ActualizadoPor: string;
 
     @Column({default : 1})
     status : boolean;

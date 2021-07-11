@@ -14,6 +14,8 @@ router.get('/products-paginate', producto.ProductosPaginados);
 router.get('/product-categoria', producto.MostrarProductosCategoria);
 router.get('/product-marca', producto.MostrarProductosMarca);
 router.post('/file-product/:id', CheckJwt, producto.ImagenProducto);
+//agregar producto a stock
+router.post('/add-stock/:idp', [CheckJwt, checkRole(['admin'])], producto.AgregarProductoStock);
 //eliminar image de producto
 router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto
@@ -25,7 +27,7 @@ router.get('/bestSellers', producto.ProductosMasVendidos);
 router.get('/more-ratings', producto.ProductosConMasRatings)
 router.post('/', CheckJwt, producto.AgregarProducto);
 router.get('/:id', producto.ObtenerProductoPorID);
-router.put('/:id', producto.EditarProducto);
+router.put('/:id', [CheckJwt, checkRole(['admin'])], producto.EditarProducto);
 router.delete('/:id', [CheckJwt, checkRole(['admin'])], producto.EliminarProducto);
 
 export default router;

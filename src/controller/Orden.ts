@@ -105,12 +105,20 @@ class OrdenController {
         let CODIGO_CUPON = req.query.CODIGO_CUPON;
         let cuponExist: Cupon;
         let ordenC: Order;
+        let SaveDtO: DetalleOrden;
         let items: Product[] = req.body;
 
         let totalPrice: number = 0;
         let totalDesc: number = 0;
+        let BeneficioTotal: number = 0;
         let total: any;
         let descuentoCupon: number = 0.00;
+        let ParseTotal : number;
+
+        ////declaraciones de IVA
+        let PorcentajeTotal: number = 1.00;
+        let PorcentajeIVA: number = 0.13;
+        let TotalIva = PorcentajeTotal + PorcentajeIVA;
 
         const itemEmail: ItemProducto[] = [];
 
@@ -122,6 +130,7 @@ class OrdenController {
                     if (cuponExist.status == true) {
                         return res.status(400).json({ message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
                     } else {
+                        
                         let date = new Date();
                         let month = date.getMonth() + 1;
                         const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
@@ -132,43 +141,81 @@ class OrdenController {
                         or.codigoOrden = codigoO;
                         or.status = 0
                         ordenC = await ordenRepo.save(or);
+                        
 
                         for (let index = 0; index < items.length; index++) {
                             let amount: number = 0;
+                            let totalIVA: number = 0.00;
                             const item = items[index];
                             const productoItem = await proRepo.findOneOrFail(item.id);
+                            
+                            //dividir el descuento del cupon entre los items que vienen del request
+                            let descuentoProducto = cuponExist.descuento / items.length;
+                            let descProducto = parseFloat(descuentoProducto.toFixed(2))
 
                             try {
                                 let operacion = productoItem.costo_standar * item.qt;
-                                let Totaldesc = 0.00;
-                                let totalPay = operacion;
+
+                                //CalculoNeto 
+                                let neto = operacion / TotalIva
+                                let Neto = neto.toFixed(2);
+
+                                let totaldesc = operacion * descProducto / 100;
+                                let Totaldesc = parseFloat(totaldesc.toFixed(2));
+                                let totalPay = operacion - Totaldesc;
                                 //let qtyExist = productoItem.catidad_por_unidad - item.qty;
 
                                 amount += totalPay
+
                                 totalPrice += totalPay
+
                                 totalDesc += Totaldesc
+
                                 const OnlyTwoDecimals = amount.toFixed(2);
 
                                 let itemString: string = item.qt.toString()
 
-                                let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals }
+                                //declaraciones de IVA
+                                let precioSinIVA = amount / TotalIva;
+                                let newPreciosSinIVA = parseFloat(precioSinIVA.toFixed(2))
 
-                                itemEmail.push(itm)
+            
+                                totalIVA += newPreciosSinIVA 
+
+                                let totIVA = amount - newPreciosSinIVA;
+                                let TotIVA = parseFloat(totIVA.toFixed(2));
+
+                                let beneficioLocal = totalPay - productoItem.precioCompra * item.qt;                    
+
+                                let beneficioSinIVA = beneficioLocal / TotalIva;
+                                let BeneficioLocal = parseFloat(beneficioSinIVA.toFixed(2))
+                
+                                BeneficioTotal += BeneficioLocal;
 
                                 try {
                                     //save Orden Detalle
+                                    let totalDesto = parseFloat(Totaldesc.toFixed(2))
                                     const saveOD = new DetalleOrden();
                                     saveOD.orden = ordenC,
                                     saveOD.producto = productoItem,
                                     saveOD.cantidad = item.qt,
-                                    saveOD.totalUnidad = amount,
-                                    saveOD.descuento = Totaldesc
-                                    await ordeDRepo.save(saveOD);
+                                    saveOD.totalUnidad = newPreciosSinIVA,
+                                    saveOD.impuesto = TotIVA,
+                                    saveOD.descuento = totalDesto,
+                                    saveOD.beneficioLocal = BeneficioLocal
+
+                                    SaveDtO = await ordeDRepo.save(saveOD);
                                 } catch (error) {
-                                    return res.status(400).json({ok: false, message:'Algo salio mal!'})
+                                    return res.status(401).json({ok: false, message:'Algo salio mal!'})
                                 }
+                                let totalProducto = SaveDtO.totalUnidad + SaveDtO.impuesto;
+                                ParseTotal = parseFloat(totalProducto.toFixed(2));
+
+                                let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: descProducto, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal }
+
+                                itemEmail.push(itm)
                             } catch (error) {
-                                return res.status(400).json({ok: false, message:'Algo ha fallado!'})
+                                return res.status(400).json({ok: false, message:'Algo ha fallado!', error})
                             }
                         }
                     }
@@ -192,68 +239,97 @@ class OrdenController {
 
                 for (let index = 0; index < items.length; index++) {
                     let amount: number = 0;
+                    let totalIVA: number = 0.00;
                     const item = items[index];
                     const productoItem = await proRepo.findOneOrFail(item.id);
 
                     let operacion = productoItem.costo_standar * item.qt;
-                    let Totaldesc = operacion * productoItem.descuento / 100;
+                    //CalculoNeto 
+                    let neto = operacion / TotalIva
+                    let Neto = neto.toFixed(2);
+                    
+                    let totaldesc = operacion * productoItem.descuento / 100;
+                    let Totaldesc = parseFloat(totaldesc.toFixed(2));
                     let totalPay = operacion - Totaldesc
+
                     //let qtyExist = productoItem.catidad_por_unidad - item.qty;
 
                     amount += totalPay
+
                     totalPrice += totalPay
+                    
                     totalDesc += Totaldesc
                     const OnlyTwoDecimals = amount.toFixed(2);
 
                     let itemString: string = item.qt.toString()
 
-                    let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: Totaldesc, totalNto: OnlyTwoDecimals }
+                    let precioSinIVA = amount / TotalIva;
+                    let newPreciosSinIVA = parseFloat(precioSinIVA.toFixed(2))
 
-                    itemEmail.push(itm)
+                    totalIVA += newPreciosSinIVA
+                    
+                    let totIVA = amount - newPreciosSinIVA;
+                    let TotIVA = parseFloat(totIVA.toFixed(2));
+
+                    let beneficioLocal = totalPay - productoItem.precioCompra * item.qt;                    
+
+                    let beneficioSinIVA = beneficioLocal / TotalIva;
+                    let BeneficioLocal = parseFloat(beneficioSinIVA.toFixed(2))
+
+                    BeneficioTotal += BeneficioLocal;
 
                     try {
                         //save Orden Detalle
+                        let totalDesto = parseFloat(Totaldesc.toFixed(2))
+
                         const saveOD = new DetalleOrden();
                         saveOD.orden = ordenC,
-                            saveOD.producto = productoItem,
-                            saveOD.cantidad = item.qt,
-                            saveOD.totalUnidad = amount,
-                            saveOD.descuento = Totaldesc
+                        saveOD.producto = productoItem,
+                        saveOD.cantidad = item.qt,
+                        saveOD.totalUnidad = newPreciosSinIVA,
+                        saveOD.impuesto = TotIVA,
+                        saveOD.descuento = totalDesto,
+                        saveOD.beneficioLocal = BeneficioLocal
 
-                        const Save = await ordeDRepo.save(saveOD);
+                        SaveDtO = await ordeDRepo.save(saveOD);
                     } catch (error) {
                         return res.status(400).json({ok: false, message:'Algo ha fallado!'})
                     }
+                    let totalProducto = SaveDtO.totalUnidad + SaveDtO.impuesto;
+                    ParseTotal = parseFloat(totalProducto.toFixed(2))
+
+                    let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: productoItem.descuento, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal }
+
+                    itemEmail.push(itm)
                 }
             }
 
         } catch (error) {
-            return res.status(400).json({ok: false, message:'Algo salio mal!'})
+            return res.status(403).json({ok: false, message:'Algo salio mal!' , error})
         }
         if (cuponExist) {
-            const Totaldesc = totalPrice * cuponExist.descuento / 100;
-            const Totalprice = totalPrice - Totaldesc;
-            descuentoCupon = Totaldesc;
-            total = Totalprice.toFixed(2)
+            
+            ordenC.PrecioTotal = totalPrice;
+            ordenC.TotalDesc = totalDesc;
+            ordenC.BeneficioVenta = BeneficioTotal;
 
-            ordenC.PrecioTotal = Totalprice;
-            ordenC.TotalDesc = Totaldesc;
-
-            const actualizarOrden = await ordenRepo.save(ordenC);
-
+            const actualizarOrden = await ordenRepo.save(ordenC)
+            total = totalPrice.toFixed(2);
 
             cuponExist.status = true;
             const statusCupon = await cuponRepo.save(cuponExist);
             res.json({ ok:true, message:"Se guardo tu reservacion" });
 
         } else {
+
             ordenC.PrecioTotal = totalPrice;
-            ordenC.TotalDesc = totalDesc
+            ordenC.TotalDesc = totalDesc;
+            ordenC.BeneficioVenta = BeneficioTotal;
             const actualizarOrden = await ordenRepo.save(ordenC)
             total = totalPrice.toFixed(2);
             res.json({ ok:true, message:"Se guardo tu reservacion" });
         }
-
+        
         //try to send email
         try {
             let direccionLocal: string = "6 Avenida Norte 3-11, Sonsonate, Sonsonate";
@@ -261,13 +337,16 @@ class OrdenController {
             const infoCliente = await clienteRepo.findOneOrFail(clienteid)
             let subject: string = ` ${infoCliente.nombre + " " + infoCliente.apellido + " Reservacion Exitosa!!!"} `
 
+            
 
             let content = itemEmail.reduce((a, b) =>  {
-                return a + '<tr><td>' + b.cantidad + '</td><td>' + b.producto + '</td><td>' + '$' + b.precioOriginal + '</td><td>' + '$' + b.descuento + '</td><td>' + '$' + b.totalNto + '</td></tr>';
+                return a + '<tr><td>' + b.producto + '</td><td>' + b.cantidad + '</td><td>' + '$' + b.precioOriginal + '</td><td>' +  b.descuento + '%' + '</td><td>' + '$' + b.IVA  + '</td><td>' + '$' + b.totalNto + '</td><td>' + '$' + b.totalProducto +'</td></tr>';
             }, '');
 
             let descTotal = itemEmail.map((a) => a.descuento).reduce((a, b) => a + b,0)
 
+            let TotalIVA = itemEmail.map((a)=>a.IVA).reduce((a, b)=> a + b, 0)
+            
 
             await transporter.sendMail({
                 from: `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
@@ -290,13 +369,15 @@ class OrdenController {
                 <p>Productos reservados: </p>
 
                 <table style = "border: hidden" >
-                    <thead class="tablahead" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
+                    <thead class="tablahead" style="font-family: -apple-system">
                     <tr>
-                    <th id="cantidad">Cantidad</th>
-                    <th id="producto">Producto</th>
-                    <th id="precioO">Precio Original</th>
-                    <th id="desc">Descuento por producto</th>
-                    <th id="TotalNto">Total Nto</th>
+                    <th id="Descripcion">Descripcion</th>
+                    <th id="UDS">Uds</th>
+                    <th id="Precio">Precio</th>
+                    <th id="desc">DescProducto</th>
+                    <th id="Iva">IVA 13%</th>
+                    <th id="TotalNto">TotalNto</th>
+                    <th id="Total">Total</th>
                     </tr>
                 </thead>
                 <tbody id="bodytabla">
@@ -307,15 +388,15 @@ class OrdenController {
                 </table>
                 <p>Descuento Total : $${totalDesc}</p>
 
-                <p>Descuento en Cupon : $${descuentoCupon}</p>
+                <p>IVA: $${parseFloat(TotalIVA.toFixed(2))}</p>
                 <p>Total a Pagar: $${total}</p>
-                <a href="${"Link tienda"}">Visitanos pronto !!!</a>
+                <a href="https://client-systempc.vercel.app">Visitanos pronto !</a>
                 </div>
                 </body>
                 </html>`
             });
         } catch (error) {
-            res.json({ ok:false, message:"Algo ha fallado en el servidor!" });
+            return console.log({ ok:false, message:"Algo ha fallado en el servidor!", error});
         }
     }
 
@@ -380,7 +461,6 @@ class OrdenController {
 
     //agregar Orden por cliente local
     static AddOrdenClienteLocal = async (req: Request, res: Response)=>{
-        console.log(req.body)
         const { id } = res.locals.jwtPayload;
         const clienteRepo = getRepository(Cliente);
         const employeeRepo = getRepository(Employee);
@@ -394,7 +474,12 @@ class OrdenController {
 
         let totalPrice: number = 0;
         let totalDesc: number = 0;
-        let total: any;
+        let BeneficioTotal: number = 0;
+        let total: any; 
+        ////declaraciones de IVA
+        let PorcentajeTotal: number = 1.00;
+        let PorcentajeIVA: number = 0.13;
+        let TotalIva = PorcentajeTotal + PorcentajeIVA;
 
         try {
             employee = await employeeRepo.findOne({id});
@@ -405,11 +490,9 @@ class OrdenController {
             }
 
         } catch (error) {
-            return res.status(400).json({ok: false, message:'Algo ha fallado!'})
+            return res.status(401).json({ok: false, message:'Algo ha fallado!'})
         }
         //buscar employee con el token que recibe
-        
-
         //buscar cliente con el emailLocal
         try {
             ClienteLocal = await clienteRepo.findOne({where:{email : employee.email}});
@@ -426,7 +509,6 @@ class OrdenController {
                 const client = await clienteRepo.save(Client);
             }
 
-            //res.json(ClienteLocal)
                 //Guardar Orden
                 let date = new Date();
                 let month = date.getMonth() + 1;
@@ -442,11 +524,14 @@ class OrdenController {
 
                 for (let index = 0; index < items.length; index++) {
                     let amount: number = 0;
+                    let totalIVA: number = 0.00;
                     const item = items[index];
                     const productoItem = await proRepo.findOneOrFail(item.id);
 
                     let operacion = productoItem.costo_standar * item.qt;
-                    let Totaldesc = operacion * productoItem.descuento / 100;
+                    let totaldesc = operacion * productoItem.descuento / 100;
+                    let Totaldesc = parseFloat(totaldesc.toFixed(2));
+
                     let totalPay = operacion - Totaldesc
                     let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
@@ -455,37 +540,58 @@ class OrdenController {
                     totalDesc += Totaldesc
                     const OnlyTwoDecimals = amount.toFixed(2);
 
+                    let precioSinIVA = amount / TotalIva;
+                    let newPreciosSinIVA = parseFloat(precioSinIVA.toFixed(2));
+
+                    totalIVA += newPreciosSinIVA
+                    
+                    let totIVA = amount - newPreciosSinIVA;
+                    let TotIVA = parseFloat(totIVA.toFixed(2));
+
+                    //calcular beneficios para el local 
+                    let beneficioLocal = totalPay - productoItem.precioCompra * item.qt;                    
+
+                    let beneficioSinIVA = beneficioLocal / TotalIva;
+                    let BeneficioLocal = parseFloat(beneficioSinIVA.toFixed(2))
+
+                    BeneficioTotal += BeneficioLocal;
+
                     try {
                         //save Orden Detalle
-                            const saveOD = new DetalleOrden();
-                            saveOD.orden = ordenC,
-                            saveOD.producto = productoItem,
-                            saveOD.cantidad = item.qt,
-                            saveOD.totalUnidad = amount,
-                            saveOD.descuento = Totaldesc
+                        let totalDesto = parseFloat(Totaldesc.toFixed(2))
+                        const saveOD = new DetalleOrden();
+                        saveOD.orden = ordenC,
+                        saveOD.producto = productoItem,
+                        saveOD.cantidad = item.qt,
+                        saveOD.totalUnidad = newPreciosSinIVA,
+                        saveOD.impuesto= TotIVA,
+                        saveOD.descuento = totalDesto
+                        saveOD.beneficioLocal = BeneficioLocal
 
-                            const Save = await ordeDRepo.save(saveOD);
+                        const Save = await ordeDRepo.save(saveOD);
 
-                            //actualizar producto
-                            try {
-                                productoItem.catidad_por_unidad = qtyExist;
-                                const saveProduct = await proRepo.save(productoItem)
-                                
-                            } catch (error) {
-                                return console.log('Error inesperado!!!');
-                            }
+                        //actualizar producto
+                        try {
+                            productoItem.catidad_por_unidad = qtyExist;
+                            const saveProduct = await proRepo.save(productoItem)
+                            
+                        } catch (error) {
+                            return console.log('Error inesperado!!!');
+                        }
                     } catch (error) {
                         return res.status(400).json({ok: false, message:'Algo salio mal!'})
                     }
                 }
 
-                ordenC.PrecioTotal = totalPrice;
-                ordenC.TotalDesc = totalDesc
+                ordenC.PrecioTotal = totalPrice,
+                ordenC.TotalDesc = totalDesc,
+                ordenC.BeneficioVenta = BeneficioTotal
+
                 const actualizarOrden = await ordenRepo.save(ordenC)
                 res.json({ ok:true,message:"Se guardo la compra!" });
 
         } catch (error) {
-            return res.status(400).json({ok: false, message:'Algo ha fallado!'})
+            return res.status(404).json({ok: false, message:'Algo ha fallado!'});
         }
         
     }

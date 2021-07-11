@@ -5,5 +5,7 @@ export default interface ItemProducto {
     producto: string,
     precioOriginal: number,
     descuento: number,
-    totalNto: string
+    totalNto: string,
+    IVA: number,
+    totalProducto: number,
 }

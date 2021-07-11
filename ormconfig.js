@@ -14,12 +14,12 @@ module.exports = {
    // "port": 3306,
    // "username": "root",
    // "password": "admind",
-   // "database": process.env.DATABASE,
+   // "database": process.env.databaseLocal,
    // "synchronize": true,
    // "logging": false, 
 
    "entities": [
-      "dist/entity/**/*.js"
+      "src/entity/**/*.ts"
    ],
    "migrations": [
       "dist/migration/**/*.js"

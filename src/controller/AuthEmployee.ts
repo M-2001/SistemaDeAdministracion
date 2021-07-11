@@ -95,7 +95,7 @@ class AuthEmployeeController{
                 from : '"Forgot Password " <castlem791@gmail.com>',//sender address
                 to: empl.email,
                 subject: "Forgot Password",
-                html: `<b>Please check on the following link , or paste this into your browser to complete the process:</b>
+                html: `<b>Por favor, consulte el siguiente enlace o peguelo en su navegador para completar el proceso y poder restaurar su contraseña: </b>
                 <a href="${verifycationLink}">${verifycationLink}</a>`,
             });
         }catch(error){

@@ -140,7 +140,6 @@ class CuponController {
                         //Try send email 
                         try {
                             let subject: string = ` ${cliente.nombre + " " + cliente.apellido + " , Por ser cliente especial !!!"} `
-
                             await transporter.sendMail({
                                 from: `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
                                 to: cliente.email,
@@ -150,7 +149,7 @@ class CuponController {
                                 <head> </head>
                                 <body><div>
                                 <h3>Felicidades !!! Por ser cliente especial te regalamos un cupon de descuento en el total de tu compra</h3>
-                                <p>Aplica tu cupón con un %${cuponExist.descuento} de descuento en tu compra total!!! </p>
+                                <p>Aplica tu cupón con un ${cuponExist.descuento}% de descuento en tu compra total!!! </p>
                                 <p>Codigo Cupon: ${cuponExist.codigo}</p>
                                 <p>${cliente.nombre + " " + cliente.apellido}, este Cupón solo es valido para ti, si lo compartes ya no sera valido</p>
                                 

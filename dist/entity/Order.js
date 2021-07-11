@@ -41,6 +41,10 @@ __decorate([
     __metadata("design:type", String)
 ], Order.prototype, "codigoOrden", void 0);
 __decorate([
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], Order.prototype, "BeneficioVenta", void 0);
+__decorate([
     typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Order.prototype, "status", void 0);
