@@ -547,7 +547,7 @@ class ProductoController {
             empleado = await empleadoRepo.findOneOrFail(id)
             let fecha = new Date();
             let getFullDate = (fecha.toLocaleString('en-us', {weekday : 'short', day:'numeric' ,month : 'long', year:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit', hour12: true, }));
-            let modificadoPor = empleado.nombre + " " + empleado.apellido + `, con role: ${empleado.role}, en la fecha: ${getFullDate}`
+            let modificadoPor = empleado.nombre + " " + empleado.apellido + ` de tipo ${empleado.role}, en la fecha: ${getFullDate}`
             try {
                 //buscar producto
                 producto = await productoRepo.findOne(idp)

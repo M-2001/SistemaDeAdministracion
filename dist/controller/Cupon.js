@@ -144,7 +144,7 @@ CuponController.SendCupon = async (req, res) => {
                                 <head> </head>
                                 <body><div>
                                 <h3>Felicidades !!! Por ser cliente especial te regalamos un cupon de descuento en el total de tu compra</h3>
-                                <p>Aplica tu cupón con un %${cuponExist.descuento} de descuento en tu compra total!!! </p>
+                                <p>Aplica tu cupón con un ${cuponExist.descuento}% de descuento en tu compra total!!! </p>
                                 <p>Codigo Cupon: ${cuponExist.codigo}</p>
                                 <p>${cliente.nombre + " " + cliente.apellido}, este Cupón solo es valido para ti, si lo compartes ya no sera valido</p>
                                 

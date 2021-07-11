@@ -44,7 +44,7 @@ export class Producto {
     @Column({default: 0})
     catidad_por_unidad : number;
 
-    @Column({type: 'decimal', precision: 19 , scale: 2, default: 0.00})
+    @Column({default: 0})
     descuento : number;
 
     @Column({default:""})

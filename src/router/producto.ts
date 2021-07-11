@@ -15,7 +15,7 @@ router.get('/product-categoria', producto.MostrarProductosCategoria);
 router.get('/product-marca', producto.MostrarProductosMarca);
 router.post('/file-product/:id', CheckJwt, producto.ImagenProducto);
 //agregar producto a stock
-router.post('/add-stock/:idp', CheckJwt, producto.AgregarProductoStock);
+router.post('/add-stock/:idp', [CheckJwt, checkRole(['admin'])], producto.AgregarProductoStock);
 //eliminar image de producto
 router.put('/file-product/:id', producto.EliminarImagenProducto);
 //estado del producto

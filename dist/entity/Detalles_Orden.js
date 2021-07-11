@@ -44,6 +44,10 @@ __decorate([
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "impuesto", void 0);
 __decorate([
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
+    __metadata("design:type", Number)
+], DetalleOrden.prototype, "beneficioLocal", void 0);
+__decorate([
     typeorm_1.Column(),
     typeorm_1.CreateDateColumn(),
     __metadata("design:type", Date)

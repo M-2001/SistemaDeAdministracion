@@ -27,6 +27,9 @@ export class DetalleOrden {
     @Column({type:'decimal', precision: 19, scale:2})
     impuesto: number;
 
+    @Column({type: 'decimal', precision: 19, scale: 2})
+    beneficioLocal: number
+
     @Column()
     @CreateDateColumn()
     fecha : Date;
