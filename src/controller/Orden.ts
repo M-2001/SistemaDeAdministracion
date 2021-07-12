@@ -504,7 +504,7 @@ class OrdenController {
                 Client.password = "SystemPc@password";
 
                 //encriptar contraeña
-                ClienteLocal.hashPassword();
+                Client.hashPassword();
 
                 const client = await clienteRepo.save(Client);
             }
@@ -588,7 +588,7 @@ class OrdenController {
                 ordenC.BeneficioVenta = BeneficioTotal
 
                 const actualizarOrden = await ordenRepo.save(ordenC)
-                res.json({ ok:true,message:"Se guardo la compra!" });
+                res.json({ ok:true,message:"Se guardo la compra!"});
 
         } catch (error) {
             return res.status(404).json({ok: false, message:'Algo ha fallado!'});

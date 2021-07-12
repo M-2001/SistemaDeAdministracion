@@ -440,7 +440,7 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
             Client.email = employee.email;
             Client.password = "SystemPc@password";
             //encriptar contraeña
-            ClienteLocal.hashPassword();
+            Client.hashPassword();
             const client = await clienteRepo.save(Client);
         }
         //Guardar Orden

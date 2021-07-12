@@ -572,27 +572,6 @@ class ProductoController {
                     let costo_standar = parseFloat(CalcPrecioVenta.toFixed(2))
 
                     //Obtener el precio sin IVA para posteriomente aplicar porcentaje de ganancia
-                    // let PrecioSinIVA = precioCompra/TotalIva;
-                    // let PrecioSinIVA1 = parseFloat(PrecioSinIVA.toFixed(2))
-                    // console.log(PrecioSinIVA1);
-
-
-                    //const newPriceWithIVA = PrecioSinIVA * TotalIva;
-                    // let precioSinIVA = PrecioSinIVA1 * PorcentajeGan;
-                    // let precioSinIVA1 = parseFloat(precioSinIVA.toFixed(2));
-                    // console.log(precioSinIVA1);
-
-                    // let newPriceSinIVA = PrecioSinIVA1 + precioSinIVA1;
-                    // let NewPrice = parseFloat(newPriceSinIVA.toFixed(2));
-                    // console.log(NewPrice);
-
-                    // let newPriceWithIVA = NewPrice * TotalIva
-                    // console.log(parseFloat(newPriceWithIVA.toFixed(2)));
-
-                    
-                    // const newPrice = costo_estandar.toFixed(2);
-
-                    //let costo_standar = parseFloat(newPriceWithIVA.toFixed(2));
                     //Intentar guardar cantidad producto
                     if (producto.catidad_por_unidad == 0) {
                         producto.catidad_por_unidad = cantidadProducto;
