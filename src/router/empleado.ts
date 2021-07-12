@@ -8,7 +8,8 @@ import { checkRole } from '../middleware/role';
 const router = Router();
 const empleado = EmpleadoController;
 
-router.get('/', [CheckJwt, checkRole(['admin'])], empleado.getEmpleados)
+//Rutas para controlador empleados
+router.get('/', empleado.getEmpleados)
 router.post('/', empleado.AgregarEmpleadoA);
 router.post('/register', [CheckJwt, checkRole(['admin'])],empleado.AgregarEmpleadoE);
 router.get('/image',empleado.getImage)

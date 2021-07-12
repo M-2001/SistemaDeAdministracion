@@ -298,8 +298,8 @@ ProductoController.EliminarProducto = async (req, res) => {
             if (producto.catidad_por_unidad != 0) {
                 return res.status(400).json({ ok: false, message: 'No se puede eliminar un producto con articulos en stock!' });
             }
-            producto.status = false;
-            await prodRepo.save(producto);
+            //producto.status = false
+            await prodRepo.remove(producto);
             const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
             if (fs.existsSync(imgdir)) {
                 fs.unlinkSync(imgdir);
@@ -464,7 +464,7 @@ ProductoController.ProductosMasVendidos = async (req, res) => {
         return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
     }
 };
-//productos mas vendidos
+//productos mas ratings
 ProductoController.ProductosConMasRatings = async (req, res) => {
     const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
     const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);

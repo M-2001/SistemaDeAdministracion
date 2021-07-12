@@ -309,8 +309,8 @@ class ProductoController {
                 if (producto.catidad_por_unidad != 0) {
                     return res.status(400).json({ok: false, message:'No se puede eliminar un producto con articulos en stock!'})
                 }
-                producto.status = false
-                await prodRepo.save(producto)
+                //producto.status = false
+                await prodRepo.remove(producto)
                 const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${producto.image}`);
                 if (fs.existsSync(imgdir)) {
                     fs.unlinkSync(imgdir)
@@ -482,7 +482,7 @@ class ProductoController {
         }
     }
 
-    //productos mas vendidos
+    //productos mas ratings
     static ProductosConMasRatings = async (req: Request, res: Response) => {
         const productoRepo = getRepository(Producto)
         const ratingRepo = getRepository(Rating)

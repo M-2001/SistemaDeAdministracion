@@ -86,8 +86,6 @@ PayController.Pay = async (req, res) => {
     let urlSuccess;
     let total;
     if (cuponExist) {
-        // const Totaldesct = totalPrice * cuponExist.descuento/100;
-        // const Totalprice = totalPrice - Totaldesct;
         urlSuccess = "https://client-systempc.vercel.app/pay?CODIGO_CUPON=" + CODIGO_CUPON;
         total = totalPrice.toFixed(2);
     }

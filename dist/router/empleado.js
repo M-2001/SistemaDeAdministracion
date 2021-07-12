@@ -6,7 +6,8 @@ const jwt_1 = require("../middleware/jwt");
 const role_1 = require("../middleware/role");
 const router = express_1.Router();
 const empleado = Employee_1.EmpleadoController;
-router.get('/', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], empleado.getEmpleados);
+//Rutas para controlador empleados
+router.get('/', empleado.getEmpleados);
 router.post('/', empleado.AgregarEmpleadoA);
 router.post('/register', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], empleado.AgregarEmpleadoE);
 router.get('/image', empleado.getImage);
