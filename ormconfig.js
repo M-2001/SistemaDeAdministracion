@@ -5,7 +5,7 @@ module.exports = {
    "port": 3306,
    "username": "wevbdYXWC1",
    "password": "Ht7TqGGjPl",
-   "database": "wevbdYXWC1",
+   "database": process.env.DATABASE,
    "synchronize": true,
    "logging": false,
 
