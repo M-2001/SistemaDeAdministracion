@@ -1,11 +1,11 @@
 module.exports = {
 
    "type": "mysql",
-   "host": "remotemysql.com",
+   "host": "bq6vldnozdexnnlzcigr-mysql.services.clever-cloud.com",
    "port": 3306,
-   "username": "wevbdYXWC1",
-   "password": "Ht7TqGGjPl",
-   "database": process.env.DATABASE,
+   "username": "upm87sccb1la3vqv",
+   "password": "O1tz2cxyiqHsRWUb8nWw",
+   "database": "bq6vldnozdexnnlzcigr",
    "synchronize": true,
    "logging": false,
 
