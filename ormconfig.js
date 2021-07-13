@@ -1,25 +1,25 @@
 module.exports = {
 
-   // "type": "mysql",
-   // "host": "remotemysql.com",
-   // "port": 3306,
-   // "username": "wevbdYXWC1",
-   // "password": "Ht7TqGGjPl",
-   // "database": "wevbdYXWC1",
-   // "synchronize": true,
-   // "logging": false,
-
    "type": "mysql",
-   "host": "localhost",
+   "host": "remotemysql.com",
    "port": 3306,
-   "username": "root",
-   "password": "admind",
-   "database": process.env.databaseLocal,
+   "username": "wevbdYXWC1",
+   "password": "Ht7TqGGjPl",
+   "database": "wevbdYXWC1",
    "synchronize": true,
-   "logging": false, 
+   "logging": false,
+
+   // "type": "mysql",
+   // "host": "localhost",
+   // "port": 3306,
+   // "username": "root",
+   // "password": "admind",
+   // "database": process.env.databaseLocal,
+   // "synchronize": true,
+   // "logging": false, 
 
    "entities": [
-      "src/entity/**/*.ts"
+      "dist/entity/**/*.js"
    ],
    "migrations": [
       "dist/migration/**/*.js"

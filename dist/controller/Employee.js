@@ -130,7 +130,6 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     try {
         employee.hashPassword();
         await empRepo.save(employee);
-        console.log(employee.id);
         if (employee.id == 1) {
             employee.role = 'admin';
             employee.email = process.env.CORREO || " ";
