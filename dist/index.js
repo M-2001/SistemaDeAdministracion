@@ -10,7 +10,7 @@ const app = express();
 dotenv.config();
 const SocketServer = index_1.default.instance;
 SocketServer.start(() => {
-    app.use(cors({ origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app"], credentials: true }));
+    app.use(cors({ origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app", 'https://admin-system-pc.vercel.app/'], credentials: true }));
     console.log('===> Servidor corriendo en puerto: ' + SocketServer.port);
     typeorm_1.createConnection().then(async (connection) => {
         if (connection) {
