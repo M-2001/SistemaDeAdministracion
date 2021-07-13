@@ -442,6 +442,7 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
             //encriptar contraeña
             Client.hashPassword();
             const client = await clienteRepo.save(Client);
+            ClienteLocal = client;
         }
         //Guardar Orden
         let date = new Date();

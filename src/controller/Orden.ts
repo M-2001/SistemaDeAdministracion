@@ -507,6 +507,7 @@ class OrdenController {
                 Client.hashPassword();
 
                 const client = await clienteRepo.save(Client);
+                ClienteLocal = client;
             }
 
                 //Guardar Orden

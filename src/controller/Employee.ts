@@ -85,10 +85,10 @@ export class EmpleadoController {
         try {
             const employee = await employeeRepo.findOneOrFail({ select: [`password`,'id'], where: { codeAccess: code } });
             if (employee.password === '') {
-                return res.json({ ok: true, newUser: true })
+                return res.json({ ok: true, newUser: true, userId: employee.id })
             }
             if (employee.password !== "") {
-                return res.json({ ok: true, newUser: false })
+                return res.json({ ok: true, newUser: false, userId: employee.id })
             }
         }
         catch (e) {
