@@ -23,7 +23,7 @@ import * as sockets from '../sockets/sockets'
 //const PORT = process.env.PORT || 5000
 
 class Server {
-    public static readonly PORT: number = 5000;
+    public static readonly PORT = process.env.PORT;
 
     private static _intance: Server;
     private app: express.Application;

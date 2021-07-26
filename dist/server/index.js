@@ -116,6 +116,6 @@ class Server {
         this.httpServer.listen(this.port, callback);
     }
 }
-Server.PORT = 5000;
+Server.PORT = process.env.PORT;
 exports.default = Server;
 //# sourceMappingURL=index.js.map
