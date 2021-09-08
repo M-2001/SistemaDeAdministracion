@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { Request, Response } from 'express';
 import CarritoController from './Carrito';
 import { Producto } from '../entity/Producto';
@@ -12,8 +13,8 @@ import ItemProducto from '../entity/ItemEmail';
 
 PaypalSdk.configure({
     'mode':'sandbox',//sandbox or live
-    'client_id': 'AaPEDYf8ahu1pp5C2bmNOI5882b6dBnHaG2e3ZAOf2TvR6p01Ad3v1K2npww4os2O2sbl0tKQbdn5HtT',
-    'client_secret': 'EBEvKMxyW2YpshzcQbycRzHJIirGDcvs8tG_u_VD56FWzZzzNOrl_NUcgdI8bSlmvt-g4CKAL8MGANvD'
+    'client_id': process.env.CLIENT_ID,
+    'client_secret': process.env.CLIENT_SECRET
 });
 
 //interfaz para recibir parametro del body

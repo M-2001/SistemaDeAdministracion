@@ -50,6 +50,9 @@ export class Producto {
     @Column({default:""})
     ActualizadoPor: string;
 
+    @Column({default: ""})
+    public_id : string
+
     @Column({default : 1})
     status : boolean;
 

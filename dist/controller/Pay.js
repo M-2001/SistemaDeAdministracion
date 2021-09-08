@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv").config();
 const Producto_1 = require("../entity/Producto");
 const typeorm_1 = require("typeorm");
 const Order_1 = require("../entity/Order");
@@ -10,8 +11,8 @@ const Cliente_1 = require("../entity/Cliente");
 const Cupones_1 = require("../entity/Cupones");
 PaypalSdk.configure({
     'mode': 'sandbox',
-    'client_id': 'AaPEDYf8ahu1pp5C2bmNOI5882b6dBnHaG2e3ZAOf2TvR6p01Ad3v1K2npww4os2O2sbl0tKQbdn5HtT',
-    'client_secret': 'EBEvKMxyW2YpshzcQbycRzHJIirGDcvs8tG_u_VD56FWzZzzNOrl_NUcgdI8bSlmvt-g4CKAL8MGANvD'
+    'client_id': process.env.CLIENT_ID,
+    'client_secret': process.env.CLIENT_SECRET
 });
 let Items;
 class PayController {

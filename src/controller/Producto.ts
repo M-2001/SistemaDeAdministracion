@@ -9,6 +9,17 @@ import { DetalleOrden } from '../entity/Detalles_Orden';
 import { Rating } from '../entity/Rating';
 import { resolve } from 'url';
 import { Employee } from '../entity/Employee';
+import * as cloudinary from 'cloudinary';
+import * as dotenv from 'dotenv';
+dotenv.config()
+
+//const Cloudinary = require('cloudinary').v
+
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
+})
 
 class ProductoController {
 
@@ -331,40 +342,54 @@ class ProductoController {
 
         const { id } = req.params;
         const productRepo = getRepository(Producto);
-        let producto;
+        let product: Producto;
         if (req.files === undefined || req.files.foto === undefined) {
             res.status(400).json({ ok: false, message: 'Ningun archivo selecionando' });
         } else {
+            //console.log(req.file.path);
             let foto = req.files.foto as UploadedFile;
             let fotoName = foto.name.split('.')
             let ext = fotoName[fotoName.length - 1];
             //extensiones permitidas 
-            const extFile = ['png', 'jpeg', 'jpg', 'git'];
+            const extFile = ['png', 'jpeg', 'jpg', 'gif'];
             if (extFile.indexOf(ext) < 0) {
                 return res.status(400)
-                    .json({ok:false, message: 'Las estensiones permitidas son ' + extFile.join(', ') })
+                    .json({ok:false, message: 'Las extensiones permitidas son ' + extFile.join(', ') })
             }
             else {
                 //cambiar nombre del archivo
                 var nombreFoto = `${id}-${new Date().getMilliseconds()}.${ext}`
+                
                 foto.mv(`src/uploads/productos/${nombreFoto}`, (err) => {
                     if (err) {
                         return res.status(500).json({ ok: false, message:'No se ha podido cargar la imagen!' });
                     }
                 });
+
+                let pathImg: any;
+                let result: any;
                 try {
-                    const product = await productRepo.findOneOrFail(id);
+                    product = await productRepo.findOneOrFail(id);
                     const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${product.image}`);
-                    if (fs.existsSync(imgdir)) {
-                        fs.unlinkSync(imgdir)
+
+                    pathImg = path.resolve(__dirname, `../../src/uploads/productos/${nombreFoto}`);
+                    //console.log(pathImg);
+                    result = await cloudinary.v2.uploader.upload(pathImg, {folder : 'productos'});
+
+                    if (!product.public_id) {
+                        console.log('Producto nuevo');
+                    } else{
+                        const deleteFotoCloud = await cloudinary.v2.uploader.destroy(product.public_id)
+                        console.log(deleteFotoCloud);
                     }
                 }
                 catch (e) {
-                    res.status(404).json({ok:false, message: 'No hay registros con este id: ' + id });
+                    res.status(404).json({ok:false, message: 'No hay registros con este id: ' + id});
                 }
                 //try to save product
                 try {
-                    await productRepo.createQueryBuilder().update(Producto).set({ image: nombreFoto }).where({ id }).execute();
+                    await productRepo.createQueryBuilder().update(Producto).set({ image: result.secure_url, public_id: result.public_id }).where({ id }).execute();
+                    await fs.unlinkSync(pathImg);
                 } catch (error) {
                     res.status(409).json({ok:false, message: 'Algo ha salido mal!' });
                 }
@@ -379,9 +404,12 @@ class ProductoController {
         const productRepo = getRepository(Producto);
         try {
             const product = await productRepo.findOneOrFail(id);
-            const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${product.image}`);
-            if (fs.existsSync(imgdir)) {
-                fs.unlinkSync(imgdir)
+            //const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${product.image}`);
+            if (!product.public_id) {
+                console.log('No Image');
+            }else{
+                const deleteFotoCloud = await cloudinary.v2.uploader.destroy(product.public_id);
+                console.log(deleteFotoCloud);
             }
         }
         catch (e) {
@@ -389,7 +417,7 @@ class ProductoController {
         }
         //try to save product
         try {
-            await productRepo.createQueryBuilder().update(Producto).set({ image: "producto.png" }).where({ id }).execute();
+            await productRepo.createQueryBuilder().update(Producto).set({ image: "producto.png", public_id: '' }).where({ id }).execute();
             res.json({ok: true, message: 'imagen de producto eliminada' })
         } catch (error) {
             res.status(409).json({ok: false, message: 'Algo ha salido mal!' });

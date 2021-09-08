@@ -1,0 +1,1 @@
+{"version":3,"file":"cloudinary.config.js","sourceRoot":"","sources":["../../src/middleware/cloudinary.config.ts"],"names":[],"mappings":"AAAA,MAAM,aAAa,GAAG,OAAO,CAAC,YAAY,CAAC,CAAC;AAC5C,aAAa,CAAC,MAAM,CAAC;IACjB,UAAU,EAAE,OAAO,CAAC,GAAG,CAAC,UAAU;IAClC,OAAO,EAAE,OAAO,CAAC,GAAG,CAAC,OAAO;IAC5B,UAAU,EAAE,OAAO,CAAC,GAAG,CAAC,UAAU;CACrC,CAAC,CAAA;AAEF,2BAA2B"}

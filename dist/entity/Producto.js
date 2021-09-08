@@ -71,6 +71,10 @@ __decorate([
     __metadata("design:type", String)
 ], Producto.prototype, "ActualizadoPor", void 0);
 __decorate([
+    typeorm_1.Column({ default: "" }),
+    __metadata("design:type", String)
+], Producto.prototype, "public_id", void 0);
+__decorate([
     typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)
 ], Producto.prototype, "status", void 0);
