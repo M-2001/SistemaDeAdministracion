@@ -4,3 +4,4 @@ node_modules/
 tmp/
 temp/
 yarn.lock
+.env
