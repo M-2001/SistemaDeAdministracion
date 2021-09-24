@@ -2,13 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transporter = void 0;
 const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+dotenv.config();
 exports.transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
     auth: {
-        user: process.env.CORREO || 'castlem791@gmail.com',
-        pass: 'plbadgpbmtpzhwbp',
+        user: process.env.CORREO,
+        pass: process.env.SECRETKEYAPP,
     },
     tls: {
         rejectUnauthorized: false

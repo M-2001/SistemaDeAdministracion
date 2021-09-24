@@ -55,7 +55,7 @@ class Server {
     middleware() {
         //this.app.set('view engine', 'ejs')
         //CORS
-        this.app.use(cors({ origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app", 'https://admin-system-pc.vercel.app'], credentials: true }));
+        this.app.use(cors({ origin: ['https://client-system-pc.vercel.app', "https://system-pc.netlify.app", 'https://admin-system-pc.vercel.app'], credentials: true }));
         //fileupload
         this.app.use(fileUpload());
         //Lectura del body
