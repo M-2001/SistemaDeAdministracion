@@ -121,7 +121,7 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     }
     //verificar si el token existe
     try {
-        verifycationLink = `https://system-pc.netlify.app/confirmRegister/${token}`;
+        verifycationLink = `https://mye-soporte.vercel.app/confirmRegister/${token}`;
     }
     catch (e) {
         return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });

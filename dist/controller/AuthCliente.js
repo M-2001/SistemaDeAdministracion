@@ -89,7 +89,7 @@ AuthClienteController.forgotPassword = async (req, res) => {
             return res.send({ ok: false, message: 'No se encontro resultado!' });
         }
         const token = jwt.sign({ id: cliente.id, email: cliente.email }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `https://client-systempc.vercel.app/reset-password/${token}`;
+        verifycationLink = `https://client-mye-soporte.vercel.app/reset-password/${token}`;
         cliente.resetPassword = token;
     }
     catch (e) {
@@ -97,8 +97,9 @@ AuthClienteController.forgotPassword = async (req, res) => {
     }
     //TODO: sendEmail
     try {
+        let email = process.env.CORREO;
         await mailer_1.transporter.sendMail({
-            from: '"Forgot Password " <castlem791@gmail.com>',
+            from: `"Forgot Password " <${email}>`,
             to: cliente.email,
             subject: "Forgot Password",
             html: `<b>Por favor, consulte el siguiente enlace o peguelo en su navegador para completar el proceso y restaurar sun contraseña: </b>

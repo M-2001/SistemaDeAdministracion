@@ -103,10 +103,10 @@ class PayController{
             let urlSuccess : any;
             let total : string;
             if (cuponExist) {
-                urlSuccess = "https://client-systempc.vercel.app/pay?CODIGO_CUPON=" + CODIGO_CUPON;
+                urlSuccess = "https://client-mye-soporte.vercel.app/pay?CODIGO_CUPON=" + CODIGO_CUPON;
                 total = totalPrice.toFixed(2)
             } else {
-                urlSuccess = "https://client-systempc.vercel.app/pay";
+                urlSuccess = "https://client-mye-soporte.vercel.app/pay";
                 total = totalPrice.toFixed(2);
             }
 
@@ -120,7 +120,7 @@ class PayController{
                     "redirect_urls": {
 
                         "return_url": urlSuccess,
-                        "cancel_url": "https://systempcs.herokuapp.com/api/pay-checkout/cancel"
+                        "cancel_url": "https://mye-soporte-server.herokuapp.com/api/pay-checkout/cancel"
                         },
                     "transactions": [{
                         "amount": {
@@ -198,7 +198,7 @@ class PayController{
                         let date = new Date();
                         let month = date.getMonth() + 1;
                         const codigoOrden = Math.floor(Math.random()* 90000) + 10000;
-                        const codigoO = 'SYSTEM_PC-'+ codigoOrden + month;
+                        const codigoO = 'M&E-'+ codigoOrden + month;
 
                         const or = new Order();
                         or.cliente = clienteid;
@@ -297,7 +297,7 @@ class PayController{
                 let date = new Date();
                 let month = date.getMonth() + 1;
                 const codigoOrden = Math.floor(Math.random()* 90000) + 10000;
-                const codigoO = 'SYSTEM_PC-'+ codigoOrden + month;
+                const codigoO = 'M&E-'+ codigoOrden + month;
 
                 const or = new Order();
                 or.cliente = clienteid;
@@ -423,8 +423,9 @@ class PayController{
             
             let TotalIVA = itemEmail.map((a)=>a.IVA).reduce((a, b)=> a + b, 0)
 
+            let email = process.env.CORREO
             await transporter.sendMail({
-                from : `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
+                from : `"M&E Soporte Tecnico, Sonsonate" <${email}>`, //sender address
                 to: infoCliente.email,
                 subject: subject,
                 html: ` <!DOCTYPE html>
@@ -440,7 +441,7 @@ class PayController{
 
                 <h4>Vendido Por: </h4>
                 <p>Dirección Compra : </p>
-                <p>System-Pc Sonsonate, ${direccionLocal}</p>
+                <p>M&E Soporte Tecnico Sonsonate, ${direccionLocal}</p>
                 <p>Productos incluidos en compra: </p>
 
                 <table style = "border: hidden" >
@@ -466,7 +467,7 @@ class PayController{
                 <p>IVA: $${parseFloat(TotalIVA.toFixed(2))}</p>
 
                 <p>Total compra: $${total}</p>
-                <a href="https://client-systempc.vercel.app">Visitanos pronto !</a>
+                <a href="https://client-mye-soporte.vercel.app">Visitanos pronto !</a>
                 </div>
                 </body>
                 </html>`

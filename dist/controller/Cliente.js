@@ -42,15 +42,16 @@ ClienteController.RegistroCliente = async (req, res) => {
         return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     try {
-        verifycationLink = `https://client-systempc.vercel.app/active/${token}`;
+        verifycationLink = `https://client-mye-soporte.vercel.app/active/${token}`;
     }
     catch (e) {
         return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
     }
     //TODO: sendEmail
     try {
+        let email = process.env.CORREO;
         await mailer_1.transporter.sendMail({
-            from: '"Confirmacion de Cuenta " <castlem791@gmail.com>',
+            from: `"Confirmacion de Cuenta " <${email}>`,
             to: cliente.email,
             subject: "Confirmacion de cuenta",
             html: `<b>Por favor, consulte el siguiente enlace o peguelo en su navegador para completar el proceso de activacion de su cuenta: </b> 
