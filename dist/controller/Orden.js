@@ -146,7 +146,7 @@ OrdenController.AddReservacion = async (req, res) => {
                             let totaldesc = operacion * descProducto / 100;
                             let Totaldesc = parseFloat(totaldesc.toFixed(2));
                             let totalPay = operacion - Totaldesc;
-                            //let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                            let qtyExist = productoItem.catidad_por_unidad - item.qt;
                             amount += totalPay;
                             totalPrice += totalPay;
                             totalDesc += Totaldesc;
@@ -182,6 +182,14 @@ OrdenController.AddReservacion = async (req, res) => {
                             ParseTotal = parseFloat(totalProducto.toFixed(2));
                             let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: descProducto, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal };
                             itemEmail.push(itm);
+                            //actualizar producto
+                            try {
+                                productoItem.catidad_por_unidad = qtyExist;
+                                const saveProduct = await proRepo.save(productoItem);
+                            }
+                            catch (error) {
+                                return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+                            }
                         }
                         catch (error) {
                             return res.status(400).json({ ok: false, message: 'Algo ha fallado!', error });
@@ -217,7 +225,7 @@ OrdenController.AddReservacion = async (req, res) => {
                 let totaldesc = operacion * productoItem.descuento / 100;
                 let Totaldesc = parseFloat(totaldesc.toFixed(2));
                 let totalPay = operacion - Totaldesc;
-                //let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                let qtyExist = productoItem.catidad_por_unidad - item.qt;
                 amount += totalPay;
                 totalPrice += totalPay;
                 totalDesc += Totaldesc;
@@ -252,6 +260,14 @@ OrdenController.AddReservacion = async (req, res) => {
                 ParseTotal = parseFloat(totalProducto.toFixed(2));
                 let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: productoItem.descuento, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal };
                 itemEmail.push(itm);
+                //actualizar producto
+                try {
+                    productoItem.catidad_por_unidad = qtyExist;
+                    const saveProduct = await proRepo.save(productoItem);
+                }
+                catch (error) {
+                    return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+                }
             }
         }
     }
@@ -513,6 +529,74 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
     }
     catch (error) {
         return res.status(404).json({ ok: false, message: 'Algo ha fallado!' });
+    }
+};
+//Metodo para Cancelar una reservacion 
+OrdenController.CancelReservation = async (req, res) => {
+    const { codigoOrden } = req.body;
+    const OrdenRepo = typeorm_1.getRepository(Order_1.Order);
+    const dtoOrden = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
+    const Productos = typeorm_1.getRepository(Producto_1.Producto);
+    let order;
+    let DetoOrdenes;
+    let productUpdated;
+    //Encontrar la orden a ejecutar
+    try {
+        order = await OrdenRepo.findOneOrFail({ where: { codigoOrden: codigoOrden } });
+        //res.json(orden)
+    }
+    catch (error) {
+        return res.json({ ok: false, message: `Orden con el codigo: ${codigoOrden} no se ha encontrado` });
+    }
+    //intentar encontar detalles de Orden
+    try {
+        if (order.status == 0) {
+            let orden = order.id;
+            //DetoOrdenes = await dtoOrden.find({where: {orden : orden.id}})
+            DetoOrdenes = await dtoOrden.createQueryBuilder('detalle_orden')
+                .innerJoin('detalle_orden.producto', 'prod')
+                .innerJoin('detalle_orden.orden', 'order')
+                .addSelect(['prod.id'])
+                .addSelect(["order.id"])
+                .where({ orden })
+                .getMany();
+            //console.log(DetoOrdenes);
+        }
+        else {
+            return res.json({ ok: false, message: `Orden con el codigo: ${order.codigoOrden} ya ha sido completada!` });
+        }
+    }
+    catch (error) {
+        return res.json({ ok: false, message: 'Algo ha salido mal!' });
+    }
+    //recorrer objeto para encontrar los productos
+    try {
+        //let dtsOrdenes : DetalleOrden[];
+        const dtsOrdenes = DetoOrdenes.map(async (pro) => {
+            let productID = pro.producto.id;
+            const Product = await Productos.findOne({ where: { id: productID } });
+            //console.log(Product);
+            if (Product.status == false) {
+                let returnProductStock = pro.cantidad + Product.catidad_por_unidad;
+                Product.catidad_por_unidad = returnProductStock;
+                Product.status = true;
+                const prod = await Productos.save(Product);
+                //console.log(returnProductStock);
+            }
+            else {
+                let returnProductStock = pro.cantidad + Product.catidad_por_unidad;
+                Product.catidad_por_unidad = returnProductStock;
+                Product.status = true;
+                const prod = await Productos.save(Product);
+            }
+        });
+        //actualizar Orden
+        order.status = 2;
+        const OrdenCanceled = OrdenRepo.save(order);
+        res.json({ message: "Orden Cancelada!" });
+    }
+    catch (error) {
+        return;
     }
 };
 exports.default = OrdenController;

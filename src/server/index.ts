@@ -14,6 +14,7 @@ import routesOrdenDte from '../router/OrdenDetalle';
 import routescarrito from '../router/carrito';
 import routesCupon from '../router/cupon';
 import routesPay from '../router/pay';
+import gallery from '../router/gallery.router';
 import * as fileUpload from 'express-fileupload';
 import * as SocketIO from 'socket.io';
 
@@ -52,7 +53,8 @@ class Server {
         ordenDte: '/api/orden-detalle',
         carrito: '/api/carrito',
         cupon: '/api/cupon',
-        pay: '/api/pay-checkout'
+        pay: '/api/pay-checkout',
+        gallery: '/api/gallery',
     }
 
     //se encarga de ejecutar todos los metodos que sean llamados
@@ -104,6 +106,7 @@ class Server {
         this.app.use(this.routenames.carrito, routescarrito)
         this.app.use(this.routenames.cupon, routesCupon)
         this.app.use(this.routenames.pay, routesPay)
+        this.app.use(this.routenames.gallery, gallery)
     }
 
     //servira para crear una nueva instancia del servidor

@@ -13,6 +13,8 @@ router.post('/new-order', [jwt_1.CheckJwt, roleUser_1.checkRoleU(['user'])], ord
 router.get('/order-paginated', [jwt_1.CheckJwt], order.MostrarOrdenPaginadas);
 router.get('/order-client', jwt_1.CheckJwt, order.MostrarOrdenCliente);
 router.post('/add-reservation', [jwt_1.CheckJwt, roleUser_1.checkRoleU(['user'])], order.AddReservacion);
+//Ruta para Cancelar una orden por parte de los clientes
+router.post('/cancel-order', [jwt_1.CheckJwt, roleUser_1.checkRoleU(['user'])], order.CancelReservation);
 router.post('/local-order', jwt_1.CheckJwt, order.AddOrdenClienteLocal);
 router.post('/order-status/:id', jwt_1.CheckJwt, order.EstadoOrden);
 exports.default = router;

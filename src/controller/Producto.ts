@@ -420,7 +420,7 @@ class ProductoController {
             await productRepo.createQueryBuilder().update(Producto).set({ image: "producto.png", public_id: '' }).where({ id }).execute();
             res.json({ok: true, message: 'imagen de producto eliminada' })
         } catch (error) {
-            res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
+            return res.status(409).json({ok: false, message: 'Algo ha salido mal!' });
         }
     }
 

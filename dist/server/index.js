@@ -16,6 +16,7 @@ const OrdenDetalle_1 = require("../router/OrdenDetalle");
 const carrito_1 = require("../router/carrito");
 const cupon_1 = require("../router/cupon");
 const pay_1 = require("../router/pay");
+const gallery_router_1 = require("../router/gallery.router");
 const fileUpload = require("express-fileupload");
 const SocketIO = require("socket.io");
 const http = require("http");
@@ -40,7 +41,8 @@ class Server {
             ordenDte: '/api/orden-detalle',
             carrito: '/api/carrito',
             cupon: '/api/cupon',
-            pay: '/api/pay-checkout'
+            pay: '/api/pay-checkout',
+            gallery: '/api/gallery',
         };
         this.corsOption = () => {
         };
@@ -80,6 +82,7 @@ class Server {
         this.app.use(this.routenames.carrito, carrito_1.default);
         this.app.use(this.routenames.cupon, cupon_1.default);
         this.app.use(this.routenames.pay, pay_1.default);
+        this.app.use(this.routenames.gallery, gallery_router_1.default);
     }
     //servira para crear una nueva instancia del servidor
     static get instance() {

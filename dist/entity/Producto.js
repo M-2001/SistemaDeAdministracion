@@ -16,6 +16,7 @@ const Marca_1 = require("./Marca");
 const Categoria_1 = require("./Categoria");
 const Rating_1 = require("./Rating");
 const Detalles_Orden_1 = require("./Detalles_Orden");
+const Galeria_1 = require("./Galeria");
 let Producto = class Producto {
 };
 __decorate([
@@ -86,6 +87,10 @@ __decorate([
     typeorm_1.OneToMany(() => Detalles_Orden_1.DetalleOrden, (detalleO) => detalleO.producto),
     __metadata("design:type", Array)
 ], Producto.prototype, "detalleO", void 0);
+__decorate([
+    typeorm_1.OneToMany(() => Galeria_1.Galeria, (galeria) => galeria.producto),
+    __metadata("design:type", Array)
+], Producto.prototype, "galeria", void 0);
 Producto = __decorate([
     typeorm_1.Entity('producto'),
     typeorm_1.Unique(['codigo_Producto'])
