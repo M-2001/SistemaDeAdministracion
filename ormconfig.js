@@ -29,8 +29,8 @@ module.exports = {
       process.env.TYPEORM_SUBSCRIBER
    ],
    "cli": {
-      "entitiesDir": "dist/entity",
-      "migrationsDir": "dist/migration",
-      "subscribersDir": "dist/subscriber"
+      "entitiesDir": "src/entity",
+      "migrationsDir": "src/migration",
+      "subscribersDir": "src/subscriber"
    }
 }
