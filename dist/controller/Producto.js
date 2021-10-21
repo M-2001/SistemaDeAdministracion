@@ -268,13 +268,14 @@ ProductoController.AgregarProducto = async (req, res) => {
 ProductoController.EditarProducto = async (req, res) => {
     let producto;
     const { id } = req.params;
-    const { nombre_producto, descripcion, descuento, proveedor, marca, categoria } = req.body;
+    const { nombre_producto, descripcion, descuento, costo_standar, proveedor, marca, categoria } = req.body;
     const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
     try {
         producto = await prodRepo.findOneOrFail(id);
         producto.nombreProducto = nombre_producto;
         producto.descripcion = descripcion;
         producto.descuento = descuento;
+        producto.costo_standar = costo_standar;
         producto.proveedor = proveedor;
         producto.marca = marca;
         producto.categoria = categoria;

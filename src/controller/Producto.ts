@@ -277,9 +277,9 @@ class ProductoController {
 
     //edit a product
     static EditarProducto = async (req: Request, res: Response) => {
-        let producto;
+        let producto: Producto;
         const { id } = req.params;
-        const { nombre_producto, descripcion, descuento, proveedor, marca, categoria } = req.body;
+        const { nombre_producto, descripcion, descuento, costo_standar, proveedor, marca, categoria } = req.body;
         const prodRepo = getRepository(Producto);
 
         try {
@@ -287,6 +287,7 @@ class ProductoController {
             producto.nombreProducto = nombre_producto;
             producto.descripcion = descripcion;
             producto.descuento = descuento;
+            producto.costo_standar = costo_standar;
             producto.proveedor = proveedor;
             producto.marca = marca;
             producto.categoria = categoria;
