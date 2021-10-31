@@ -3,13 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
 const typeorm_1 = require("typeorm");
 const Categoria_1 = require("../entity/Categoria");
+const Producto_1 = require("../entity/Producto");
 class CategoriaController {
 }
 //mostrar categorias
 CategoriaController.MostrarCategorias = async (_, res) => {
     try {
         const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
-        const categoria = await categoriaRepo.find();
+        const categoria = await categoriaRepo.find({ where: { status: true } });
         if (categoria.length > 0) {
             res.json({ ok: true, categoria });
         }
@@ -71,7 +72,7 @@ CategoriaController.AgregarCategoria = async (req, res) => {
             return res.status(400).json({ ok: false, errors });
         }
         await categoriaRepo.save(category);
-        //all ok 
+        //all ok
         res.json({ ok: true, message: 'Se ha agregado una nueva categoria' });
     }
     catch (error) {
@@ -139,19 +140,31 @@ CategoriaController.EstadoCategoria = async (req, res) => {
     let categoria;
     const id = req.body;
     const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
+    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
     try {
         categoria = await categoriaRepo.findOneOrFail(id);
-        if (categoria.status == true) {
-            categoria.status = false;
-        }
-        else {
-            categoria.status = true;
-        }
-        const categoriaStatus = await categoriaRepo.save(categoria);
-        res.json({ ok: true, message: 'Estado de categoria actualizado!' });
     }
     catch (error) {
-        res.json({ ok: false, message: 'Algo salio mal!' });
+        return res.json({ ok: false, message: `Categoria con el id: ${req.body.id} no encontrada!!!` });
+    }
+    try {
+        const [producto, totalResult] = await productoRepo.findAndCount({ where: { categoria: categoria } });
+        if (totalResult > 0) {
+            return res.status(300).json({ ok: false, message: `Advertencia: No se puede modificar el estado con el id: ${categoria.id} porque tiene registros asociados!` });
+        }
+        else {
+            if (categoria.status == true) {
+                categoria.status = false;
+            }
+            else {
+                categoria.status = true;
+            }
+            const categoriaStatus = await categoriaRepo.save(categoria);
+            res.json({ ok: true, message: 'Estado de categoria actualizado!' });
+        }
+    }
+    catch (error) {
+        return res.json({ ok: false, message: "Sucedio un error Inesperado!!!" });
     }
 };
 exports.default = CategoriaController;

@@ -2,13 +2,14 @@ import { validate } from 'class-validator';
 import { Request, Response } from 'express';
 import { getRepository } from 'typeorm';
 import { Categoria } from '../entity/Categoria';
+import { Producto } from '../entity/Producto';
 class CategoriaController {
 
     //mostrar categorias
     static MostrarCategorias = async (_: Request, res: Response) => {
         try {
             const categoriaRepo = getRepository(Categoria)
-            const categoria = await categoriaRepo.find()
+            const categoria = await categoriaRepo.find({where : {status : true}})
             if (categoria.length > 0) {
                 res.json({ok: true ,categoria})
             } else {
@@ -68,7 +69,7 @@ class CategoriaController {
                 return res.status(400).json({ok: false,errors });
             }
             await categoriaRepo.save(category);
-            //all ok 
+            //all ok
             res.json({ok: true, message: 'Se ha agregado una nueva categoria' });
         } catch (error) {
             res.status(400).json({ok: false, message: 'Algo ha salio mal!' });
@@ -131,13 +132,23 @@ class CategoriaController {
 
     //estado categoria
     static EstadoCategoria = async (req: Request, res: Response) => {
-        let categoria;
+        let categoria : Categoria;
         const id = req.body;
         const categoriaRepo = getRepository(Categoria);
+		const productoRepo = getRepository(Producto);
         try {
             categoria = await categoriaRepo.findOneOrFail(id)
 
-            if (categoria.status == true) {
+        } catch (error) {
+            return res.json({ ok: false, message: `Categoria con el id: ${req.body.id} no encontrada!!!` });
+        }
+
+		try {
+			const [producto, totalResult] = await productoRepo.findAndCount({where: { categoria : categoria}});
+			if (totalResult > 0) {
+				return res.status(300).json({ok: false, message : `Advertencia: No se puede modificar el estado con el id: ${categoria.id} porque tiene registros asociados!`});
+			} else {
+				if (categoria.status == true) {
                 categoria.status = false
             } else {
                 categoria.status = true
@@ -145,10 +156,10 @@ class CategoriaController {
 
             const categoriaStatus = await categoriaRepo.save(categoria)
             res.json({ ok: true, message:'Estado de categoria actualizado!' });
-
-        } catch (error) {
-            res.json({ok: false, message: 'Algo salio mal!'})
-        }
+			}
+		} catch (error) {
+			return res.json({ok: false, message: "Sucedio un error Inesperado!!!"});
+		}
     };
 
 }

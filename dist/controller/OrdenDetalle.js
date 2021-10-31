@@ -12,11 +12,12 @@ OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
     take = Number(take);
     try {
         const ordenesDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-        const [ordenesD, totalItems] = await ordenesDRepo.createQueryBuilder('orden_detalle')
-            .innerJoin('orden_detalle.producto', 'producto')
-            .innerJoin('orden_detalle.orden', 'orden')
-            .addSelect(['producto.nombreProducto'])
-            .addSelect(['orden.fecha_Orden', 'orden.cliente'])
+        const [ordenesD, totalItems] = await ordenesDRepo
+            .createQueryBuilder("orden_detalle")
+            .innerJoin("orden_detalle.producto", "producto")
+            .innerJoin("orden_detalle.orden", "orden")
+            .addSelect(["producto.nombreProducto"])
+            .addSelect(["orden.fecha_Orden", "orden.cliente"])
             .skip((pagina - 1) * take)
             .take(take)
             .getManyAndCount();
@@ -27,14 +28,25 @@ OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, ordenesD, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                ordenesD,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados!' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados!",
+            });
         }
     }
     catch (error) {
-        res.json({ ok: false, message: 'Algo ha salido mal!' });
+        res.json({ ok: false, message: "Algo ha salido mal!" });
     }
 };
 //Mostrar detalles de ordenes por orden ID
@@ -42,22 +54,28 @@ OrdenDetalle.MostrarDteOrderByOrderId = async (req, res) => {
     const { orden } = req.body;
     try {
         const ordenesDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-        const ordenesD = await ordenesDRepo.createQueryBuilder('orden_detalle')
-            .innerJoin('orden_detalle.producto', 'producto')
-            .innerJoin('orden_detalle.orden', 'orden')
-            .addSelect(['producto.nombreProducto'])
-            .addSelect(['orden.fecha_Orden', 'orden.cliente'])
+        const ordenesD = await ordenesDRepo
+            .createQueryBuilder("orden_detalle")
+            .innerJoin("orden_detalle.producto", "producto")
+            .innerJoin("orden_detalle.orden", "orden")
+            .addSelect(["producto.nombreProducto"])
+            .addSelect(["orden.fecha_Orden", "orden.cliente"])
             .where({ orden })
             .getMany();
         if (ordenesD.length > 0) {
             res.json({ ok: true, ordenesD });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados!' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados!",
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo ha salido mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo ha salido mal!" });
     }
 };
 exports.default = OrdenDetalle;

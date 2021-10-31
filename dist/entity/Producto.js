@@ -32,7 +32,7 @@ __decorate([
     __metadata("design:type", String)
 ], Producto.prototype, "nombreProducto", void 0);
 __decorate([
-    typeorm_1.Column(),
+    typeorm_1.Column({ length: 5000 }),
     __metadata("design:type", String)
 ], Producto.prototype, "descripcion", void 0);
 __decorate([
@@ -52,11 +52,11 @@ __decorate([
     __metadata("design:type", Categoria_1.Categoria)
 ], Producto.prototype, "categoria", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
+    typeorm_1.Column({ type: "decimal", precision: 19, scale: 2, default: 0.0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "precioCompra", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
+    typeorm_1.Column({ type: "decimal", precision: 19, scale: 2, default: 0.0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "costo_standar", void 0);
 __decorate([
@@ -92,8 +92,8 @@ __decorate([
     __metadata("design:type", Array)
 ], Producto.prototype, "galeria", void 0);
 Producto = __decorate([
-    typeorm_1.Entity('producto'),
-    typeorm_1.Unique(['codigo_Producto'])
+    typeorm_1.Entity("producto"),
+    typeorm_1.Unique(["codigo_Producto"])
 ], Producto);
 exports.Producto = Producto;
 //# sourceMappingURL=Producto.js.map

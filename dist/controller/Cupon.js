@@ -14,18 +14,20 @@ CuponController.CrearCupon = async (req, res) => {
         let date = new Date();
         let month = date.getMonth() + 1;
         const codigoCupon = Math.floor(Math.random() * 90000) + 10000;
-        const codigo = 'SYSTEM_PC-' + codigoCupon + month;
+        const codigo = "SYSTEM_PC-" + codigoCupon + month;
         const { descuento, fechaExp } = req.body;
         const cupon = new Cupones_1.Cupon();
-        cupon.codigo = codigo,
-            cupon.descuento = descuento,
-            cupon.fechaExp = new Date(fechaExp);
+        (cupon.codigo = codigo),
+            (cupon.descuento = descuento),
+            (cupon.fechaExp = new Date(fechaExp));
         newCupon = await cuponRepo.save(cupon);
         //all is ok
-        res.json({ ok: true, message: 'Cupon Creado con exito!' });
+        res.json({ ok: true, message: "Cupon Creado con exito!" });
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
 };
 //cambiar estado cupon
@@ -37,10 +39,12 @@ CuponController.EstadoCupon = async (req, res) => {
         cupon = await cuponRepo.findOneOrFail(id);
         cupon.status = !cupon.status;
         await cuponRepo.save(cupon);
-        res.json({ ok: true, message: 'Estado de cupon actualizado!' });
+        res.json({ ok: true, message: "Estado de cupon actualizado!" });
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
 };
 //mostrar cupones
@@ -53,11 +57,16 @@ CuponController.MostrarCupones = async (req, res) => {
             res.json({ ok: true, cupon });
         }
         else {
-            res.json({ ok: false, message: ' No se encontraron resultados' });
+            res.json({
+                ok: false,
+                message: " No se encontraron resultados",
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
 };
 //mostrar cupones Pajinados
@@ -68,7 +77,10 @@ CuponController.MostrarCuponesPaginados = async (req, res) => {
     take = Number(take);
     try {
         const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
-        const [cupones, totalItems] = await cuponRepo.findAndCount({ take, skip: (pagina - 1) * take });
+        const [cupones, totalItems] = await cuponRepo.findAndCount({
+            take,
+            skip: (pagina - 1) * take,
+        });
         if (cupones.length > 0) {
             let totalPages = totalItems / take;
             if (totalPages % 1 !== 0) {
@@ -76,14 +88,27 @@ CuponController.MostrarCuponesPaginados = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, cupones, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                cupones,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados!' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados!",
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
 };
 //eliminar Cupon
@@ -95,15 +120,17 @@ CuponController.EliminarCupon = async (req, res) => {
         cupon = await cuponRepo.findOneOrFail({ where: { id } });
     }
     catch (error) {
-        return res.status(404).json({ message: 'No se han encontrado resultados ' });
+        return res
+            .status(404)
+            .json({ message: "No se han encontrado resultados " });
     }
     //Try to delete Category
     try {
         await cuponRepo.remove(cupon);
-        res.json({ ok: true, message: 'Cupon ha sido eliminado!' });
+        res.json({ ok: true, message: "Cupon ha sido eliminado!" });
     }
     catch (error) {
-        return res.status(409).json({ message: 'Algo ha salido mal!' });
+        return res.status(409).json({ message: "Algo ha salido mal!" });
     }
 };
 //enviar Cupon
@@ -118,23 +145,49 @@ CuponController.SendCupon = async (req, res) => {
     try {
         if (CODIGO_CUPON) {
             try {
-                cuponExist = await cuponRepo.findOneOrFail({ where: { codigo: CODIGO_CUPON } });
+                cuponExist = await cuponRepo.findOneOrFail({
+                    where: { codigo: CODIGO_CUPON },
+                });
                 if (cuponExist.status == true) {
-                    return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' , ya ha sido utilizado!!!' });
+                    return res
+                        .status(400)
+                        .json({
+                        ok: false,
+                        message: "El cupón con el codigo: " +
+                            CODIGO_CUPON +
+                            " , ya ha sido utilizado!!!",
+                    });
                 }
                 else {
                     try {
-                        cliente = await clienteRepo.findOne({ where: { email } });
+                        cliente = await clienteRepo.findOne({
+                            where: { email },
+                        });
                         if (!cliente) {
-                            return res.status(400).json({ ok: true, message: 'El cliente con el email: ' + email + ' no existe!!!' });
+                            return res
+                                .status(400)
+                                .json({
+                                ok: true,
+                                message: "El cliente con el email: " +
+                                    email +
+                                    " no existe!!!",
+                            });
                         }
                     }
                     catch (error) {
-                        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+                        return res
+                            .status(400)
+                            .json({
+                            ok: false,
+                            message: "Algo salio mal!",
+                        });
                     }
-                    //Try send email 
+                    //Try send email
                     try {
-                        let subject = ` ${cliente.nombre + " " + cliente.apellido + " , Por ser cliente especial !!!"} `;
+                        let subject = ` ${cliente.nombre +
+                            " " +
+                            cliente.apellido +
+                            " , Por ser cliente especial !!!"} `;
                         await mailer_1.transporter.sendMail({
                             from: `"System-PC Sonsonate" <castlem791@gmail.com>`,
                             to: cliente.email,
@@ -147,50 +200,84 @@ CuponController.SendCupon = async (req, res) => {
                                 <p>Aplica tu cupón con un ${cuponExist.descuento}% de descuento en tu compra total!!! </p>
                                 <p>Codigo Cupon: ${cuponExist.codigo}</p>
                                 <p>${cliente.nombre + " " + cliente.apellido}, este Cupón solo es valido para ti, si lo compartes ya no sera valido</p>
-                                
+
                                 <a href="${"Link tienda"}">Visitanos pronto !!!</a>
                                 </div>
                                 </body>
-                                </html>`
+                                </html>`,
                         });
-                        res.json({ ok: true, message: "Email enviado con exito!!!" });
+                        res.json({
+                            ok: true,
+                            message: "Email enviado con exito!!!",
+                        });
                     }
                     catch (error) {
-                        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+                        return res
+                            .status(400)
+                            .json({
+                            ok: false,
+                            message: "Algo salio mal!",
+                        });
                     }
                 }
             }
             catch (error) {
-                return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + CODIGO_CUPON + ' no es valido!!!' });
+                return res
+                    .status(400)
+                    .json({
+                    ok: false,
+                    message: "El cupón con el codigo: " +
+                        CODIGO_CUPON +
+                        " no es valido!!!",
+                });
             }
         }
         else {
-            return res.status(405).json({ ok: false, message: 'Debe enviar un codigo de cupon!!!' });
+            return res
+                .status(405)
+                .json({
+                ok: false,
+                message: "Debe enviar un codigo de cupon!!!",
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
 };
-//mostrar cupon 
+//mostrar cupon
 CuponController.MostrarCupon = async (req, res) => {
     const codeCoupon = req.query.code;
     const cpRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     let cuponExist;
     try {
-        cuponExist = await cpRepo.findOneOrFail({ where: { codigo: codeCoupon } });
+        cuponExist = await cpRepo.findOneOrFail({
+            where: { codigo: codeCoupon },
+        });
         if (new Date(cuponExist.fechaExp).getTime() < Date.now()) {
-            return res.send({ ok: false, message: 'Cupon expirado' });
+            return res.send({ ok: false, message: "Cupon expirado" });
         }
         if (cuponExist.status == true) {
-            return res.send({ ok: false, message: 'Este cupon ya fue utilizado' });
+            return res.send({
+                ok: false,
+                message: "Este cupon ya fue utilizado",
+            });
         }
         else {
             return res.send({ ok: true });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'El cupón con el codigo: ' + codeCoupon + ' no es valido!!!' });
+        return res
+            .status(400)
+            .json({
+            ok: false,
+            message: "El cupón con el codigo: " +
+                codeCoupon +
+                " no es valido!!!",
+        });
     }
 };
 exports.default = CuponController;

@@ -15,7 +15,7 @@ dotenv.config();
 cloudinary.v2.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET
+    api_secret: process.env.API_SECRET,
 });
 class ProductoController {
     constructor() {
@@ -36,27 +36,41 @@ class ProductoController {
 }
 ProductoController.MostrarProductos = async (req, res) => {
     const search = req.query.search || "";
+    const status = req.query.status || "";
     try {
         const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-        const [productos, _] = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
-            .leftJoin('producto.categoria', 'cat')
+        const [productos, _] = await productoRepo
+            .createQueryBuilder("producto")
+            .leftJoin("producto.proveedor", "prov")
+            .addSelect(["prov.nombre_proveedor"])
+            .leftJoin("producto.marca", "marca")
+            .addSelect(["marca.marca"])
+            .leftJoin("producto.categoria", "cat")
             .take(3)
-            .addSelect(['cat.categoria'])
-            .where("producto.nombreProducto like :name", { name: `%${search}%` })
+            .addSelect(["cat.categoria"])
+            .where("producto.nombreProducto like :name", {
+            name: `${search}%`,
+        })
+            .andWhere("producto.status like :estado", {
+            estado: `%${status}%`,
+        })
             .getManyAndCount();
         if (productos.length > 0) {
             return res.json({ ok: true, productos });
         }
         else {
-            return res.json({ ok: false, message: 'No se encontraron resultados' });
+            return res.json({
+                ok: false,
+                message: "No se encontraron resultados",
+            });
         }
     }
     catch (error) {
-        return res.json({ ok: false, message: 'Algo esta fallando' });
+        return res.json({
+            ok: false,
+            message: "Algo esta fallando",
+            error,
+        });
     }
 };
 //mostrar productos paginados
@@ -66,30 +80,33 @@ ProductoController.ProductosPaginados = async (req, res) => {
     let order;
     let typeOrder = Number(req.query.order || 0);
     if (typeOrder === 0) {
-        order = 'ASC';
+        order = "ASC";
     }
     else if (typeOrder === 1) {
-        order = 'DESC';
+        order = "DESC";
     }
     else {
-        order = 'ASC';
+        order = "ASC";
     }
     pagina = Number(pagina);
     let take = 5;
     take = Number(take);
     try {
         const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-        const [producto, totalItems] = await productoRepo.createQueryBuilder('producto')
-            .innerJoin('producto.marca', 'marca')
-            .innerJoin('producto.categoria', 'categoria')
-            .innerJoin('producto.proveedor', 'proveedor')
-            .addSelect(['proveedor.nombre_proveedor', 'proveedor.id'])
-            .addSelect(['categoria.categoria', 'categoria.id'])
-            .addSelect(['marca.marca', 'marca.id'])
+        const [producto, totalItems] = await productoRepo
+            .createQueryBuilder("producto")
+            .innerJoin("producto.marca", "marca")
+            .innerJoin("producto.categoria", "categoria")
+            .innerJoin("producto.proveedor", "proveedor")
+            .addSelect(["proveedor.nombre_proveedor", "proveedor.id"])
+            .addSelect(["categoria.categoria", "categoria.id"])
+            .addSelect(["marca.marca", "marca.id"])
             .skip((pagina - 1) * take)
             .take(take)
-            .where("producto.nombreProducto like :name", { name: `%${search}%` })
-            .orderBy('producto.id', order)
+            .where("producto.nombreProducto like :name", {
+            name: `%${search}%`,
+        })
+            .orderBy("producto.id", order)
             .getManyAndCount();
         for (let i = 0; i < producto.length; i++) {
             const prod = producto[i];
@@ -105,14 +122,25 @@ ProductoController.ProductosPaginados = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                producto,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados",
+            });
         }
     }
     catch (error) {
-        res.json({ ok: false, message: 'Algo ha salido mal' });
+        res.json({ ok: false, message: "Algo ha salido mal" });
     }
 };
 //mostrar productos por categorias
@@ -124,13 +152,14 @@ ProductoController.MostrarProductosCategoria = async (req, res) => {
     take = Number(take);
     try {
         const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-        const [producto, totalItems] = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
-            .leftJoin('producto.categoria', 'cat')
-            .addSelect(['cat.categoria'])
+        const [producto, totalItems] = await productoRepo
+            .createQueryBuilder("producto")
+            .leftJoin("producto.proveedor", "prov")
+            .addSelect(["prov.nombre_proveedor"])
+            .leftJoin("producto.marca", "marca")
+            .addSelect(["marca.marca"])
+            .leftJoin("producto.categoria", "cat")
+            .addSelect(["cat.categoria"])
             .skip((pagina - 1) * take)
             .take(take)
             .where({ categoria })
@@ -142,14 +171,26 @@ ProductoController.MostrarProductosCategoria = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                producto,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados con categoria: ' + categoria });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados con categoria: " +
+                    categoria,
+            });
         }
     }
     catch (error) {
-        res.json({ ok: false, message: 'Algo ha salido mal!' });
+        res.json({ ok: false, message: "Algo ha salido mal!" });
     }
 };
 //mostrar por marca
@@ -161,13 +202,14 @@ ProductoController.MostrarProductosMarca = async (req, res) => {
     take = Number(take);
     try {
         const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-        const [producto, totalItems] = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.categoria', 'cat')
-            .addSelect(['cat.categoria'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
+        const [producto, totalItems] = await productoRepo
+            .createQueryBuilder("producto")
+            .leftJoin("producto.proveedor", "prov")
+            .addSelect(["prov.nombre_proveedor"])
+            .leftJoin("producto.categoria", "cat")
+            .addSelect(["cat.categoria"])
+            .leftJoin("producto.marca", "marca")
+            .addSelect(["marca.marca"])
             .skip((pagina - 1) * take)
             .take(take)
             .where({ marca })
@@ -179,14 +221,25 @@ ProductoController.MostrarProductosMarca = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, producto, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                producto,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados",
+            });
         }
     }
     catch (error) {
-        res.json({ ok: false, message: 'Algo ha salido mal' });
+        res.json({ ok: false, message: "Algo ha salido mal" });
     }
 };
 //obtener producto por id
@@ -194,33 +247,44 @@ ProductoController.ObtenerProductoPorID = async (req, res) => {
     const { id } = req.params;
     try {
         const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-        const producto = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
-            .leftJoin('producto.categoria', 'cat')
-            .addSelect(['cat.categoria']).where({ id })
+        const producto = await productoRepo
+            .createQueryBuilder("producto")
+            .leftJoin("producto.proveedor", "prov")
+            .addSelect(["prov.nombre_proveedor"])
+            .leftJoin("producto.marca", "marca")
+            .addSelect(["marca.marca"])
+            .leftJoin("producto.categoria", "cat")
+            .addSelect(["cat.categoria"])
+            .where({ id })
             .getOneOrFail();
         if (!producto) {
-            res.status(400).json({ ok: false, message: "Error al procesar la peticion" });
+            res.status(400).json({
+                ok: false,
+                message: "Error al procesar la peticion",
+            });
             return;
         }
         res.json({ ok: true, producto });
     }
     catch (error) {
-        return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
+        return res.status(404).json({
+            ok: false,
+            message: "No hay registros con este id: " + id,
+        });
     }
 };
 //create new product
 ProductoController.AgregarProducto = async (req, res) => {
-    const { codigo_producto, nombre_producto, descripcion, proveedor, marca, categoria } = req.body;
+    const { codigo_producto, nombre_producto, descripcion, proveedor, marca, categoria, } = req.body;
     const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
     const codeProductExist = await prodRepo.findOne({
-        where: { codigo_Producto: codigo_producto }
+        where: { codigo_Producto: codigo_producto },
     });
     if (codeProductExist) {
-        return res.status(400).json({ ok: false, message: 'Ya existe un producto con el codigo ' + codigo_producto });
+        return res.status(400).json({
+            ok: false,
+            message: "Ya existe un producto con el codigo " + codigo_producto,
+        });
     }
     const producto = new Producto_1.Producto();
     producto.codigo_Producto = codigo_producto;
@@ -234,16 +298,20 @@ ProductoController.AgregarProducto = async (req, res) => {
     producto.categoria = categoria;
     producto.status = false;
     //validations
-    const ValidateOps = { validationError: { target: false, value: false } };
+    const ValidateOps = {
+        validationError: { target: false, value: false },
+    };
     const errors = await class_validator_1.validate(producto, ValidateOps);
     if (errors.length > 0) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
     //try to save a product
     try {
         const nuevoProducto = await prodRepo.save(producto);
         //declaraciones de IVA
-        let PorcentajeTotal = 1.00;
+        let PorcentajeTotal = 1.0;
         let PorcentajeIVA = 0.13;
         let TotalIva = PorcentajeTotal + PorcentajeIVA;
         //Actualizar precio producto Con IVA incluido
@@ -254,21 +322,29 @@ ProductoController.AgregarProducto = async (req, res) => {
         try {
             const newProduct = await prodRepo.save(nuevoProducto);
             //all ok
-            res.json({ ok: true, message: 'Producto guardado con Exito!', newProduct });
+            res.json({
+                ok: true,
+                message: "Producto guardado con Exito!",
+                newProduct,
+            });
         }
         catch (error) {
-            console.log('Error al aplicar IVA!!!');
+            console.log("Error al aplicar IVA!!!");
         }
     }
     catch (e) {
-        res.status(409).json({ ok: false, message: 'Algo esta fallando!', e });
+        res.status(409).json({
+            ok: false,
+            message: "Algo esta fallando!",
+            e,
+        });
     }
 };
 //edit a product
 ProductoController.EditarProducto = async (req, res) => {
     let producto;
     const { id } = req.params;
-    const { nombre_producto, descripcion, descuento, costo_standar, proveedor, marca, categoria } = req.body;
+    const { nombre_producto, descripcion, descuento, costo_standar, proveedor, marca, categoria, } = req.body;
     const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
     try {
         producto = await prodRepo.findOneOrFail(id);
@@ -281,21 +357,29 @@ ProductoController.EditarProducto = async (req, res) => {
         producto.categoria = categoria;
     }
     catch (error) {
-        return res.status(404).json({ ok: false, message: 'No se encontro resultado ' });
+        return res
+            .status(404)
+            .json({ ok: false, message: "No se encontro resultado " });
     }
-    const ValidateOps = { validationError: { target: false, value: false } };
+    const ValidateOps = {
+        validationError: { target: false, value: false },
+    };
     const errors = await class_validator_1.validate(producto, ValidateOps);
     if (errors.length > 0) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
     //try to save producto
     try {
         await prodRepo.save(producto);
         //all ok
-        res.json({ ok: true, message: 'Producto actualizado con exito!' });
+        res.json({ ok: true, message: "Producto actualizado con exito!" });
     }
     catch (error) {
-        return res.status(409).json({ ok: true, message: 'Algo ha salido mal!', });
+        return res
+            .status(409)
+            .json({ ok: true, message: "Algo ha salido mal!" });
     }
 };
 //delete product
@@ -306,7 +390,10 @@ ProductoController.EliminarProducto = async (req, res) => {
         const producto = await prodRepo.findOneOrFail(id);
         try {
             if (producto.catidad_por_unidad != 0) {
-                return res.status(400).json({ ok: false, message: 'No se puede eliminar un producto con articulos en stock!' });
+                return res.status(400).json({
+                    ok: false,
+                    message: "No se puede eliminar un producto con articulos en stock!",
+                });
             }
             //producto.status = false
             await prodRepo.remove(producto);
@@ -316,13 +403,19 @@ ProductoController.EliminarProducto = async (req, res) => {
             }
         }
         catch (error) {
-            return res.send({ ok: false, message: 'No puedes eliminar este producto porque podria haber registros vinculados' });
+            return res.send({
+                ok: false,
+                message: "No puedes eliminar este producto porque podria haber registros vinculados",
+            });
         }
-        //delete 
-        res.json({ ok: true, message: 'Se elimino el producto!' });
+        //delete
+        res.json({ ok: true, message: "Se elimino el producto!" });
     }
     catch (e) {
-        return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
+        return res.status(404).json({
+            ok: false,
+            message: "No hay registros con este id: " + id,
+        });
     }
 };
 //subir imagen producto
@@ -331,25 +424,33 @@ ProductoController.ImagenProducto = async (req, res) => {
     const productRepo = typeorm_1.getRepository(Producto_1.Producto);
     let product;
     if (req.files === undefined || req.files.foto === undefined) {
-        res.status(400).json({ ok: false, message: 'Ningun archivo selecionando' });
+        res.status(400).json({
+            ok: false,
+            message: "Ningun archivo selecionando",
+        });
     }
     else {
         //console.log(req.file.path);
         let foto = req.files.foto;
-        let fotoName = foto.name.split('.');
+        let fotoName = foto.name.split(".");
         let ext = fotoName[fotoName.length - 1];
-        //extensiones permitidas 
-        const extFile = ['png', 'jpeg', 'jpg', 'gif'];
+        //extensiones permitidas
+        const extFile = ["png", "jpeg", "jpg", "gif"];
         if (extFile.indexOf(ext) < 0) {
-            return res.status(400)
-                .json({ ok: false, message: 'Las extensiones permitidas son ' + extFile.join(', ') });
+            return res.status(400).json({
+                ok: false,
+                message: "Las extensiones permitidas son " + extFile.join(", "),
+            });
         }
         else {
             //cambiar nombre del archivo
             var nombreFoto = `${id}-${new Date().getMilliseconds()}.${ext}`;
             foto.mv(`src/uploads/productos/${nombreFoto}`, (err) => {
                 if (err) {
-                    return res.status(500).json({ ok: false, message: 'No se ha podido cargar la imagen!' });
+                    return res.status(500).json({
+                        ok: false,
+                        message: "No se ha podido cargar la imagen!",
+                    });
                 }
             });
             let pathImg;
@@ -359,9 +460,11 @@ ProductoController.ImagenProducto = async (req, res) => {
                 const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${product.image}`);
                 pathImg = path.resolve(__dirname, `../../src/uploads/productos/${nombreFoto}`);
                 //console.log(pathImg);
-                result = await cloudinary.v2.uploader.upload(pathImg, { folder: 'productos' });
+                result = await cloudinary.v2.uploader.upload(pathImg, {
+                    folder: "productos",
+                });
                 if (!product.public_id) {
-                    console.log('Producto nuevo');
+                    console.log("Producto nuevo");
                 }
                 else {
                     const deleteFotoCloud = await cloudinary.v2.uploader.destroy(product.public_id);
@@ -369,18 +472,32 @@ ProductoController.ImagenProducto = async (req, res) => {
                 }
             }
             catch (e) {
-                res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
+                res.status(404).json({
+                    ok: false,
+                    message: "No hay registros con este id: " + id,
+                });
             }
             //try to save product
             try {
-                await productRepo.createQueryBuilder().update(Producto_1.Producto).set({ image: result.secure_url, public_id: result.public_id }).where({ id }).execute();
+                await productRepo
+                    .createQueryBuilder()
+                    .update(Producto_1.Producto)
+                    .set({
+                    image: result.secure_url,
+                    public_id: result.public_id,
+                })
+                    .where({ id })
+                    .execute();
                 await fs.unlinkSync(pathImg);
             }
             catch (error) {
-                res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
+                res.status(409).json({
+                    ok: false,
+                    message: "Algo ha salido mal!",
+                });
             }
         }
-        res.json({ ok: true, message: 'La imagen se ha guardado.' });
+        res.json({ ok: true, message: "La imagen se ha guardado." });
     }
 };
 //eliminar imagen Producto
@@ -391,7 +508,7 @@ ProductoController.EliminarImagenProducto = async (req, res) => {
         const product = await productRepo.findOneOrFail(id);
         //const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${product.image}`);
         if (!product.public_id) {
-            console.log('No Image');
+            console.log("No Image");
         }
         else {
             const deleteFotoCloud = await cloudinary.v2.uploader.destroy(product.public_id);
@@ -399,15 +516,25 @@ ProductoController.EliminarImagenProducto = async (req, res) => {
         }
     }
     catch (e) {
-        return res.status(404).json({ ok: false, message: 'No hay registros con este id: ' + id });
+        return res.status(404).json({
+            ok: false,
+            message: "No hay registros con este id: " + id,
+        });
     }
     //try to save product
     try {
-        await productRepo.createQueryBuilder().update(Producto_1.Producto).set({ image: "producto.png", public_id: '' }).where({ id }).execute();
-        res.json({ ok: true, message: 'imagen de producto eliminada' });
+        await productRepo
+            .createQueryBuilder()
+            .update(Producto_1.Producto)
+            .set({ image: "producto.png", public_id: "" })
+            .where({ id })
+            .execute();
+        res.json({ ok: true, message: "imagen de producto eliminada" });
     }
     catch (error) {
-        return res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
+        return res
+            .status(409)
+            .json({ ok: false, message: "Algo ha salido mal!" });
     }
 };
 //getProductoById
@@ -425,10 +552,13 @@ ProductoController.EstadoProducto = async (req, res) => {
         producto = await proRepo.findOneOrFail(id);
         producto.status = !producto.status;
         await proRepo.save(producto);
-        res.json({ ok: true, mesaage: 'Estado de producto ha cambiado!' });
+        res.json({ ok: true, mesaage: "Estado de producto ha cambiado!" });
     }
     catch (error) {
-        res.json({ ok: false, message: 'No se pudo completar la accion solicitada' });
+        res.json({
+            ok: false,
+            message: "No se pudo completar la accion solicitada",
+        });
     }
 };
 //get image producto
@@ -449,21 +579,23 @@ ProductoController.ProductosMasVendidos = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const [productos, totalItems] = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.categoria', 'cat')
-            .addSelect(['cat.categoria'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
+        const [productos, totalItems] = await productoRepo
+            .createQueryBuilder("producto")
+            .leftJoin("producto.proveedor", "prov")
+            .addSelect(["prov.nombre_proveedor"])
+            .leftJoin("producto.categoria", "cat")
+            .addSelect(["cat.categoria"])
+            .leftJoin("producto.marca", "marca")
+            .addSelect(["marca.marca"])
             .skip((pagina - 1) * take)
             .take(take)
             .getManyAndCount();
         const formated = productos.map(async (pro) => {
             let producto = pro.id;
-            const DO = await detalleORepo.createQueryBuilder('detalle_orden')
-                .innerJoin('detalle_orden.producto', 'dto')
-                .addSelect(['dto.nombreProducto', 'dto.id'])
+            const DO = await detalleORepo
+                .createQueryBuilder("detalle_orden")
+                .innerJoin("detalle_orden.producto", "dto")
+                .addSelect(["dto.nombreProducto", "dto.id"])
                 .where({ producto })
                 .getMany();
             let totalVenta = DO.map((a) => a.cantidad).reduce((a, b) => a + b, 0);
@@ -481,12 +613,23 @@ ProductoController.ProductosMasVendidos = async (req, res) => {
             nextPage = pagina >= totalPages ? pagina : pagina + 1;
             prevPage = pagina <= 1 ? pagina : pagina - 1;
         }
-        Promise.all(formated).then(values => {
-            res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false });
+        Promise.all(formated).then((values) => {
+            res.json({
+                ok: true,
+                values,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+                empty: false,
+            });
         });
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo ha fallado!" });
     }
 };
 //productos mas ratings
@@ -498,21 +641,23 @@ ProductoController.ProductosConMasRatings = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const [productos, totalItems] = await productoRepo.createQueryBuilder('producto')
-            .leftJoin('producto.proveedor', 'prov')
-            .addSelect(['prov.nombre_proveedor'])
-            .leftJoin('producto.categoria', 'cat')
-            .addSelect(['cat.categoria'])
-            .leftJoin('producto.marca', 'marca')
-            .addSelect(['marca.marca'])
+        const [productos, totalItems] = await productoRepo
+            .createQueryBuilder("producto")
+            .leftJoin("producto.proveedor", "prov")
+            .addSelect(["prov.nombre_proveedor"])
+            .leftJoin("producto.categoria", "cat")
+            .addSelect(["cat.categoria"])
+            .leftJoin("producto.marca", "marca")
+            .addSelect(["marca.marca"])
             .skip((pagina - 1) * take)
             .take(take)
             .getManyAndCount();
         const formated = productos.map(async (pro) => {
             let producto = pro.id;
-            const Rating = await ratingRepo.createQueryBuilder('rating')
-                .innerJoin('rating.producto', 'dto')
-                .addSelect(['dto.nombreProducto', 'dto.id'])
+            const Rating = await ratingRepo
+                .createQueryBuilder("rating")
+                .innerJoin("rating.producto", "dto")
+                .addSelect(["dto.nombreProducto", "dto.id"])
                 .where({ producto })
                 .getMany();
             let totalRating = Rating.map((a) => a.ratingNumber).reduce((a, b) => a + b, 0);
@@ -531,12 +676,23 @@ ProductoController.ProductosConMasRatings = async (req, res) => {
             nextPage = pagina >= totalPages ? pagina : pagina + 1;
             prevPage = pagina <= 1 ? pagina : pagina - 1;
         }
-        Promise.all(formated).then(values => {
-            res.json({ ok: true, values, totalItems, totalPages, currentPage: pagina, nextPage, prevPage, empty: false });
+        Promise.all(formated).then((values) => {
+            res.json({
+                ok: true,
+                values,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+                empty: false,
+            });
         });
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo ha fallado!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo ha fallado!" });
     }
 };
 //agregarProductoStock
@@ -551,19 +707,34 @@ ProductoController.AgregarProductoStock = async (req, res) => {
     try {
         empleado = await empleadoRepo.findOneOrFail(id);
         let fecha = new Date();
-        let getFullDate = (fecha.toLocaleString('en-us', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true, }));
-        let modificadoPor = empleado.nombre + " " + empleado.apellido + ` de tipo ${empleado.role}, en la fecha: ${getFullDate}`;
+        let getFullDate = fecha.toLocaleString("en-us", {
+            weekday: "short",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+        });
+        let modificadoPor = empleado.nombre +
+            " " +
+            empleado.apellido +
+            ` de tipo ${empleado.role}, en la fecha: ${getFullDate}`;
         try {
             //buscar producto
             producto = await productoRepo.findOne(idp);
             if (!producto) {
-                return res.status(400).json({ ok: false, message: 'No se encontro resultado con el id: ' + idp });
+                return res.status(400).json({
+                    ok: false,
+                    message: "No se encontro resultado con el id: " + idp,
+                });
             }
             else {
                 //declaracion porcentaje de ganancia mediante el mercado
                 let PorcentajeBeneficio = beneficio / 100;
                 //declaraciones de IVA
-                let PorcentajeTotal = 1.00;
+                let PorcentajeTotal = 1.0;
                 let PorcentajeIVA = 0.13;
                 let TotalIva = PorcentajeTotal + PorcentajeIVA;
                 //generar precio de venta de acuerdo al precio de compra y margen de beneficio
@@ -586,7 +757,10 @@ ProductoController.AgregarProductoStock = async (req, res) => {
                     res.json({ ok: true, producto });
                 }
                 else {
-                    res.status(400).json({ ok: false, message: 'Aun hay producto en stock' });
+                    res.status(400).json({
+                        ok: false,
+                        message: "Aun hay producto en stock",
+                    });
                 }
             }
         }
@@ -595,7 +769,9 @@ ProductoController.AgregarProductoStock = async (req, res) => {
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Administrador no encontrado' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Administrador no encontrado" });
     }
 };
 exports.default = ProductoController;

@@ -19,10 +19,10 @@ RatingController.AgregarRating = async (req, res) => {
     try {
         await ratingRepo.save(rating);
         //all is ok
-        res.json({ ok: true, message: 'Rating agregado con exito' });
+        res.json({ ok: true, message: "Rating agregado con exito" });
     }
     catch (error) {
-        return res.status(400).json({ message: 'Algo salio mal!' });
+        return res.status(400).json({ message: "Algo salio mal!" });
     }
 };
 //mostrar rating paginados
@@ -33,7 +33,7 @@ RatingController.MostrarRating = async (req, res) => {
     take = Number(take);
     try {
         const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
-        const rating = await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre 
+        const rating = await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre
             from rating r inner join producto p on r.productoId = p.id inner join cliente c on r.clienteId = c.id limit ${take} offset ${pagina} `);
         // producto.map(prod =>{
         //     delete prod.proveedor.email;
@@ -48,11 +48,14 @@ RatingController.MostrarRating = async (req, res) => {
             res.json({ ok: true, rating });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados",
+            });
         }
     }
     catch (error) {
-        return res.json({ ok: false, message: 'Algo ha salido mal' });
+        return res.json({ ok: false, message: "Algo ha salido mal" });
     }
 };
 //Mostrar rating pajinado
@@ -63,11 +66,12 @@ RatingController.MostrarRatingPaginados = async (req, res) => {
     take = Number(take);
     try {
         const ratingsRepo = typeorm_1.getRepository(Rating_1.Rating);
-        const [ratings, totalItems] = await ratingsRepo.createQueryBuilder('rating')
-            .innerJoin('rating.cliente', 'cliente')
-            .innerJoin('rating.producto', 'producto')
-            .addSelect(['cliente.nombre', 'cliente.apellido'])
-            .addSelect(['producto.nombreProducto'])
+        const [ratings, totalItems] = await ratingsRepo
+            .createQueryBuilder("rating")
+            .innerJoin("rating.cliente", "cliente")
+            .innerJoin("rating.producto", "producto")
+            .addSelect(["cliente.nombre", "cliente.apellido"])
+            .addSelect(["producto.nombreProducto"])
             .skip((pagina - 1) * take)
             .take(take)
             .getManyAndCount();
@@ -78,14 +82,27 @@ RatingController.MostrarRatingPaginados = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, ratings, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                ratings,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados!' });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados!",
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo ha salido mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo ha salido mal!" });
     }
 };
 //Mostrar rating por producto
@@ -97,11 +114,17 @@ RatingController.MostrarRatingPorProducto = async (req, res) => {
     take = Number(take);
     try {
         const ratingsRepo = typeorm_1.getRepository(Rating_1.Rating);
-        const [ratings, totalItems] = await ratingsRepo.createQueryBuilder('rating')
-            .innerJoin('rating.cliente', 'cliente')
-            .innerJoin('rating.producto', 'producto')
-            .addSelect(['cliente.nombre', 'cliente.apellido', 'cliente.imagen', 'cliente.id'])
-            .addSelect(['producto.nombreProducto'])
+        const [ratings, totalItems] = await ratingsRepo
+            .createQueryBuilder("rating")
+            .innerJoin("rating.cliente", "cliente")
+            .innerJoin("rating.producto", "producto")
+            .addSelect([
+            "cliente.nombre",
+            "cliente.apellido",
+            "cliente.imagen",
+            "cliente.id",
+        ])
+            .addSelect(["producto.nombreProducto"])
             .skip((pagina - 1) * take)
             .take(take)
             .where({ producto })
@@ -113,14 +136,25 @@ RatingController.MostrarRatingPorProducto = async (req, res) => {
             }
             let nextPage = pagina >= totalPages ? pagina : pagina + 1;
             let prevPage = pagina <= 1 ? pagina : pagina - 1;
-            res.json({ ok: true, ratings, totalItems, totalPages, currentPage: pagina, nextPage, prevPage });
+            res.json({
+                ok: true,
+                ratings,
+                totalItems,
+                totalPages,
+                currentPage: pagina,
+                nextPage,
+                prevPage,
+            });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron productos!' });
+            res.json({
+                ok: false,
+                message: "No se encontraron productos!",
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ message: 'Algo ha salido mal!' });
+        return res.status(400).json({ message: "Algo ha salido mal!" });
     }
 };
 //Actualizar rating realizados por el usuario logado
@@ -131,25 +165,34 @@ RatingController.ActualizarRating = async (req, res) => {
     const { ratingNumber, titulo, comentario } = req.body;
     const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
     try {
-        rating = await ratingRepo.createQueryBuilder('rating')
-            .leftJoin('rating.cliente', 'rc')
-            .addSelect(['rc.id', 'rc.nombre', 'rc.apellido'])
+        rating = await ratingRepo
+            .createQueryBuilder("rating")
+            .leftJoin("rating.cliente", "rc")
+            .addSelect(["rc.id", "rc.nombre", "rc.apellido"])
             .where({ id })
             .getOneOrFail();
-        rating.ratingNumber = ratingNumber,
-            rating.titulo = titulo,
-            rating.comentario = comentario;
+        (rating.ratingNumber = ratingNumber),
+            (rating.titulo = titulo),
+            (rating.comentario = comentario);
         console.log(rating);
-        if ((rating.cliente.id === clienteid)) {
+        if (rating.cliente.id === clienteid) {
             await ratingRepo.save(rating);
-            res.json({ ok: true, message: 'Rating actualizado' });
+            res.json({ ok: true, message: "Rating actualizado" });
         }
         else {
-            return res.json({ ok: false, message: 'No puedes modificar este rating' });
+            return res.json({
+                ok: false,
+                message: "No puedes modificar este rating",
+            });
         }
     }
     catch (error) {
-        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados con el id: ' + id });
+        return res
+            .status(404)
+            .json({
+            ok: false,
+            message: "No se han encontrado resultados con el id: " + id,
+        });
     }
 };
 //eliminar ratin hechos por el usuario logado
@@ -159,22 +202,31 @@ RatingController.EliminarRating = async (req, res) => {
     const { id } = req.params;
     const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
     try {
-        rating = await ratingRepo.createQueryBuilder('rating')
-            .leftJoin('rating.cliente', 'rc')
-            .addSelect(['rc.id', 'rc.nombre', 'rc.apellido'])
+        rating = await ratingRepo
+            .createQueryBuilder("rating")
+            .leftJoin("rating.cliente", "rc")
+            .addSelect(["rc.id", "rc.nombre", "rc.apellido"])
             .where({ id })
             .getOneOrFail();
         console.log(rating);
-        if ((rating.cliente.id === clienteid)) {
+        if (rating.cliente.id === clienteid) {
             await ratingRepo.delete(id);
-            res.json({ ok: true, message: 'Rating Eliminado!' });
+            res.json({ ok: true, message: "Rating Eliminado!" });
         }
         else {
-            return res.json({ ok: false, message: 'No puedes eliminar rating de otros usuarios' });
+            return res.json({
+                ok: false,
+                message: "No puedes eliminar rating de otros usuarios",
+            });
         }
     }
     catch (error) {
-        return res.status(404).json({ ok: false, message: 'No se han encontrado resultados con el id: ' + id });
+        return res
+            .status(404)
+            .json({
+            ok: false,
+            message: "No se han encontrado resultados con el id: " + id,
+        });
     }
 };
 //mostrar rating id
@@ -183,19 +235,25 @@ RatingController.RatingPorId = async (req, res) => {
     const { id } = req.params;
     try {
         const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
-        rating = await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre 
-            from rating r 
-            inner join producto p on r.productoId = p.id inner join cliente c on r.clienteId = c.id 
+        rating =
+            await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre
+            from rating r
+            inner join producto p on r.productoId = p.id inner join cliente c on r.clienteId = c.id
             where r.id = '${id}'`);
         if (rating.length > 0) {
             res.json({ ok: true, rating });
         }
         else {
-            res.json({ ok: false, message: 'No se encontraron resultados con el id: ' + id });
+            res.json({
+                ok: false,
+                message: "No se encontraron resultados con el id: " + id,
+            });
         }
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo ha salido mal' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo ha salido mal" });
     }
 };
 exports.default = RatingController;

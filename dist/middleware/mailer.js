@@ -13,12 +13,12 @@ exports.transporter = nodemailer.createTransport({
         pass: process.env.SECRETKEYAPP,
     },
     tls: {
-        rejectUnauthorized: false
-    }
+        rejectUnauthorized: false,
+    },
 });
 exports.transporter.verify((err, success) => {
     err
-        ? console.log('===> Algo salio mal al intentar conectar al servidor de correos')
+        ? console.log("===> Algo salio mal al intentar conectar al servidor de correos")
         : console.log(`===> Servidor listo para enviar emails`);
 });
 //# sourceMappingURL=mailer.js.map
