@@ -12,7 +12,7 @@ const checkRole = (roles) => {
             emp = await userRepo.findOneOrFail(id);
         }
         catch (e) {
-            res.status(404).json({ message: 'Not Authorized' });
+            res.status(404).json({ message: "Not Authorized" });
         }
         //check
         const { role } = emp;
@@ -20,7 +20,7 @@ const checkRole = (roles) => {
             next();
         }
         else {
-            res.status(404).json({ message: 'Not Authorized' });
+            res.status(404).json({ message: "Not Authorized" });
         }
     };
 };

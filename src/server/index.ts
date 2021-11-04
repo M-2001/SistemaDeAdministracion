@@ -72,13 +72,18 @@ class Server {
     //this.app.set('view engine', 'ejs')
 
     //CORS
-    //this.app.use(cors({ origin: ['https://client-mye-soporte.vercel.app', 'https://mye-soporte.vercel.app'], credentials: true }));
     this.app.use(
       cors({
-        origin: ["http://localhost:3000", "http://localhost:3001"],
+        origin: [
+          "https://client-mye-soporte.vercel.app",
+          "https://mye-soporte.vercel.app",
+          "http://localhost:3000",
+          "http://localhost:3001",
+        ],
         credentials: true,
       })
     );
+
     //fileupload
     this.app.use(fileUpload());
 
@@ -125,7 +130,12 @@ class Server {
   private sockets() {
     this.io = new SocketIO.Server(this.httpServer, {
       cors: {
-        origin: ["http://localhost:3000", "http://localhost:3001"],
+        origin: [
+          "https://client-mye-soporte.vercel.app",
+          "https://mye-soporte.vercel.app",
+          "http://localhost:3000",
+          "http://localhost:3001",
+        ],
         allowedHeaders: "Content-Type",
         methods: "GET, POST",
         credentials: true,

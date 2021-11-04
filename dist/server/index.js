@@ -27,25 +27,24 @@ class Server {
     constructor() {
         //sirve para iniciar todas las rutas necesarias
         this.routenames = {
-            empleado: '/api/empleado',
-            cliente: '/api/user',
-            authEmpleado: '/api/auth',
-            authCliente: '/api/authU',
-            categoria: '/api/categoria',
-            marca: '/api/marca',
-            proveedor: '/api/proveedor',
-            producto: '/api/producto',
-            usuario: '/api/usuario',
-            rating: '/api/producto-rating',
-            orden: '/api/orden',
-            ordenDte: '/api/orden-detalle',
-            carrito: '/api/carrito',
-            cupon: '/api/cupon',
-            pay: '/api/pay-checkout',
-            gallery: '/api/gallery',
+            empleado: "/api/empleado",
+            cliente: "/api/user",
+            authEmpleado: "/api/auth",
+            authCliente: "/api/authU",
+            categoria: "/api/categoria",
+            marca: "/api/marca",
+            proveedor: "/api/proveedor",
+            producto: "/api/producto",
+            usuario: "/api/usuario",
+            rating: "/api/producto-rating",
+            orden: "/api/orden",
+            ordenDte: "/api/orden-detalle",
+            carrito: "/api/carrito",
+            cupon: "/api/cupon",
+            pay: "/api/pay-checkout",
+            gallery: "/api/gallery",
         };
-        this.corsOption = () => {
-        };
+        this.corsOption = () => { };
         this.app = express();
         this.middleware();
         this.routes();
@@ -57,7 +56,13 @@ class Server {
     middleware() {
         //this.app.set('view engine', 'ejs')
         //CORS
-        this.app.use(cors({ origin: ['https://client-mye-soporte.vercel.app', 'https://mye-soporte.vercel.app'], credentials: true }));
+        this.app.use(cors({
+            origin: [
+                "https://client-mye-soporte.vercel.app",
+                "https://mye-soporte.vercel.app",
+            ],
+            credentials: true,
+        }));
         //fileupload
         this.app.use(fileUpload());
         //Lectura del body
@@ -97,19 +102,22 @@ class Server {
     sockets() {
         this.io = new SocketIO.Server(this.httpServer, {
             cors: {
-                origin: ['https://client-mye-soporte.vercel.app', 'https://mye-soporte.vercel.app'],
-                allowedHeaders: 'Content-Type',
-                methods: 'GET, POST',
+                origin: [
+                    "https://client-mye-soporte.vercel.app",
+                    "https://mye-soporte.vercel.app",
+                ],
+                allowedHeaders: "Content-Type",
+                methods: "GET, POST",
                 credentials: true,
-            }
+            },
         });
         //require('socket.io')(this.httpServer,{origin:'*',})
     }
     //connectar cliente que escuchar los eventos del servidor
     conectarCliente() {
-        this.io.on("connect", cliente => {
+        this.io.on("connect", (cliente) => {
             this.socketID = cliente.id;
-            console.log('Usuario conectado al servidor con id: ' + this.socketID);
+            console.log("Usuario conectado al servidor con id: " + this.socketID);
             sockets.desconectar(cliente, this.io);
             sockets.nuevo(cliente, this.io);
         });

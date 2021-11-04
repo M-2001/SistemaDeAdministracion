@@ -31,7 +31,9 @@ CarritoController.AgregarProductoCarrito = async (req, res) => {
         res.json({ ok: true, total, Items });
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
 };
 //guardar orden detalle
@@ -57,12 +59,12 @@ CarritoController.guardarOrden_DetalleOrden = async (req, res) => {
             let qtyExist = productoItem.catidad_por_unidad - qty;
             amount += operacion;
             const OnlyTwoDecimals = amount.toFixed(2);
-            const parseAmount = parseInt(OnlyTwoDecimals.replace('.', ','), 10);
+            const parseAmount = parseInt(OnlyTwoDecimals.replace(".", ","), 10);
             const saveOD = new Detalles_Orden_1.DetalleOrden();
-            saveOD.orden = ordenC,
-                saveOD.producto = productoItem,
-                saveOD.cantidad = qty,
-                saveOD.totalUnidad = parseAmount;
+            (saveOD.orden = ordenC),
+                (saveOD.producto = productoItem),
+                (saveOD.cantidad = qty),
+                (saveOD.totalUnidad = parseAmount);
             const Save = await ordeDRepo.save(saveOD);
             productoItem.catidad_por_unidad = qtyExist;
             const saveProduct = await proRepo.save(productoItem);
@@ -71,10 +73,11 @@ CarritoController.guardarOrden_DetalleOrden = async (req, res) => {
         });
     }
     catch (error) {
-        return res.status(400).json({ ok: false, message: 'Algo salio mal!' });
+        return res
+            .status(400)
+            .json({ ok: false, message: "Algo salio mal!" });
     }
     res.json({ ok: true, totalToPay });
 };
-;
 exports.default = CarritoController;
 //# sourceMappingURL=Carrito.js.map

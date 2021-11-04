@@ -10,12 +10,20 @@ const app = express();
 dotenv.config();
 const SocketServer = index_1.default.instance;
 SocketServer.start(() => {
-    app.use(cors({ origin: ['https://client-mye-soporte.vercel.app', 'https://mye-soporte.vercel.app'], credentials: true }));
-    console.log('===> Servidor corriendo en puerto: ' + SocketServer.port);
-    typeorm_1.createConnection().then(async (connection) => {
+    app.use(cors({
+        origin: [
+            "https://client-mye-soporte.vercel.app",
+            "https://mye-soporte.vercel.app",
+        ],
+        credentials: true,
+    }));
+    console.log("===> Servidor corriendo en puerto: " + SocketServer.port);
+    typeorm_1.createConnection()
+        .then(async (connection) => {
         if (connection) {
-            return console.log('===> Conectado a la base de datos con exito!!!');
+            return console.log("===> Conectado a la base de datos con exito!!!");
         }
-    }).catch(error => console.log('===> Hubo un error al intentar conectar con la base de datos!'));
+    })
+        .catch((error) => console.log("===> Hubo un error al intentar conectar con la base de datos!"));
 });
 //# sourceMappingURL=index.js.map
