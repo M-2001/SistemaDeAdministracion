@@ -78,15 +78,16 @@ AuthEmployeeController.forgotPassword = async (req, res) => {
     try {
         empl = await emplRespo.findOneOrFail({ where: { email: email } });
         token = jwt.sign({ id: empl.id, code: empl.codeAccess }, process.env.JWTSECRETRESET, { expiresIn: '30m' });
-        verifycationLink = `https://system-pc.netlify.app/reset-password/${token}`;
+        verifycationLink = `https://mye-soporte.vercel.app/reset-password/${token}`;
     }
     catch (e) {
         return res.json({ ok: false, message: 'no se encontro to correo en los registros' });
     }
     //TODO: sendEmail
     try {
+        let email = process.env.CORREO;
         await mailer_1.transporter.sendMail({
-            from: '"Forgot Password " <castlem791@gmail.com>',
+            from: ` "Forgot Password " <${email}> `,
             to: empl.email,
             subject: "Forgot Password",
             html: `<b>Por favor, consulte el siguiente enlace o peguelo en su navegador para completar el proceso y poder restaurar su contraseña: </b>

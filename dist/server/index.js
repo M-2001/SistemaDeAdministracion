@@ -16,6 +16,7 @@ const OrdenDetalle_1 = require("../router/OrdenDetalle");
 const carrito_1 = require("../router/carrito");
 const cupon_1 = require("../router/cupon");
 const pay_1 = require("../router/pay");
+const gallery_router_1 = require("../router/gallery.router");
 const fileUpload = require("express-fileupload");
 const SocketIO = require("socket.io");
 const http = require("http");
@@ -40,7 +41,8 @@ class Server {
             ordenDte: '/api/orden-detalle',
             carrito: '/api/carrito',
             cupon: '/api/cupon',
-            pay: '/api/pay-checkout'
+            pay: '/api/pay-checkout',
+            gallery: '/api/gallery',
         };
         this.corsOption = () => {
         };
@@ -55,7 +57,7 @@ class Server {
     middleware() {
         //this.app.set('view engine', 'ejs')
         //CORS
-        this.app.use(cors({ origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app", 'https://admin-system-pc.vercel.app'], credentials: true }));
+        this.app.use(cors({ origin: ['https://client-mye-soporte.vercel.app', 'https://mye-soporte.vercel.app'], credentials: true }));
         //fileupload
         this.app.use(fileUpload());
         //Lectura del body
@@ -80,6 +82,7 @@ class Server {
         this.app.use(this.routenames.carrito, carrito_1.default);
         this.app.use(this.routenames.cupon, cupon_1.default);
         this.app.use(this.routenames.pay, pay_1.default);
+        this.app.use(this.routenames.gallery, gallery_router_1.default);
     }
     //servira para crear una nueva instancia del servidor
     static get instance() {
@@ -94,7 +97,7 @@ class Server {
     sockets() {
         this.io = new SocketIO.Server(this.httpServer, {
             cors: {
-                origin: ['https://client-systempc.vercel.app', "https://system-pc.netlify.app", 'https://admin-system-pc.vercel.app/'],
+                origin: ['https://client-mye-soporte.vercel.app', 'https://mye-soporte.vercel.app'],
                 allowedHeaders: 'Content-Type',
                 methods: 'GET, POST',
                 credentials: true,

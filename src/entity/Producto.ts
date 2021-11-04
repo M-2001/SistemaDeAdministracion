@@ -6,6 +6,7 @@ import { type } from 'os';
 import { Rating } from './Rating';
 import { DetalleOrden } from './Detalles_Orden';
 import { Order } from './Order';
+import { Galeria } from './Galeria';
 
 @Entity('producto')
 @Unique(['codigo_Producto'])
@@ -64,6 +65,6 @@ export class Producto {
     @OneToMany(() => DetalleOrden, (detalleO : DetalleOrden) => detalleO.producto)
     detalleO ?: DetalleOrden[]
 
-    // @OneToMany(() => Order, (order : Order) => order.producto)
-    // orden ?: Order[]
+    @OneToMany(() => Galeria, (galeria : Galeria) => galeria.producto)
+    galeria ?: Galeria[]
 }

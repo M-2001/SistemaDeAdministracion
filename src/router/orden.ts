@@ -15,6 +15,9 @@ router.post('/new-order', [CheckJwt, checkRoleU(['user'])], ordenC.guardarOrden_
 router.get('/order-paginated',[CheckJwt], order.MostrarOrdenPaginadas)
 router.get('/order-client',CheckJwt,order.MostrarOrdenCliente)
 router.post('/add-reservation',[CheckJwt, checkRoleU(['user'])], order.AddReservacion)
+//Ruta para Cancelar una orden por parte de los clientes
+router.post('/cancel-order', [CheckJwt, checkRoleU(['user'])], order.CancelReservation);
+
 router.post('/local-order',CheckJwt, order.AddOrdenClienteLocal)
-router.post('/order-status/:id',CheckJwt, order.EstadoOrden)
+router.post('/order-status/:id',CheckJwt, order.EstadoOrden);
 export default router;

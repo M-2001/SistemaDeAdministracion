@@ -134,7 +134,7 @@ class OrdenController {
                         let date = new Date();
                         let month = date.getMonth() + 1;
                         const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
-                        const codigoO = 'SYSTEM_PC-' + codigoOrden + month;
+                        const codigoO = 'M&E-' + codigoOrden + month;
 
                         const or = new Order();
                         or.cliente = clienteid;
@@ -163,7 +163,7 @@ class OrdenController {
                                 let totaldesc = operacion * descProducto / 100;
                                 let Totaldesc = parseFloat(totaldesc.toFixed(2));
                                 let totalPay = operacion - Totaldesc;
-                                //let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                                let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                                 amount += totalPay
 
@@ -214,6 +214,15 @@ class OrdenController {
                                 let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: descProducto, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal }
 
                                 itemEmail.push(itm)
+                                //actualizar producto
+                                try {
+                                    productoItem.catidad_por_unidad = qtyExist;
+                                    const saveProduct = await proRepo.save(productoItem)
+                                    
+                                } catch (error) {
+                                    return res.status(400).json({ok: false, message:'Algo salio mal!'})
+                                }
+
                             } catch (error) {
                                 return res.status(400).json({ok: false, message:'Algo ha fallado!', error})
                             }
@@ -229,7 +238,7 @@ class OrdenController {
                 let date = new Date();
                 let month = date.getMonth() + 1;
                 const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
-                const codigoO = 'SYSTEM_PC-' + codigoOrden + month;
+                const codigoO = 'M&E-' + codigoOrden + month;
 
                 const or = new Order();
                 or.cliente = clienteid;
@@ -252,7 +261,7 @@ class OrdenController {
                     let Totaldesc = parseFloat(totaldesc.toFixed(2));
                     let totalPay = operacion - Totaldesc
 
-                    //let qtyExist = productoItem.catidad_por_unidad - item.qty;
+                    let qtyExist = productoItem.catidad_por_unidad - item.qt;
 
                     amount += totalPay
 
@@ -301,6 +310,14 @@ class OrdenController {
                     let itm = { codigoOrden: ordenC.codigoOrden, cantidad: itemString, producto: productoItem.nombreProducto, precioOriginal: productoItem.costo_standar, descuento: productoItem.descuento, totalNto: Neto, IVA: TotIVA, totalProducto: ParseTotal }
 
                     itemEmail.push(itm)
+                     //actualizar producto
+                    try {
+                        productoItem.catidad_por_unidad = qtyExist;
+                        const saveProduct = await proRepo.save(productoItem)
+                        
+                    } catch (error) {
+                        return res.status(400).json({ok: false, message:'Algo salio mal!'})
+                    }
                 }
             }
 
@@ -328,6 +345,8 @@ class OrdenController {
             const actualizarOrden = await ordenRepo.save(ordenC)
             total = totalPrice.toFixed(2);
             res.json({ ok:true, message:"Se guardo tu reservacion" });
+
+            
         }
         
         //try to send email
@@ -347,9 +366,10 @@ class OrdenController {
 
             let TotalIVA = itemEmail.map((a)=>a.IVA).reduce((a, b)=> a + b, 0)
             
-
+            let email = process.env.CORREO
+            
             await transporter.sendMail({
-                from: `"System-PC Sonsonate" <castlem791@gmail.com>`, //sender address
+                from: `"M&E Soporte Tecnico Sonsonate" <${email}>`, //sender address
                 to: infoCliente.email,
                 subject: subject,
                 html: ` <!DOCTYPE html>
@@ -365,7 +385,7 @@ class OrdenController {
 
                 <h4>Vendido Por: </h4>
                 <p>Dirección post-compra : </p>
-                <p>System-Pc Sonsonate, ${direccionLocal}</p>
+                <p>M&E Soporte Tecnico Sonsonate, ${direccionLocal}</p>
                 <p>Productos reservados: </p>
 
                 <table style = "border: hidden" >
@@ -390,7 +410,7 @@ class OrdenController {
 
                 <p>IVA: $${parseFloat(TotalIVA.toFixed(2))}</p>
                 <p>Total a Pagar: $${total}</p>
-                <a href="https://client-systempc.vercel.app">Visitanos pronto !</a>
+                <a href="https://client-mye-soporte.vercel.app">Visitanos pronto !</a>
                 </div>
                 </body>
                 </html>`
@@ -514,7 +534,7 @@ class OrdenController {
                 let date = new Date();
                 let month = date.getMonth() + 1;
                 const codigoOrden = Math.floor(Math.random() * 90000) + 10000;
-                const codigoO = 'SYSTEM_PC-' + codigoOrden + month;
+                const codigoO = 'M&E-' + codigoOrden + month;
 
                 const or = new Order();
                 or.cliente = ClienteLocal,
@@ -595,6 +615,77 @@ class OrdenController {
             return res.status(404).json({ok: false, message:'Algo ha fallado!'});
         }
         
+    }
+
+    //Metodo para Cancelar una reservacion 
+    static CancelReservation = async(req: Request, res: Response)=>{
+        const {codigoOrden} = req.body;
+        const OrdenRepo = getRepository(Order);
+        const dtoOrden = getRepository(DetalleOrden);
+        const Productos = getRepository(Producto);
+
+        let order : Order;
+        let DetoOrdenes : DetalleOrden[];
+        let productUpdated : Producto;
+
+        //Encontrar la orden a ejecutar
+        try {
+            order = await OrdenRepo.findOneOrFail({where : {codigoOrden : codigoOrden}});
+            //res.json(orden)
+        } catch (error) {
+            return res.json({ok: false, message: `Orden con el codigo: ${codigoOrden} no se ha encontrado`});
+        }
+        //intentar encontar detalles de Orden
+
+        try {
+            if (order.status == 0) {
+                let orden = order.id;
+                //DetoOrdenes = await dtoOrden.find({where: {orden : orden.id}})
+                DetoOrdenes = await dtoOrden.createQueryBuilder('detalle_orden')
+                .innerJoin('detalle_orden.producto', 'prod')
+                .innerJoin('detalle_orden.orden', 'order')
+                .addSelect(['prod.id'])
+                .addSelect(["order.id"])
+                .where({orden})
+                .getMany()
+                //console.log(DetoOrdenes);
+            } else {
+                return res.json({ok: false, message: `Orden con el codigo: ${order.codigoOrden} ya ha sido completada!`});
+            }
+        } catch (error) {
+            return res.json({ok: false, message: 'Algo ha salido mal!'})
+        }
+
+        //recorrer objeto para encontrar los productos
+        try {
+            //let dtsOrdenes : DetalleOrden[];
+            const dtsOrdenes = DetoOrdenes.map(async pro => {
+            let productID = pro.producto.id;
+            const Product = await Productos.findOne({where: {id : productID}})
+            //console.log(Product);
+            if (Product.status == false) {
+                let returnProductStock = pro.cantidad + Product.catidad_por_unidad;
+                Product.catidad_por_unidad = returnProductStock;
+                Product.status = true;
+
+                const prod = await Productos.save(Product)
+                //console.log(returnProductStock);
+            }else{
+                let returnProductStock = pro.cantidad + Product.catidad_por_unidad;
+                Product.catidad_por_unidad = returnProductStock;
+                Product.status = true;
+
+                const prod = await Productos.save(Product)
+            } 
+            })
+            //actualizar Orden
+            order.status = 2;
+            const OrdenCanceled = OrdenRepo.save(order)
+            res.json({message: "Orden Cancelada!"})
+            
+        } catch (error) {
+            return
+        }
     }
 }
 

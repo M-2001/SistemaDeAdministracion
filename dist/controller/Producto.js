@@ -406,7 +406,7 @@ ProductoController.EliminarImagenProducto = async (req, res) => {
         res.json({ ok: true, message: 'imagen de producto eliminada' });
     }
     catch (error) {
-        res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
+        return res.status(409).json({ ok: false, message: 'Algo ha salido mal!' });
     }
 };
 //getProductoById
