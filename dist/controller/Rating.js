@@ -1,14 +1,16 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Rating_1 = require("../entity/Rating");
 class RatingController {
 }
+_a = RatingController;
 //Agregar rating a producto
 RatingController.AgregarRating = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     const { productoId, ratingNumber, titulo, comentario } = req.body;
-    const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
+    const ratingRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
     const rating = new Rating_1.Rating();
     rating.ratingNumber = ratingNumber;
     rating.titulo = titulo;
@@ -32,7 +34,7 @@ RatingController.MostrarRating = async (req, res) => {
     let take = req.query.limit || 10;
     take = Number(take);
     try {
-        const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
+        const ratingRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
         const rating = await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre
             from rating r inner join producto p on r.productoId = p.id inner join cliente c on r.clienteId = c.id limit ${take} offset ${pagina} `);
         // producto.map(prod =>{
@@ -65,7 +67,7 @@ RatingController.MostrarRatingPaginados = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const ratingsRepo = typeorm_1.getRepository(Rating_1.Rating);
+        const ratingsRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
         const [ratings, totalItems] = await ratingsRepo
             .createQueryBuilder("rating")
             .innerJoin("rating.cliente", "cliente")
@@ -113,7 +115,7 @@ RatingController.MostrarRatingPorProducto = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const ratingsRepo = typeorm_1.getRepository(Rating_1.Rating);
+        const ratingsRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
         const [ratings, totalItems] = await ratingsRepo
             .createQueryBuilder("rating")
             .innerJoin("rating.cliente", "cliente")
@@ -163,7 +165,7 @@ RatingController.ActualizarRating = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
     const { id } = req.params;
     const { ratingNumber, titulo, comentario } = req.body;
-    const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
+    const ratingRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
     try {
         rating = await ratingRepo
             .createQueryBuilder("rating")
@@ -200,7 +202,7 @@ RatingController.EliminarRating = async (req, res) => {
     let rating;
     const { clienteid } = res.locals.jwtPayload;
     const { id } = req.params;
-    const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
+    const ratingRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
     try {
         rating = await ratingRepo
             .createQueryBuilder("rating")
@@ -234,7 +236,7 @@ RatingController.RatingPorId = async (req, res) => {
     let rating;
     const { id } = req.params;
     try {
-        const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
+        const ratingRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
         rating =
             await ratingRepo.query(` select r.id, r.ratingNumber, r.titulo, r.comentario, p.nombreProducto, c.apellido, c.nombre
             from rating r

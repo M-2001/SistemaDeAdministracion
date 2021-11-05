@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GaleriaController = void 0;
 const cloudinary = require("cloudinary");
@@ -15,11 +16,12 @@ cloudinary.v2.config({
 class GaleriaController {
 }
 exports.GaleriaController = GaleriaController;
+_a = GaleriaController;
 //agregar galeria
 GaleriaController.AgregarGaleria = async (req, res) => {
     const { productID } = req.params;
-    const productRepo = typeorm_1.getRepository(Producto_1.Producto);
-    const galleryRepo = typeorm_1.getRepository(Galeria_1.Galeria);
+    const productRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const galleryRepo = (0, typeorm_1.getRepository)(Galeria_1.Galeria);
     let product;
     let GalleryImages;
     if (req.files === undefined || req.files.foto === undefined) {
@@ -119,8 +121,8 @@ GaleriaController.AgregarGaleria = async (req, res) => {
 //mostrar galleria
 GaleriaController.MostrarGaleria = async (req, res) => {
     const { productID } = req.params;
-    const productRepo = typeorm_1.getRepository(Producto_1.Producto);
-    const galleryRepo = typeorm_1.getRepository(Galeria_1.Galeria);
+    const productRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const galleryRepo = (0, typeorm_1.getRepository)(Galeria_1.Galeria);
     let product;
     let GalleryImages;
     try {
@@ -154,7 +156,7 @@ GaleriaController.MostrarGaleria = async (req, res) => {
 //remover imagen galeria
 GaleriaController.RemoverImagenGaleria = async (req, res) => {
     const { galleryID } = req.params;
-    const GalleryRepo = typeorm_1.getRepository(Galeria_1.Galeria);
+    const GalleryRepo = (0, typeorm_1.getRepository)(Galeria_1.Galeria);
     let Gallery;
     //req.params == undefined || req.params == null ? res.send('hola soy un error') : res.send(productID);
     try {
@@ -185,9 +187,9 @@ GaleriaController.RemoverImagenGaleria = async (req, res) => {
 //remover imagen galeria
 GaleriaController.ActualizarImagenGaleria = async (req, res) => {
     const { galleryID } = req.params;
-    const GalleryRepo = typeorm_1.getRepository(Galeria_1.Galeria);
+    const GalleryRepo = (0, typeorm_1.getRepository)(Galeria_1.Galeria);
     let Gallery;
-    const galleryRepo = typeorm_1.getRepository(Galeria_1.Galeria);
+    const galleryRepo = (0, typeorm_1.getRepository)(Galeria_1.Galeria);
     if (req.files === undefined || req.files.foto === undefined) {
         res.status(400).json({
             ok: false,

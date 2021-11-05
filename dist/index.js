@@ -14,11 +14,13 @@ SocketServer.start(() => {
         origin: [
             "https://client-mye-soporte.vercel.app",
             "https://mye-soporte.vercel.app",
+            "http://localhost:3000",
+            "http://localhost:3001"
         ],
         credentials: true,
     }));
     console.log("===> Servidor corriendo en puerto: " + SocketServer.port);
-    typeorm_1.createConnection()
+    (0, typeorm_1.createConnection)()
         .then(async (connection) => {
         if (connection) {
             return console.log("===> Conectado a la base de datos con exito!!!");

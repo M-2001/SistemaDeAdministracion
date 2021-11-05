@@ -15,27 +15,27 @@ const Producto_1 = require("./Producto");
 let Galeria = class Galeria {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Galeria.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Galeria.prototype, "imagen", void 0);
 __decorate([
-    typeorm_1.ManyToOne(type => Producto_1.Producto, producto => producto.galeria),
+    (0, typeorm_1.ManyToOne)(type => Producto_1.Producto, producto => producto.galeria),
     __metadata("design:type", Producto_1.Producto)
 ], Galeria.prototype, "producto", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
 ], Galeria.prototype, "public_id", void 0);
 __decorate([
-    typeorm_1.Column({ default: true }),
+    (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], Galeria.prototype, "status", void 0);
 Galeria = __decorate([
-    typeorm_1.Entity("galeria")
+    (0, typeorm_1.Entity)("galeria")
 ], Galeria);
 exports.Galeria = Galeria;
 //# sourceMappingURL=Galeria.js.map

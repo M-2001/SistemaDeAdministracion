@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AuthEmployee_1 = require("../controller/AuthEmployee");
 const jwt_1 = require("../middleware/jwt");
-const router = express_1.Router();
+const router = (0, express_1.Router)();
 const auth = AuthEmployee_1.default;
 //login Empleado
 router.post('/loginEmployee', auth.Login);

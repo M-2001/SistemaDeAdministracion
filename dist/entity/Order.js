@@ -16,44 +16,44 @@ const Detalles_Orden_1 = require("./Detalles_Orden");
 let Order = class Order {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Order.prototype, "id", void 0);
 __decorate([
-    typeorm_1.ManyToOne(type => Cliente_1.Cliente, cliente => cliente.order),
+    (0, typeorm_1.ManyToOne)(type => Cliente_1.Cliente, cliente => cliente.order),
     __metadata("design:type", Cliente_1.Cliente)
 ], Order.prototype, "cliente", void 0);
 __decorate([
-    typeorm_1.Column(),
-    typeorm_1.CreateDateColumn(),
+    (0, typeorm_1.Column)(),
+    (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Order.prototype, "fecha_Orden", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
     __metadata("design:type", Number)
 ], Order.prototype, "PrecioTotal", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 19, scale: 2, default: 0.00 }),
     __metadata("design:type", Number)
 ], Order.prototype, "TotalDesc", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Order.prototype, "codigoOrden", void 0);
 __decorate([
-    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2, default: 0 }),
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 19, scale: 2, default: 0 }),
     __metadata("design:type", Number)
 ], Order.prototype, "BeneficioVenta", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Order.prototype, "status", void 0);
 __decorate([
-    typeorm_1.OneToMany(type => Detalles_Orden_1.DetalleOrden, detalle => detalle.orden),
+    (0, typeorm_1.OneToMany)(type => Detalles_Orden_1.DetalleOrden, detalle => detalle.orden),
     __metadata("design:type", Array)
 ], Order.prototype, "detalleOrden", void 0);
 Order = __decorate([
-    typeorm_1.Entity("orden")
+    (0, typeorm_1.Entity)("orden")
 ], Order);
 exports.Order = Order;
 //# sourceMappingURL=Order.js.map

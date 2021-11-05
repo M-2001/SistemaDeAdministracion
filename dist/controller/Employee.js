@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmpleadoController = void 0;
 const class_validator_1 = require("class-validator");
@@ -10,9 +11,10 @@ const jwt = require("jsonwebtoken");
 class EmpleadoController {
 }
 exports.EmpleadoController = EmpleadoController;
+_a = EmpleadoController;
 //GetAll Employees
 EmpleadoController.getEmpleados = async (_, res) => {
-    const empleadoRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const empleadoRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     try {
         const empl = await empleadoRepo.find();
         if (empl.length > 0) {
@@ -36,7 +38,7 @@ EmpleadoController.MostrarEmpleadosPaginados = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const empleadosRepo = typeorm_1.getRepository(Employee_1.Employee);
+        const empleadosRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
         const [empleados, totalItems] = await empleadosRepo
             .createQueryBuilder("empleado")
             .skip((pagina - 1) * take)
@@ -79,7 +81,7 @@ EmpleadoController.MostrarEmpleadosPaginados = async (req, res) => {
 //getEmployeeByID
 EmpleadoController.getEmpleadoByID = async (req, res) => {
     const { id } = req.params;
-    const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const employeeRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     try {
         const employee = await employeeRepo.findOneOrFail({
             select: [
@@ -110,7 +112,7 @@ EmpleadoController.getEmpleadoByID = async (req, res) => {
 //Check si el usuario existe
 EmpleadoController.checkIfExistUser = async (req, res) => {
     const { code } = req.params;
-    const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const employeeRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     try {
         const employee = await employeeRepo.findOneOrFail({
             select: [`password`, "id"],
@@ -144,7 +146,7 @@ EmpleadoController.checkIfExistUser = async (req, res) => {
 EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     const { apellido, nombre, code, password } = req.body;
     const token = jwt.sign({ codeAccess: req.body.code }, process.env.JWTSECRET, { expiresIn: "1h" });
-    const empRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const empRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     let employee;
     let verifycationLink;
     //buscar e la base de datos si no existen regiatro con el mismo codigo
@@ -170,7 +172,7 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await class_validator_1.validate(employee, ValidateOps);
+    const errors = await (0, class_validator_1.validate)(employee, ValidateOps);
     if (errors.length > 0) {
         return res
             .status(400)
@@ -210,7 +212,7 @@ EmpleadoController.AgregarEmpleadoA = async (req, res) => {
 //delete employee
 EmpleadoController.EliminarEmpleado = async (req, res) => {
     const { id } = req.params;
-    const empRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const empRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     try {
         const empl = await empRepo.findOneOrFail(id);
         await empRepo.delete(empl);
@@ -233,7 +235,7 @@ EmpleadoController.EditarEmpleado = async (req, res) => {
     let employee;
     const { id } = req.params;
     const { apellido, nombre, telefono, direccion, email } = req.body;
-    const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const emplRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     try {
         employee = await emplRepo.findOneOrFail(id);
         employee.apellido = apellido;
@@ -253,7 +255,7 @@ EmpleadoController.EditarEmpleado = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await class_validator_1.validate(employee, ValidateOps);
+    const errors = await (0, class_validator_1.validate)(employee, ValidateOps);
     //try to save employee
     try {
         //all is ok
@@ -269,7 +271,7 @@ EmpleadoController.EditarEmpleado = async (req, res) => {
 //subir imagen perfil
 EmpleadoController.ImagenPerfilEmpleado = async (req, res) => {
     const { id } = res.locals.jwtPayload;
-    const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const employeeRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     let employee;
     if (req.files === undefined || req.files.foto === undefined) {
         return res
@@ -356,7 +358,7 @@ EmpleadoController.ImagenPerfilEmpleado = async (req, res) => {
 //create new employeeE
 EmpleadoController.AgregarEmpleadoE = async (req, res) => {
     const { apellido, nombre, code } = req.body;
-    const empRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const empRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     const codeExist = await empRepo.findOne({
         where: { codeAccess: code },
     });
@@ -375,7 +377,7 @@ EmpleadoController.AgregarEmpleadoE = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await class_validator_1.validate(employee, ValidateOps);
+    const errors = await (0, class_validator_1.validate)(employee, ValidateOps);
     if (errors.length > 0) {
         return res
             .status(400)

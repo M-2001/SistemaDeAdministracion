@@ -16,45 +16,45 @@ const Cliente_1 = require("./Cliente");
 let Rating = class Rating {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Rating.prototype, "id", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => Producto_1.Producto, (producto) => producto.rating),
+    (0, typeorm_1.ManyToOne)(() => Producto_1.Producto, (producto) => producto.rating),
     __metadata("design:type", Producto_1.Producto)
 ], Rating.prototype, "producto", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => Cliente_1.Cliente, (cliente) => cliente.rating),
+    (0, typeorm_1.ManyToOne)(() => Cliente_1.Cliente, (cliente) => cliente.rating),
     __metadata("design:type", Cliente_1.Cliente)
 ], Rating.prototype, "cliente", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Rating.prototype, "ratingNumber", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Rating.prototype, "titulo", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Rating.prototype, "comentario", void 0);
 __decorate([
-    typeorm_1.Column(),
-    typeorm_1.CreateDateColumn(),
+    (0, typeorm_1.Column)(),
+    (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Rating.prototype, "createRating", void 0);
 __decorate([
-    typeorm_1.Column(),
-    typeorm_1.UpdateDateColumn(),
+    (0, typeorm_1.Column)(),
+    (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
 ], Rating.prototype, "modifiedRating", void 0);
 __decorate([
-    typeorm_1.Column({ default: true }),
+    (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
 ], Rating.prototype, "status", void 0);
 Rating = __decorate([
-    typeorm_1.Entity("rating")
+    (0, typeorm_1.Entity)("rating")
 ], Rating);
 exports.Rating = Rating;
 //# sourceMappingURL=Rating.js.map

@@ -16,24 +16,24 @@ const Producto_1 = require("./Producto");
 let Categoria = class Categoria {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Categoria.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Categoria.prototype, "categoria", void 0);
 __decorate([
-    typeorm_1.Column({ default: 1 }),
+    (0, typeorm_1.Column)({ default: 1 }),
     __metadata("design:type", Boolean)
 ], Categoria.prototype, "status", void 0);
 __decorate([
-    typeorm_1.OneToMany(type => Producto_1.Producto, producto => producto.id),
+    (0, typeorm_1.OneToMany)(type => Producto_1.Producto, producto => producto.id),
     __metadata("design:type", Array)
 ], Categoria.prototype, "producto", void 0);
 Categoria = __decorate([
-    typeorm_1.Entity("categoria"),
-    typeorm_1.Unique(['categoria'])
+    (0, typeorm_1.Entity)("categoria"),
+    (0, typeorm_1.Unique)(['categoria'])
 ], Categoria);
 exports.Categoria = Categoria;
 //# sourceMappingURL=Categoria.js.map

@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
 const typeorm_1 = require("typeorm");
@@ -22,7 +23,7 @@ class ProductoController {
         //mostrar todos los productos
         this.getAllProducts = async () => {
             try {
-                const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+                const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
                 const producto = await productoRepo.find();
                 if (producto.length > 0) {
                     return producto;
@@ -34,11 +35,12 @@ class ProductoController {
         };
     }
 }
+_a = ProductoController;
 ProductoController.MostrarProductos = async (req, res) => {
     const search = req.query.search || "";
-    const status = req.query.status || "";
+    const status = Number(req.query.status) || 1;
     try {
-        const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+        const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
         const [productos, _] = await productoRepo
             .createQueryBuilder("producto")
             .leftJoin("producto.proveedor", "prov")
@@ -52,7 +54,7 @@ ProductoController.MostrarProductos = async (req, res) => {
             name: `${search}%`,
         })
             .andWhere("producto.status = :status", {
-            status: status,
+            status,
         })
             .getManyAndCount();
         if (productos.length > 0) {
@@ -77,8 +79,9 @@ ProductoController.MostrarProductos = async (req, res) => {
 ProductoController.ProductosPaginados = async (req, res) => {
     let pagina = req.query.pagina || 1;
     let search = req.query.producto || "";
-    let status = req.query.status || "";
-    let price = req.query.price || "";
+    let status = req.query.status || 1;
+    let price = Number(req.query.price) || 100000000;
+    const desc = Number(req.query.desc) || 0;
     let order;
     let typeOrder = Number(req.query.order || 0);
     if (typeOrder === 0) {
@@ -94,7 +97,7 @@ ProductoController.ProductosPaginados = async (req, res) => {
     let take = 5;
     take = Number(take);
     try {
-        const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+        const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
         const [producto, totalItems] = await productoRepo
             .createQueryBuilder("producto")
             .innerJoin("producto.marca", "marca")
@@ -112,8 +115,9 @@ ProductoController.ProductosPaginados = async (req, res) => {
             price,
         })
             .andWhere("producto.status = :status", {
-            status: status,
+            status,
         })
+            .andWhere("producto.descuento >= :desc", { desc })
             .orderBy("producto.id", order)
             .getManyAndCount();
         for (let i = 0; i < producto.length; i++) {
@@ -161,7 +165,7 @@ ProductoController.MostrarProductosCategoria = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+        const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
         const [producto, totalItems] = await productoRepo
             .createQueryBuilder("producto")
             .leftJoin("producto.proveedor", "prov")
@@ -200,8 +204,7 @@ ProductoController.MostrarProductosCategoria = async (req, res) => {
         else {
             res.json({
                 ok: false,
-                message: "No se encontraron resultados con categoria: " +
-                    categoria,
+                message: "No se encontraron resultados con categoria: " + categoria,
             });
         }
     }
@@ -219,7 +222,7 @@ ProductoController.MostrarProductosMarca = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+        const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
         const [producto, totalItems] = await productoRepo
             .createQueryBuilder("producto")
             .leftJoin("producto.proveedor", "prov")
@@ -270,7 +273,7 @@ ProductoController.MostrarProductosMarca = async (req, res) => {
 ProductoController.ObtenerProductoPorID = async (req, res) => {
     const { id } = req.params;
     try {
-        const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+        const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
         const producto = await productoRepo
             .createQueryBuilder("producto")
             .leftJoin("producto.proveedor", "prov")
@@ -300,7 +303,7 @@ ProductoController.ObtenerProductoPorID = async (req, res) => {
 //create new product
 ProductoController.AgregarProducto = async (req, res) => {
     const { codigo_producto, nombre_producto, descripcion, proveedor, marca, categoria, } = req.body;
-    const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const prodRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     const codeProductExist = await prodRepo.findOne({
         where: { codigo_Producto: codigo_producto },
     });
@@ -325,11 +328,9 @@ ProductoController.AgregarProducto = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await class_validator_1.validate(producto, ValidateOps);
+    const errors = await (0, class_validator_1.validate)(producto, ValidateOps);
     if (errors.length > 0) {
-        return res
-            .status(400)
-            .json({ ok: false, message: "Algo salio mal!" });
+        return res.status(400).json({ ok: false, message: "Algo salio mal!" });
     }
     //try to save a product
     try {
@@ -369,7 +370,7 @@ ProductoController.EditarProducto = async (req, res) => {
     let producto;
     const { id } = req.params;
     const { nombre_producto, descripcion, descuento, costo_standar, proveedor, marca, categoria, } = req.body;
-    const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const prodRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     try {
         producto = await prodRepo.findOneOrFail(id);
         producto.nombreProducto = nombre_producto;
@@ -388,11 +389,9 @@ ProductoController.EditarProducto = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await class_validator_1.validate(producto, ValidateOps);
+    const errors = await (0, class_validator_1.validate)(producto, ValidateOps);
     if (errors.length > 0) {
-        return res
-            .status(400)
-            .json({ ok: false, message: "Algo salio mal!" });
+        return res.status(400).json({ ok: false, message: "Algo salio mal!" });
     }
     //try to save producto
     try {
@@ -401,15 +400,13 @@ ProductoController.EditarProducto = async (req, res) => {
         res.json({ ok: true, message: "Producto actualizado con exito!" });
     }
     catch (error) {
-        return res
-            .status(409)
-            .json({ ok: true, message: "Algo ha salido mal!" });
+        return res.status(409).json({ ok: true, message: "Algo ha salido mal!" });
     }
 };
 //delete product
 ProductoController.EliminarProducto = async (req, res) => {
     const { id } = req.params;
-    const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const prodRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     try {
         const producto = await prodRepo.findOneOrFail(id);
         try {
@@ -445,7 +442,7 @@ ProductoController.EliminarProducto = async (req, res) => {
 //subir imagen producto
 ProductoController.ImagenProducto = async (req, res) => {
     const { id } = req.params;
-    const productRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const productRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     let product;
     if (req.files === undefined || req.files.foto === undefined) {
         res.status(400).json({
@@ -527,7 +524,7 @@ ProductoController.ImagenProducto = async (req, res) => {
 //eliminar imagen Producto
 ProductoController.EliminarImagenProducto = async (req, res) => {
     const { id } = req.params;
-    const productRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const productRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     try {
         const product = await productRepo.findOneOrFail(id);
         //const imgdir = path.resolve(__dirname, `../../src/uploads/productos/${product.image}`);
@@ -563,7 +560,7 @@ ProductoController.EliminarImagenProducto = async (req, res) => {
 };
 //getProductoById
 ProductoController.getProductoById = async (id) => {
-    const ordenRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const ordenRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     const producto = await ordenRepo.findOneOrFail(id);
     return producto;
 };
@@ -571,7 +568,7 @@ ProductoController.getProductoById = async (id) => {
 ProductoController.EstadoProducto = async (req, res) => {
     let producto;
     const id = req.body;
-    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     try {
         producto = await proRepo.findOneOrFail(id);
         producto.status = !producto.status;
@@ -596,10 +593,11 @@ ProductoController.getImage = (req, res) => {
 };
 //productos mas vendidos
 ProductoController.ProductosMasVendidos = async (req, res) => {
-    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-    const detalleORepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-    let status = req.query.status || "";
+    const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const detalleORepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+    let status = Number(req.query.status) || 1;
     let pagina = req.query.pagina || 1;
+    const price = Number(req.query.price) || 100000000000;
     pagina = Number(pagina);
     let take = req.query.limit || 5;
     take = Number(take);
@@ -616,6 +614,7 @@ ProductoController.ProductosMasVendidos = async (req, res) => {
             .andWhere("producto.status = :status", {
             status: status,
         })
+            .andWhere("producto.costo_standar <= :price", { price })
             .take(take)
             .getManyAndCount();
         const formated = productos.map(async (pro) => {
@@ -655,20 +654,17 @@ ProductoController.ProductosMasVendidos = async (req, res) => {
         });
     }
     catch (error) {
-        return res
-            .status(400)
-            .json({ ok: false, message: "Algo ha fallado!" });
+        return res.status(400).json({ ok: false, message: "Algo ha fallado!" });
     }
 };
 //productos mas ratings
 ProductoController.ProductosConMasRatings = async (req, res) => {
-    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-    const ratingRepo = typeorm_1.getRepository(Rating_1.Rating);
-    let status = req.query.status || "";
-    let pagina = req.query.pagina || 1;
-    pagina = Number(pagina);
-    let take = req.query.limit || 5;
-    take = Number(take);
+    const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const ratingRepo = (0, typeorm_1.getRepository)(Rating_1.Rating);
+    const status = Number(req.query.status) || 1;
+    const pagina = Number(req.query.pagina) || 1;
+    const price = Number(req.query.price) || 1000000000;
+    let take = Number(req.query.limit) || 5;
     try {
         const [productos, totalItems] = await productoRepo
             .createQueryBuilder("producto")
@@ -688,9 +684,10 @@ ProductoController.ProductosConMasRatings = async (req, res) => {
                 .innerJoin("rating.producto", "dto")
                 .addSelect(["dto.nombreProducto", "dto.id"])
                 .where({ producto })
-                .andWhere("producto.status = :status", {
-                status: status,
+                .andWhere("dto.status = :status", {
+                status,
             })
+                .andWhere("dto.costo_standar <= :price", { price })
                 .getMany();
             let totalRating = Rating.map((a) => a.ratingNumber).reduce((a, b) => a + b, 0);
             const total = totalRating / Rating.length;
@@ -722,9 +719,7 @@ ProductoController.ProductosConMasRatings = async (req, res) => {
         });
     }
     catch (error) {
-        return res
-            .status(400)
-            .json({ ok: false, message: "Algo ha fallado!" });
+        return res.status(400).json({ ok: false, message: "Algo ha fallado!" });
     }
 };
 //agregarProductoStock
@@ -734,8 +729,8 @@ ProductoController.AgregarProductoStock = async (req, res) => {
     const { cantidadProducto, precioCompra, beneficio } = req.body;
     let producto;
     let empleado;
-    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
-    const empleadoRepo = typeorm_1.getRepository(Employee_1.Employee);
+    const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const empleadoRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
     try {
         empleado = await empleadoRepo.findOneOrFail(id);
         let fecha = new Date();

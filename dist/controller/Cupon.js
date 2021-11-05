@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Cupones_1 = require("../entity/Cupones");
@@ -6,11 +7,12 @@ const Cliente_1 = require("../entity/Cliente");
 const mailer_1 = require("../middleware/mailer");
 class CuponController {
 }
+_a = CuponController;
 //crear cupon de descuento
 CuponController.CrearCupon = async (req, res) => {
     let newCupon;
     try {
-        const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+        const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
         let date = new Date();
         let month = date.getMonth() + 1;
         const codigoCupon = Math.floor(Math.random() * 90000) + 10000;
@@ -34,7 +36,7 @@ CuponController.CrearCupon = async (req, res) => {
 CuponController.EstadoCupon = async (req, res) => {
     let cupon;
     const id = req.body;
-    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
     try {
         cupon = await cuponRepo.findOneOrFail(id);
         cupon.status = !cupon.status;
@@ -50,7 +52,7 @@ CuponController.EstadoCupon = async (req, res) => {
 //mostrar cupones
 CuponController.MostrarCupones = async (req, res) => {
     let cupon;
-    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
     try {
         cupon = await cuponRepo.findAndCount();
         if (cupon.length > 0) {
@@ -76,7 +78,7 @@ CuponController.MostrarCuponesPaginados = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+        const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
         const [cupones, totalItems] = await cuponRepo.findAndCount({
             take,
             skip: (pagina - 1) * take,
@@ -115,7 +117,7 @@ CuponController.MostrarCuponesPaginados = async (req, res) => {
 CuponController.EliminarCupon = async (req, res) => {
     let cupon;
     const { id } = req.body;
-    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
     try {
         cupon = await cuponRepo.findOneOrFail({ where: { id } });
     }
@@ -135,8 +137,8 @@ CuponController.EliminarCupon = async (req, res) => {
 };
 //enviar Cupon
 CuponController.SendCupon = async (req, res) => {
-    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
-    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
+    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
+    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
     const email = req.body.email;
     let CODIGO_CUPON = req.query.CODIGO_CUPON;
     let cuponExist;
@@ -250,7 +252,7 @@ CuponController.SendCupon = async (req, res) => {
 //mostrar cupon
 CuponController.MostrarCupon = async (req, res) => {
     const codeCoupon = req.query.code;
-    const cpRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const cpRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
     let cuponExist;
     try {
         cuponExist = await cpRepo.findOneOrFail({

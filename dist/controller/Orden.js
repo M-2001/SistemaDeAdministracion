@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Order_1 = require("../entity/Order");
@@ -10,14 +11,15 @@ const Cupones_1 = require("../entity/Cupones");
 const Employee_1 = require("../entity/Employee");
 class OrdenController {
 }
+_a = OrdenController;
 //mostrar ordens
 OrdenController.MostrarOrdenes = async (req, res) => {
     try {
-        const ordenRepo = typeorm_1.getRepository(Order_1.Order);
+        const ordenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
         const orders = await ordenRepo.find();
         return res.json({ ok: true, orders });
     }
-    catch (_a) {
+    catch (_b) {
         return res.send({ ok: false, message: "error en el servidor" });
     }
 };
@@ -29,7 +31,7 @@ OrdenController.MostrarOrdenPaginadas = async (req, res) => {
     let searchOrden = req.query.searchOrden || "";
     take = Number(take);
     try {
-        const ordenesRepo = typeorm_1.getRepository(Order_1.Order);
+        const ordenesRepo = (0, typeorm_1.getRepository)(Order_1.Order);
         const [ordenes, totalItems] = await ordenesRepo
             .createQueryBuilder("orden")
             .innerJoin("orden.cliente", "cliente")
@@ -81,7 +83,7 @@ OrdenController.MostrarOrdenCliente = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const ordenesRepo = typeorm_1.getRepository(Order_1.Order);
+        const ordenesRepo = (0, typeorm_1.getRepository)(Order_1.Order);
         const [ordenes, totalItems] = await ordenesRepo
             .createQueryBuilder("orden")
             .innerJoin("orden.cliente", "cliente")
@@ -125,11 +127,11 @@ OrdenController.MostrarOrdenCliente = async (req, res) => {
 //agregar Reservacion
 OrdenController.AddReservacion = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
-    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
-    const ordeDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
-    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
-    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const ordenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
+    const ordeDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
     let CODIGO_CUPON = req.query.CODIGO_CUPON;
     let cuponExist;
     let ordenC;
@@ -483,9 +485,9 @@ OrdenController.EstadoOrden = async (req, res) => {
     let ordenDetalle;
     //let orderId;
     const { id } = req.params;
-    const OrdenRepo = typeorm_1.getRepository(Order_1.Order);
-    const ordenDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const OrdenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
+    const ordenDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     let itemsOrden;
     try {
         const order = await OrdenRepo.findOneOrFail({ where: { id } });
@@ -560,11 +562,11 @@ OrdenController.EstadoOrden = async (req, res) => {
 //agregar Orden por cliente local
 OrdenController.AddOrdenClienteLocal = async (req, res) => {
     const { id } = res.locals.jwtPayload;
-    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
-    const employeeRepo = typeorm_1.getRepository(Employee_1.Employee);
-    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
-    const ordeDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const employeeRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const ordenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
+    const ordeDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     let employee;
     let ClienteLocal;
     let ordenC;
@@ -686,9 +688,9 @@ OrdenController.AddOrdenClienteLocal = async (req, res) => {
 //Metodo para Cancelar una reservacion
 OrdenController.CancelReservation = async (req, res) => {
     const { codigoOrden } = req.body;
-    const OrdenRepo = typeorm_1.getRepository(Order_1.Order);
-    const dtoOrden = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
-    const Productos = typeorm_1.getRepository(Producto_1.Producto);
+    const OrdenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
+    const dtoOrden = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+    const Productos = (0, typeorm_1.getRepository)(Producto_1.Producto);
     let order;
     let DetoOrdenes;
     let productUpdated;

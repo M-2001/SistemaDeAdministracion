@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
 const Proveedor_1 = require("../entity/Proveedor");
@@ -6,10 +7,11 @@ const typeorm_1 = require("typeorm");
 const Producto_1 = require("../entity/Producto");
 class ProveedorController {
 }
+_a = ProveedorController;
 //Mostrar proveedores
 ProveedorController.MostrarProveedors = async (_, res) => {
     try {
-        const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
+        const proveedorRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
         const proveedor = await proveedorRepo.find({
             where: { status: true },
         });
@@ -35,7 +37,7 @@ ProveedorController.MostrarProveedoresPaginados = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const proveedoresRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
+        const proveedoresRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
         const [proveedores, totalItems] = await proveedoresRepo
             .createQueryBuilder("proveedor")
             .skip((pagina - 1) * take)
@@ -76,7 +78,7 @@ ProveedorController.MostrarProveedoresPaginados = async (req, res) => {
 ProveedorController.AgregarProveedor = async (req, res) => {
     const { nombre, email, telefono, direccion } = req.body;
     try {
-        const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
+        const proveedorRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
         const proveedorExist = await proveedorRepo.findOne({
             where: { nombre_proveedor: nombre },
         });
@@ -97,7 +99,7 @@ ProveedorController.AgregarProveedor = async (req, res) => {
         const ValidateOps = {
             validationError: { target: false, value: false },
         };
-        const errors = await class_validator_1.validate(proveedor, ValidateOps);
+        const errors = await (0, class_validator_1.validate)(proveedor, ValidateOps);
         if (errors.length > 0) {
             return res.status(400).json({ ok: false, errors });
         }
@@ -113,7 +115,7 @@ ProveedorController.AgregarProveedor = async (req, res) => {
 ProveedorController.ObtenerProveedorPorID = async (req, res) => {
     const { id } = req.params;
     try {
-        const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
+        const proveedorRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
         const proveedor = await proveedorRepo.findOneOrFail({
             where: { id },
         });
@@ -133,7 +135,7 @@ ProveedorController.ActualizarProveedor = async (req, res) => {
     let proveedor;
     const { id } = req.params;
     const { nombre, email, telefono, direccion } = req.body;
-    const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
+    const proveedorRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
     try {
         proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
         (proveedor.nombre_proveedor = nombre),
@@ -152,7 +154,7 @@ ProveedorController.ActualizarProveedor = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await class_validator_1.validate(proveedor, ValidateOps);
+    const errors = await (0, class_validator_1.validate)(proveedor, ValidateOps);
     //Try to save data Category
     try {
         await proveedorRepo.save(proveedor);
@@ -169,7 +171,7 @@ ProveedorController.ActualizarProveedor = async (req, res) => {
 ProveedorController.EliminarProveedor = async (req, res) => {
     let proveedor;
     const { id } = req.params;
-    const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
+    const proveedorRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
     try {
         proveedor = await proveedorRepo.findOneOrFail({ where: { id } });
     }
@@ -198,8 +200,8 @@ ProveedorController.EliminarProveedor = async (req, res) => {
 ProveedorController.EstadoProveedor = async (req, res) => {
     let proveedor;
     const id = req.body;
-    const proveedorRepo = typeorm_1.getRepository(Proveedor_1.Proveedor);
-    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const proveedorRepo = (0, typeorm_1.getRepository)(Proveedor_1.Proveedor);
+    const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     try {
         proveedor = await proveedorRepo.findOneOrFail(id);
     }

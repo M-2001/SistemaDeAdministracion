@@ -1,4 +1,5 @@
 "use strict";
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
 const typeorm_1 = require("typeorm");
@@ -6,10 +7,11 @@ const Marca_1 = require("../entity/Marca");
 const Producto_1 = require("../entity/Producto");
 class MarcaController {
 }
+_a = MarcaController;
 //mostrar marcas
 MarcaController.MostrarMarcas = async (_, res) => {
     try {
-        const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
+        const marcaRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
         const marca = await marcaRepo.find({ where: { status: true } });
         if (marca.length > 0) {
             res.json({ ok: true, marca });
@@ -33,7 +35,7 @@ MarcaController.MostrarMarcasPaginadas = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const marcasRepo = typeorm_1.getRepository(Marca_1.Marca);
+        const marcasRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
         const [marcas, totalItems] = await marcasRepo
             .createQueryBuilder("marca")
             .skip((pagina - 1) * take)
@@ -72,7 +74,7 @@ MarcaController.MostrarMarcasPaginadas = async (req, res) => {
 MarcaController.AgregarMarca = async (req, res) => {
     const { marca } = req.body;
     try {
-        const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
+        const marcaRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
         const marcaExist = await marcaRepo.findOne({
             where: { marca: marca },
         });
@@ -91,7 +93,7 @@ MarcaController.AgregarMarca = async (req, res) => {
         const ValidateOps = {
             validationError: { target: false, value: false },
         };
-        const errors = await class_validator_1.validate(marc, ValidateOps);
+        const errors = await (0, class_validator_1.validate)(marc, ValidateOps);
         if (errors.length > 0) {
             return res.status(400).json({ ok: false, errors });
         }
@@ -107,7 +109,7 @@ MarcaController.AgregarMarca = async (req, res) => {
 MarcaController.ObtenerMarcaPorID = async (req, res) => {
     const { id } = req.params;
     try {
-        const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
+        const marcaRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
         const marca = await marcaRepo.findOneOrFail({ where: { id } });
         res.json({ ok: true, marca });
     }
@@ -125,7 +127,7 @@ MarcaController.ActualizarMarca = async (req, res) => {
     let marc;
     const { id } = req.params;
     const { marca } = req.body;
-    const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
+    const marcaRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
     try {
         marc = await marcaRepo.findOneOrFail({ where: { id } });
         marc.marca = marca;
@@ -153,7 +155,7 @@ MarcaController.ActualizarMarca = async (req, res) => {
 MarcaController.EliminarMarca = async (req, res) => {
     let marca;
     const { id } = req.params;
-    const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
+    const marcaRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
     try {
         marca = await marcaRepo.findOneOrFail({ where: { id } });
     }
@@ -181,8 +183,8 @@ MarcaController.EliminarMarca = async (req, res) => {
 MarcaController.EstadoMarca = async (req, res) => {
     let marca;
     const id = req.body;
-    const marcaRepo = typeorm_1.getRepository(Marca_1.Marca);
-    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const marcaRepo = (0, typeorm_1.getRepository)(Marca_1.Marca);
+    const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
     try {
         marca = await marcaRepo.findOneOrFail(id);
     }

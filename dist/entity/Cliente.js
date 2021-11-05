@@ -25,69 +25,69 @@ let Cliente = class Cliente {
     }
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Cliente.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Cliente.prototype, "apellido", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Cliente.prototype, "nombre", void 0);
 __decorate([
-    class_validator_1.IsEmail(),
-    typeorm_1.Column(),
+    (0, class_validator_1.IsEmail)(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Cliente.prototype, "email", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Cliente.prototype, "password", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
 ], Cliente.prototype, "telefono", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
 ], Cliente.prototype, "direccion", void 0);
 __decorate([
-    typeorm_1.Column({ default: "usuario.png" }),
+    (0, typeorm_1.Column)({ default: "usuario.png" }),
     __metadata("design:type", String)
 ], Cliente.prototype, "imagen", void 0);
 __decorate([
-    typeorm_1.Column({ default: 'user' }),
+    (0, typeorm_1.Column)({ default: 'user' }),
     __metadata("design:type", String)
 ], Cliente.prototype, "role", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
 ], Cliente.prototype, "confirmacionCode", void 0);
 __decorate([
-    typeorm_1.Column({ default: 0 }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Boolean)
 ], Cliente.prototype, "estado", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
 ], Cliente.prototype, "resetPassword", void 0);
 __decorate([
-    typeorm_1.Column({ default: "" }),
+    (0, typeorm_1.Column)({ default: "" }),
     __metadata("design:type", String)
 ], Cliente.prototype, "refreshToken", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Rating_1.Rating, (rating) => rating.cliente),
+    (0, typeorm_1.OneToMany)(() => Rating_1.Rating, (rating) => rating.cliente),
     __metadata("design:type", Rating_1.Rating)
 ], Cliente.prototype, "rating", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Order_1.Order, (order) => order.cliente),
+    (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.cliente),
     __metadata("design:type", Array)
 ], Cliente.prototype, "order", void 0);
 Cliente = __decorate([
-    typeorm_1.Entity("cliente"),
-    typeorm_1.Unique(['email'])
+    (0, typeorm_1.Entity)("cliente"),
+    (0, typeorm_1.Unique)(['email'])
 ], Cliente);
 exports.Cliente = Cliente;
 //# sourceMappingURL=Cliente.js.map

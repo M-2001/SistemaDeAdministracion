@@ -6,7 +6,7 @@ const Employee_1 = require("../entity/Employee");
 const checkRole = (roles) => {
     return async (req, res, next) => {
         const { id } = res.locals.jwtPayload;
-        const userRepo = typeorm_1.getRepository(Employee_1.Employee);
+        const userRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
         let emp;
         try {
             emp = await userRepo.findOneOrFail(id);
