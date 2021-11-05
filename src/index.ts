@@ -14,9 +14,7 @@ SocketServer.start(() => {
 		cors({
 			origin: [
 				"https://client-mye-soporte.vercel.app",
-				"https://mye-soporte.vercel.app",
-				"http://localhost:3000",
-				"http://localhost:3001"
+				"https://mye-soporte.vercel.app"
 			],
 			credentials: true,
 		})

@@ -130,7 +130,7 @@ class Server {
       cors: {
         origin: [
           "https://client-mye-soporte.vercel.app",
-          "https://mye-soporte.vercel.app"
+          "https://mye-soporte.vercel.app",
         ],
         allowedHeaders: "Content-Type",
         methods: "GET, POST",
