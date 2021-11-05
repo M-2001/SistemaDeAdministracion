@@ -14,29 +14,29 @@ const typeorm_1 = require("typeorm");
 let Cupon = class Cupon {
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", Number)
 ], Cupon.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Cupon.prototype, "codigo", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", Number)
 ], Cupon.prototype, "descuento", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    (0, typeorm_1.CreateDateColumn)(),
+    typeorm_1.Column(),
+    typeorm_1.CreateDateColumn(),
     __metadata("design:type", Date)
 ], Cupon.prototype, "fechaExp", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    typeorm_1.Column({ default: 0 }),
     __metadata("design:type", Boolean)
 ], Cupon.prototype, "status", void 0);
 Cupon = __decorate([
-    (0, typeorm_1.Entity)("cupon"),
-    (0, typeorm_1.Unique)(["codigo"])
+    typeorm_1.Entity("cupon"),
+    typeorm_1.Unique(["codigo"])
 ], Cupon);
 exports.Cupon = Cupon;
 //# sourceMappingURL=Cupones.js.map

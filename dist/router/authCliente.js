@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const AuthCliente_1 = require("../controller/AuthCliente");
 const jwt_1 = require("../middleware/jwt");
-const router = (0, express_1.Router)();
+const router = express_1.Router();
 const auth = AuthCliente_1.default;
 //login cliente
 router.post('/loginU', auth.Login);

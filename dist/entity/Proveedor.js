@@ -17,37 +17,37 @@ const Producto_1 = require("./Producto");
 let Proveedor = class Proveedor {
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", Number)
 ], Proveedor.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Proveedor.prototype, "nombre_proveedor", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)(),
-    (0, typeorm_1.Column)(),
+    class_validator_1.IsEmail(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Proveedor.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Proveedor.prototype, "telefono", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Proveedor.prototype, "direccion", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1 }),
+    typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)
 ], Proveedor.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(type => Producto_1.Producto, producto => producto.id),
+    typeorm_1.OneToMany(type => Producto_1.Producto, producto => producto.id),
     __metadata("design:type", Array)
 ], Proveedor.prototype, "producto", void 0);
 Proveedor = __decorate([
-    (0, typeorm_1.Entity)("proveedor"),
-    (0, typeorm_1.Unique)(['nombre_proveedor'])
+    typeorm_1.Entity("proveedor"),
+    typeorm_1.Unique(['nombre_proveedor'])
 ], Proveedor);
 exports.Proveedor = Proveedor;
 //# sourceMappingURL=Proveedor.js.map

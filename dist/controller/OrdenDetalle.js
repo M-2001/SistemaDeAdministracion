@@ -1,11 +1,9 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 class OrdenDetalle {
 }
-_a = OrdenDetalle;
 //mostrar detalles de ordenes paginados
 OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
     let pagina = req.query.pagina || 1;
@@ -13,7 +11,7 @@ OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const ordenesDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+        const ordenesDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
         const [ordenesD, totalItems] = await ordenesDRepo
             .createQueryBuilder("orden_detalle")
             .innerJoin("orden_detalle.producto", "producto")
@@ -55,7 +53,7 @@ OrdenDetalle.MostrarDteOrdenPaginadas = async (req, res) => {
 OrdenDetalle.MostrarDteOrderByOrderId = async (req, res) => {
     const { orden } = req.body;
     try {
-        const ordenesDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
+        const ordenesDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
         const ordenesD = await ordenesDRepo
             .createQueryBuilder("orden_detalle")
             .innerJoin("orden_detalle.producto", "producto")

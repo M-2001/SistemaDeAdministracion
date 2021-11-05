@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
@@ -8,7 +7,6 @@ const class_validator_1 = require("class-validator");
 const mailer_1 = require("../middleware/mailer");
 class AuthClienteController {
 }
-_a = AuthClienteController;
 //login cliente
 AuthClienteController.Login = async (req, res) => {
     const { email, password } = req.body;
@@ -17,7 +15,7 @@ AuthClienteController.Login = async (req, res) => {
             .status(400)
             .json({ message: "username & password are required" });
     }
-    const clienteRepository = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepository = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
         cliente = await clienteRepository.findOneOrFail({
@@ -68,7 +66,7 @@ AuthClienteController.passwordChange = async (req, res) => {
             message: "Old password and new password are required!",
         });
     }
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
         cliente = await clienteRepo.findOneOrFail(id);
@@ -85,7 +83,7 @@ AuthClienteController.passwordChange = async (req, res) => {
     const validateOps = {
         validationError: { target: false, value: false },
     };
-    const error = await (0, class_validator_1.validate)(cliente, validateOps);
+    const error = await class_validator_1.validate(cliente, validateOps);
     if (error.length > 0) {
         res.status(400).json({
             ok: false,
@@ -111,7 +109,7 @@ AuthClienteController.forgotPassword = async (req, res) => {
     const message = "check your email for a link to reset your password.";
     let verifycationLink;
     let emailStatus = "Ok";
-    const clienteRespo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRespo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
         cliente = await clienteRespo.findOneOrFail({ where: { email } });
@@ -168,7 +166,7 @@ AuthClienteController.createNewPassword = async (req, res) => {
         });
     }
     let jwtPayload;
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
         cliente = await clienteRepo.findOneOrFail({
@@ -185,7 +183,7 @@ AuthClienteController.createNewPassword = async (req, res) => {
     const validationsOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await (0, class_validator_1.validate)(cliente, validationsOps);
+    const errors = await class_validator_1.validate(cliente, validationsOps);
     if (errors.length > 0) {
         return res
             .status(400)
@@ -215,7 +213,7 @@ AuthClienteController.ActivarCuenta = async (req, res) => {
             message: "Todos los campos son requeridos!",
         });
     }
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
         cliente = await clienteRepo.findOneOrFail({
@@ -230,7 +228,7 @@ AuthClienteController.ActivarCuenta = async (req, res) => {
     const validationsOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await (0, class_validator_1.validate)(cliente, validationsOps);
+    const errors = await class_validator_1.validate(cliente, validationsOps);
     if (errors.length > 0) {
         return res
             .status(400)
@@ -251,7 +249,7 @@ AuthClienteController.refreshToken = async (req, res) => {
     if (!refreshToken) {
         res.status(400).json({ ok: false, message: "Algo salio mal!" });
     }
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     try {
         const verifyResult = jwt.verify(refreshToken, process.env.JWTSECRETREFRESH);

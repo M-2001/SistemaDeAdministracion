@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Cliente_1 = require("../entity/Cliente");
 const typeorm_1 = require("typeorm");
@@ -11,14 +10,13 @@ const mailer_1 = require("../middleware/mailer");
 const Order_1 = require("../entity/Order");
 class ClienteController {
 }
-_a = ClienteController;
 //create new cliente
 ClienteController.RegistroCliente = async (req, res) => {
     const { apellido, nombre, email, password } = req.body;
     const token = jwt.sign({ email: req.body.email }, process.env.JWTSECRET, {
         expiresIn: "1h",
     });
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     const message = "Se creo la cuenta con exito";
     let verifycationLink;
@@ -44,7 +42,7 @@ ClienteController.RegistroCliente = async (req, res) => {
     const ValidateOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await (0, class_validator_1.validate)(cliente, ValidateOps);
+    const errors = await class_validator_1.validate(cliente, ValidateOps);
     if (errors.length > 0) {
         return res
             .status(400)
@@ -98,7 +96,7 @@ ClienteController.getClientes = async (req, res) => {
     pagina = Number(pagina);
     let take = 5;
     take = Number(take);
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     try {
         const [cliente, totalItems] = await clienteRepo
             .createQueryBuilder()
@@ -144,7 +142,7 @@ ClienteController.getClientes = async (req, res) => {
 //subir imagen perfil
 ClienteController.ImagenPerfilCliente = async (req, res) => {
     const { id } = req.params;
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let cliente;
     if (req.files === undefined || req.files.foto === undefined) {
         return res
@@ -230,7 +228,7 @@ ClienteController.ImagenPerfilCliente = async (req, res) => {
 //getClienteByID
 ClienteController.getClienteByID = async (req, res) => {
     const { id } = req.params;
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     try {
         const cliente = await clienteRepo.findOneOrFail({
             select: [
@@ -266,7 +264,7 @@ ClienteController.EditarCliente = async (req, res) => {
     let cliente;
     const { id } = req.params;
     const { apellido, nombre, telefono, direccion } = req.body;
-    const emplRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const emplRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     try {
         cliente = await emplRepo.findOneOrFail(id);
         cliente.apellido = apellido;
@@ -300,7 +298,7 @@ ClienteController.EditarCliente = async (req, res) => {
 //delete cliente
 ClienteController.EliminarCliente = async (req, res) => {
     const { id } = req.params;
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     try {
         const cliente = await clienteRepo.findOneOrFail(id);
         await clienteRepo.delete(cliente);
@@ -333,8 +331,8 @@ ClienteController.MejoresClientes = async (req, res) => {
     pagina = Number(pagina);
     let take = 5;
     take = Number(take);
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
-    const ordenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
+    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
     const OrdenesCliente = [];
     try {
         const [clientes, totalItems] = await clienteRepo

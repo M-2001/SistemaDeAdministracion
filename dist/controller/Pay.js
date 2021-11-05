@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv").config();
 const Producto_1 = require("../entity/Producto");
@@ -18,15 +17,14 @@ PaypalSdk.configure({
 let Items;
 class PayController {
 }
-_a = PayController;
 //metodo de pago paypal
 PayController.Pay = async (req, res) => {
     let items = req.body;
     let CODIGO_CUPON = req.query.CODIGO_CUPON;
     Items = items;
     //let CODE_CUPON = CODIGO_CUPON;
-    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
-    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
+    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
     let totalPrice = 0;
     let cuponExist;
     try {
@@ -172,11 +170,11 @@ PayController.Pay = async (req, res) => {
 //metodo que da continuidad al metodo de pago paypal se encarga de guardar ordenes y detalles de ordenes en base de datos
 PayController.PaySuccess = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
-    const ordenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
-    const ordeDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
-    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
-    const cuponRepo = (0, typeorm_1.getRepository)(Cupones_1.Cupon);
-    const clienteRepo = (0, typeorm_1.getRepository)(Cliente_1.Cliente);
+    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
+    const ordeDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
+    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
+    const cuponRepo = typeorm_1.getRepository(Cupones_1.Cupon);
+    const clienteRepo = typeorm_1.getRepository(Cliente_1.Cliente);
     let items = Items;
     let ordenC;
     let cuponExist;

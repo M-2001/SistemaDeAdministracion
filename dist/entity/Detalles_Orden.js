@@ -16,48 +16,48 @@ const Producto_1 = require("./Producto");
 let DetalleOrden = class DetalleOrden {
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Order_1.Order, (order) => order.detalleOrden),
+    typeorm_1.ManyToOne(() => Order_1.Order, (order) => order.detalleOrden),
     __metadata("design:type", Order_1.Order)
 ], DetalleOrden.prototype, "orden", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Producto_1.Producto, (producto) => producto.detalleO),
+    typeorm_1.ManyToOne(() => Producto_1.Producto, (producto) => producto.detalleO),
     __metadata("design:type", Producto_1.Producto)
 ], DetalleOrden.prototype, "producto", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "cantidad", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'decimal', precision: 19, scale: 2 }),
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "totalUnidad", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'double', default: 0 }),
+    typeorm_1.Column({ type: 'double', default: 0 }),
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "descuento", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'decimal', precision: 19, scale: 2 }),
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "impuesto", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'decimal', precision: 19, scale: 2 }),
+    typeorm_1.Column({ type: 'decimal', precision: 19, scale: 2 }),
     __metadata("design:type", Number)
 ], DetalleOrden.prototype, "beneficioLocal", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    (0, typeorm_1.CreateDateColumn)(),
+    typeorm_1.Column(),
+    typeorm_1.CreateDateColumn(),
     __metadata("design:type", Date)
 ], DetalleOrden.prototype, "fecha", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1 }),
+    typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)
 ], DetalleOrden.prototype, "status", void 0);
 DetalleOrden = __decorate([
-    (0, typeorm_1.Entity)("detalle_orden")
+    typeorm_1.Entity("detalle_orden")
 ], DetalleOrden);
 exports.DetalleOrden = DetalleOrden;
 //# sourceMappingURL=Detalles_Orden.js.map

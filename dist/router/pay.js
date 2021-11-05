@@ -10,7 +10,7 @@ PaypalSdk.configure({
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
 });
-const router = (0, express_1.Router)();
+const router = express_1.Router();
 const pay = Pay_1.default;
 router.post("/success", jwt_1.CheckJwt, pay.PaySuccess);
 router.get("/cancel", (req, res) => res.send("Canceled"));

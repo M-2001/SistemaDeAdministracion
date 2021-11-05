@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Producto_1 = require("../entity/Producto");
 const typeorm_1 = require("typeorm");
@@ -8,12 +7,11 @@ const Detalles_Orden_1 = require("../entity/Detalles_Orden");
 let Items;
 class CarritoController {
 }
-_a = CarritoController;
 //Agregar productos al carrito
 CarritoController.AgregarProductoCarrito = async (req, res) => {
     let items = req.body;
     Items = items;
-    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
     let totalPrice = 0;
     try {
         for (let index = 0; index < items.length; index++) {
@@ -41,9 +39,9 @@ CarritoController.AgregarProductoCarrito = async (req, res) => {
 //guardar orden detalle
 CarritoController.guardarOrden_DetalleOrden = async (req, res) => {
     const { clienteid } = res.locals.jwtPayload;
-    const ordenRepo = (0, typeorm_1.getRepository)(Order_1.Order);
-    const ordeDRepo = (0, typeorm_1.getRepository)(Detalles_Orden_1.DetalleOrden);
-    const proRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const ordenRepo = typeorm_1.getRepository(Order_1.Order);
+    const ordeDRepo = typeorm_1.getRepository(Detalles_Orden_1.DetalleOrden);
+    const proRepo = typeorm_1.getRepository(Producto_1.Producto);
     let totalToPay = 0;
     try {
         const or = new Order_1.Order();

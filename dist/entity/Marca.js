@@ -16,24 +16,24 @@ const Producto_1 = require("./Producto");
 let Marca = class Marca {
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", Number)
 ], Marca.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Marca.prototype, "marca", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1 }),
+    typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)
 ], Marca.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(type => Producto_1.Producto, producto => producto.id),
+    typeorm_1.OneToMany(type => Producto_1.Producto, producto => producto.id),
     __metadata("design:type", Array)
 ], Marca.prototype, "producto", void 0);
 Marca = __decorate([
-    (0, typeorm_1.Entity)("marca"),
-    (0, typeorm_1.Unique)(["marca"])
+    typeorm_1.Entity("marca"),
+    typeorm_1.Unique(["marca"])
 ], Marca);
 exports.Marca = Marca;
 //# sourceMappingURL=Marca.js.map

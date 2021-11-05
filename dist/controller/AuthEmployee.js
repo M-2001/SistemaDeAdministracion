@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const Employee_1 = require("../entity/Employee");
@@ -8,7 +7,6 @@ const class_validator_1 = require("class-validator");
 const mailer_1 = require("../middleware/mailer");
 class AuthEmployeeController {
 }
-_a = AuthEmployeeController;
 //login employee
 AuthEmployeeController.Login = async (req, res) => {
     const { code, password } = req.body;
@@ -17,7 +15,7 @@ AuthEmployeeController.Login = async (req, res) => {
             .status(400)
             .json({ ok: false, message: "code & password are required" });
     }
-    const empRepository = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const empRepository = typeorm_1.getRepository(Employee_1.Employee);
     let emp;
     try {
         emp = await empRepository.findOneOrFail({
@@ -58,7 +56,7 @@ AuthEmployeeController.passwordChange = async (req, res) => {
             message: "Contraseña antigua y nueva son requeridas!",
         });
     }
-    const emplRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     let empl;
     try {
         empl = await emplRepo.findOneOrFail(id);
@@ -78,7 +76,7 @@ AuthEmployeeController.passwordChange = async (req, res) => {
     const validateOps = {
         validationError: { target: false, value: false },
     };
-    const error = await (0, class_validator_1.validate)(empl, validateOps);
+    const error = await class_validator_1.validate(empl, validateOps);
     if (error.length > 0) {
         res.status(400).json({ ok: false, message: "Algo esta fallando" });
     }
@@ -101,7 +99,7 @@ AuthEmployeeController.forgotPassword = async (req, res) => {
     let verifycationLink;
     let emailStatus = "Ok";
     let token;
-    const emplRespo = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const emplRespo = typeorm_1.getRepository(Employee_1.Employee);
     let empl;
     try {
         empl = await emplRespo.findOneOrFail({ where: { email: email } });
@@ -155,7 +153,7 @@ AuthEmployeeController.createNewPassword = async (req, res) => {
             message: "Todos los campos son requeridos!",
         });
     }
-    const emplRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     let jwtPayload;
     let empl;
     try {
@@ -171,7 +169,7 @@ AuthEmployeeController.createNewPassword = async (req, res) => {
     const validationsOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await (0, class_validator_1.validate)(empl, validationsOps);
+    const errors = await class_validator_1.validate(empl, validationsOps);
     if (errors.length > 0) {
         return res
             .status(400)
@@ -200,7 +198,7 @@ AuthEmployeeController.ActivarCuenta = async (req, res) => {
             message: "Todos los campos son requeridos",
         });
     }
-    const emplRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     let employee;
     try {
         employee = await emplRepo.findOneOrFail({
@@ -215,7 +213,7 @@ AuthEmployeeController.ActivarCuenta = async (req, res) => {
     const validationsOps = {
         validationError: { target: false, value: false },
     };
-    const errors = await (0, class_validator_1.validate)(employee, validationsOps);
+    const errors = await class_validator_1.validate(employee, validationsOps);
     if (errors.length > 0) {
         return res
             .status(400)
@@ -240,7 +238,7 @@ AuthEmployeeController.addNewPassword = async (req, res) => {
     const id = req.params;
     const { password } = req.body;
     let employee;
-    const emplRepo = (0, typeorm_1.getRepository)(Employee_1.Employee);
+    const emplRepo = typeorm_1.getRepository(Employee_1.Employee);
     try {
         employee = await emplRepo.findOneOrFail(id);
         if (employee) {

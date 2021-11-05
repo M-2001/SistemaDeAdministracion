@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Cliente_1 = require("../controller/Cliente");
 const jwt_1 = require("../middleware/jwt");
-const router = (0, express_1.Router)();
+const router = express_1.Router();
 const cliente = Cliente_1.default;
 router.get('/', cliente.getClientes);
 router.get('/best-client', jwt_1.CheckJwt, cliente.MejoresClientes);

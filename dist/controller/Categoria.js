@@ -1,5 +1,4 @@
 "use strict";
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const class_validator_1 = require("class-validator");
 const typeorm_1 = require("typeorm");
@@ -7,11 +6,10 @@ const Categoria_1 = require("../entity/Categoria");
 const Producto_1 = require("../entity/Producto");
 class CategoriaController {
 }
-_a = CategoriaController;
 //mostrar categorias
 CategoriaController.MostrarCategorias = async (_, res) => {
     try {
-        const categoriaRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
+        const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
         const categoria = await categoriaRepo.find({ where: { status: true } });
         if (categoria.length > 0) {
             res.json({ ok: true, categoria });
@@ -32,7 +30,7 @@ CategoriaController.MostrarCategoriasPaginadas = async (req, res) => {
     let take = req.query.limit || 5;
     take = Number(take);
     try {
-        const categoriasRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
+        const categoriasRepo = typeorm_1.getRepository(Categoria_1.Categoria);
         const [categorias, totalItems] = await categoriasRepo.createQueryBuilder('categoria')
             .skip((pagina - 1) * take)
             .take(take)
@@ -59,7 +57,7 @@ CategoriaController.MostrarCategoriasPaginadas = async (req, res) => {
 CategoriaController.AgregarCategoria = async (req, res) => {
     const { categoria } = req.body;
     try {
-        const categoriaRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
+        const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
         const categoryExist = await categoriaRepo.findOne({ where: { categoria: categoria } });
         console.log(categoryExist);
         if (categoryExist) {
@@ -69,7 +67,7 @@ CategoriaController.AgregarCategoria = async (req, res) => {
         category.categoria = categoria;
         //validations
         const ValidateOps = { validationError: { target: false, value: false } };
-        const errors = await (0, class_validator_1.validate)(category, ValidateOps);
+        const errors = await class_validator_1.validate(category, ValidateOps);
         if (errors.length > 0) {
             return res.status(400).json({ ok: false, errors });
         }
@@ -85,7 +83,7 @@ CategoriaController.AgregarCategoria = async (req, res) => {
 CategoriaController.ObtenerCategoriaPorID = async (req, res) => {
     const { id } = req.params;
     try {
-        const categoriaRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
+        const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
         const categoria = await categoriaRepo.findOneOrFail({ where: { id } });
         res.json({ ok: true, categoria });
     }
@@ -98,7 +96,7 @@ CategoriaController.ActualizarCategoria = async (req, res) => {
     let category;
     const { id } = req.params;
     const { categoria } = req.body;
-    const categoriaRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
+    const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
     try {
         category = await categoriaRepo.findOneOrFail({ where: { id } });
         category.categoria = categoria;
@@ -107,7 +105,7 @@ CategoriaController.ActualizarCategoria = async (req, res) => {
         return res.status(404).json({ ok: false, message: 'No se han encontrado resultados ' });
     }
     const ValidateOps = { validationError: { target: false, value: false } };
-    const errors = await (0, class_validator_1.validate)(category, ValidateOps);
+    const errors = await class_validator_1.validate(category, ValidateOps);
     //Try to save data Category
     try {
         await categoriaRepo.save(category);
@@ -121,7 +119,7 @@ CategoriaController.ActualizarCategoria = async (req, res) => {
 CategoriaController.EliminarCategoria = async (req, res) => {
     let category;
     const { id } = req.params;
-    const categoriaRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
+    const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
     try {
         category = await categoriaRepo.findOneOrFail({ where: { id } });
     }
@@ -141,8 +139,8 @@ CategoriaController.EliminarCategoria = async (req, res) => {
 CategoriaController.EstadoCategoria = async (req, res) => {
     let categoria;
     const id = req.body;
-    const categoriaRepo = (0, typeorm_1.getRepository)(Categoria_1.Categoria);
-    const productoRepo = (0, typeorm_1.getRepository)(Producto_1.Producto);
+    const categoriaRepo = typeorm_1.getRepository(Categoria_1.Categoria);
+    const productoRepo = typeorm_1.getRepository(Producto_1.Producto);
     try {
         categoria = await categoriaRepo.findOneOrFail(id);
     }

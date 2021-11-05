@@ -20,80 +20,80 @@ const Galeria_1 = require("./Galeria");
 let Producto = class Producto {
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", String)
 ], Producto.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Producto.prototype, "codigo_Producto", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    typeorm_1.Column(),
     __metadata("design:type", String)
 ], Producto.prototype, "nombreProducto", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 5000 }),
+    typeorm_1.Column({ length: 5000 }),
     __metadata("design:type", String)
 ], Producto.prototype, "descripcion", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: "producto.png" }),
+    typeorm_1.Column({ default: "producto.png" }),
     __metadata("design:type", String)
 ], Producto.prototype, "image", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Proveedor_1.Proveedor, (prov) => prov.producto),
+    typeorm_1.ManyToOne(() => Proveedor_1.Proveedor, (prov) => prov.producto),
     __metadata("design:type", Proveedor_1.Proveedor)
 ], Producto.prototype, "proveedor", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Marca_1.Marca, (marca) => marca.producto),
+    typeorm_1.ManyToOne(() => Marca_1.Marca, (marca) => marca.producto),
     __metadata("design:type", Marca_1.Marca)
 ], Producto.prototype, "marca", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Categoria_1.Categoria, (categoria) => categoria.producto),
+    typeorm_1.ManyToOne(() => Categoria_1.Categoria, (categoria) => categoria.producto),
     __metadata("design:type", Categoria_1.Categoria)
 ], Producto.prototype, "categoria", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "decimal", precision: 19, scale: 2, default: 0.0 }),
+    typeorm_1.Column({ type: "decimal", precision: 19, scale: 2, default: 0.0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "precioCompra", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "decimal", precision: 19, scale: 2, default: 0.0 }),
+    typeorm_1.Column({ type: "decimal", precision: 19, scale: 2, default: 0.0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "costo_standar", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    typeorm_1.Column({ default: 0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "catidad_por_unidad", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    typeorm_1.Column({ default: 0 }),
     __metadata("design:type", Number)
 ], Producto.prototype, "descuento", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: "" }),
+    typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Producto.prototype, "ActualizadoPor", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: "" }),
+    typeorm_1.Column({ default: "" }),
     __metadata("design:type", String)
 ], Producto.prototype, "public_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1 }),
+    typeorm_1.Column({ default: 1 }),
     __metadata("design:type", Boolean)
 ], Producto.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Rating_1.Rating, (rating) => rating.producto),
+    typeorm_1.OneToMany(() => Rating_1.Rating, (rating) => rating.producto),
     __metadata("design:type", Array)
 ], Producto.prototype, "rating", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Detalles_Orden_1.DetalleOrden, (detalleO) => detalleO.producto),
+    typeorm_1.OneToMany(() => Detalles_Orden_1.DetalleOrden, (detalleO) => detalleO.producto),
     __metadata("design:type", Array)
 ], Producto.prototype, "detalleO", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Galeria_1.Galeria, (galeria) => galeria.producto),
+    typeorm_1.OneToMany(() => Galeria_1.Galeria, (galeria) => galeria.producto),
     __metadata("design:type", Array)
 ], Producto.prototype, "galeria", void 0);
 Producto = __decorate([
-    (0, typeorm_1.Entity)("producto"),
-    (0, typeorm_1.Unique)(["codigo_Producto"])
+    typeorm_1.Entity("producto"),
+    typeorm_1.Unique(["codigo_Producto"])
 ], Producto);
 exports.Producto = Producto;
 //# sourceMappingURL=Producto.js.map
