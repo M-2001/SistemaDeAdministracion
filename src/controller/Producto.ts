@@ -38,7 +38,7 @@ class ProductoController {
 
   static MostrarProductos = async (req: Request, res: Response) => {
     const search = req.query.search || "";
-    const status = req.query.status || "";
+    const status = Number(req.query.status) || 1;
     try {
       const productoRepo = getRepository(Producto);
       const [productos, _] = await productoRepo
@@ -48,13 +48,13 @@ class ProductoController {
         .leftJoin("producto.marca", "marca")
         .addSelect(["marca.marca"])
         .leftJoin("producto.categoria", "cat")
-        .take(3)
+        .take(4)
         .addSelect(["cat.categoria"])
         .where("producto.nombreProducto like :name", {
           name: `${search}%`,
         })
-        .andWhere("producto.status like :estado", {
-          estado: `%${status}%`,
+        .andWhere("producto.status = :status", {
+          status,
         })
         .getManyAndCount();
 
@@ -79,6 +79,9 @@ class ProductoController {
   static ProductosPaginados = async (req: Request, res: Response) => {
     let pagina = req.query.pagina || 1;
     let search = req.query.producto || "";
+    let status = req.query.status || 1;
+    let price = Number(req.query.price) || 100000000;
+    const desc = Number(req.query.desc) || 0;
     let order: "ASC" | "DESC";
     let typeOrder = Number(req.query.order || 0);
     if (typeOrder === 0) {
@@ -106,6 +109,13 @@ class ProductoController {
         .where("producto.nombreProducto like :name", {
           name: `%${search}%`,
         })
+        .andWhere("producto.costo_standar <= :price", {
+          price,
+        })
+        .andWhere("producto.status = :status", {
+          status,
+        })
+        .andWhere("producto.descuento >= :desc", { desc })
         .orderBy("producto.id", order)
         .getManyAndCount();
 
@@ -147,6 +157,8 @@ class ProductoController {
   //mostrar productos por categorias
   static MostrarProductosCategoria = async (req: Request, res: Response) => {
     const categoria = req.query.categoria;
+    let price = req.query.price || "";
+    let status = req.query.status || "";
     let pagina = req.query.pagina || 1;
     pagina = Number(pagina);
     let take = req.query.limit || 5;
@@ -164,6 +176,12 @@ class ProductoController {
         .skip((pagina - 1) * take)
         .take(take)
         .where({ categoria })
+        .andWhere("producto.costo_standar <= :price", {
+          price,
+        })
+        .andWhere("producto.status = :status", {
+          status: status,
+        })
         .getManyAndCount();
 
       if (producto.length > 0) {
@@ -196,6 +214,8 @@ class ProductoController {
   //mostrar por marca
   static MostrarProductosMarca = async (req: Request, res: Response) => {
     const marca = req.query.marca;
+    let price = req.query.price || "";
+    let status = req.query.status || "";
     let pagina = req.query.pagina || 1;
     pagina = Number(pagina);
     let take = req.query.limit || 5;
@@ -213,6 +233,12 @@ class ProductoController {
         .skip((pagina - 1) * take)
         .take(take)
         .where({ marca })
+        .andWhere("producto.costo_standar <= :price", {
+          price,
+        })
+        .andWhere("producto.status = :status", {
+          status: status,
+        })
         .getManyAndCount();
 
       if (producto.length > 0) {
@@ -609,7 +635,9 @@ class ProductoController {
   static ProductosMasVendidos = async (req: Request, res: Response) => {
     const productoRepo = getRepository(Producto);
     const detalleORepo = getRepository(DetalleOrden);
+    let status = Number(req.query.status) || 1;
     let pagina = req.query.pagina || 1;
+    const price = Number(req.query.price) || 100000000000;
     pagina = Number(pagina);
     let take = req.query.limit || 5;
     take = Number(take);
@@ -623,6 +651,10 @@ class ProductoController {
         .leftJoin("producto.marca", "marca")
         .addSelect(["marca.marca"])
         .skip((pagina - 1) * take)
+        .andWhere("producto.status = :status", {
+          status: status,
+        })
+        .andWhere("producto.costo_standar <= :price", { price })
         .take(take)
         .getManyAndCount();
       const formated = productos.map(async (pro) => {
@@ -670,10 +702,10 @@ class ProductoController {
   static ProductosConMasRatings = async (req: Request, res: Response) => {
     const productoRepo = getRepository(Producto);
     const ratingRepo = getRepository(Rating);
-    let pagina = req.query.pagina || 1;
-    pagina = Number(pagina);
-    let take = req.query.limit || 5;
-    take = Number(take);
+    const status = Number(req.query.status) || 1;
+    const pagina = Number(req.query.pagina) || 1;
+    const price = Number(req.query.price) || 1000000000;
+    let take = Number(req.query.limit) || 5;
     try {
       const [productos, totalItems] = await productoRepo
         .createQueryBuilder("producto")
@@ -693,6 +725,10 @@ class ProductoController {
           .innerJoin("rating.producto", "dto")
           .addSelect(["dto.nombreProducto", "dto.id"])
           .where({ producto })
+          .andWhere("dto.status = :status", {
+            status,
+          })
+          .andWhere("dto.costo_standar <= :price", { price })
           .getMany();
         let totalRating = Rating.map((a) => a.ratingNumber).reduce(
           (a, b) => a + b,
