@@ -22,7 +22,7 @@ router.put('/status', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.Es
 router.get('/bestSellers', producto.ProductosMasVendidos);
 //produstos con mas rating
 router.get('/more-ratings', producto.ProductosConMasRatings);
-router.post('/', /*CheckJwt,*/ producto.AgregarProducto);
+router.post('/', jwt_1.CheckJwt, producto.AgregarProducto);
 router.get('/:id', producto.ObtenerProductoPorID);
 router.put('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EditarProducto);
 router.delete('/:id', [jwt_1.CheckJwt, role_1.checkRole(['admin'])], producto.EliminarProducto);
