@@ -300,7 +300,7 @@ ProductoController.ObtenerProductoPorID = async (req, res) => {
 };
 //create new product
 ProductoController.AgregarProducto = async (req, res) => {
-    const { codigo_producto, nombre_producto, descripcion, proveedor, marca, categoria, } = req.body;
+    const { codigo_producto, nombre_producto, descripcion, proveedor, precio, cantidadUnidad, marca, categoria, } = req.body;
     const prodRepo = typeorm_1.getRepository(Producto_1.Producto);
     const codeProductExist = await prodRepo.findOne({
         where: { codigo_Producto: codigo_producto },
@@ -316,12 +316,12 @@ ProductoController.AgregarProducto = async (req, res) => {
     producto.nombreProducto = nombre_producto;
     producto.descripcion = descripcion;
     // producto.precioCompra = precioCompra;
-    // producto.costo_standar = costo_standar;
-    // producto.descuento = descuento;
+    producto.costo_standar = precio;
+    producto.catidad_por_unidad = cantidadUnidad;
     producto.proveedor = proveedor;
     producto.marca = marca;
     producto.categoria = categoria;
-    producto.status = false;
+    producto.status = true;
     //validations
     const ValidateOps = {
         validationError: { target: false, value: false },

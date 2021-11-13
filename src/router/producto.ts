@@ -25,7 +25,7 @@ router.get('/bestSellers', producto.ProductosMasVendidos);
 
 //produstos con mas rating
 router.get('/more-ratings', producto.ProductosConMasRatings)
-router.post('/', CheckJwt, producto.AgregarProducto);
+router.post('/', /*CheckJwt,*/ producto.AgregarProducto);
 router.get('/:id', producto.ObtenerProductoPorID);
 router.put('/:id', [CheckJwt, checkRole(['admin'])], producto.EditarProducto);
 router.delete('/:id', [CheckJwt, checkRole(['admin'])], producto.EliminarProducto);

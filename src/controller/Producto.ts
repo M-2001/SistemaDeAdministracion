@@ -307,6 +307,8 @@ class ProductoController {
 			nombre_producto,
 			descripcion,
 			proveedor,
+			precio,
+			cantidadUnidad,
 			marca,
 			categoria,
 		} = req.body;
@@ -327,12 +329,13 @@ class ProductoController {
 		producto.nombreProducto = nombre_producto;
 		producto.descripcion = descripcion;
 		// producto.precioCompra = precioCompra;
-		// producto.costo_standar = costo_standar;
-		// producto.descuento = descuento;
+		producto.costo_standar = precio;
+
+		producto.catidad_por_unidad = cantidadUnidad;
 		producto.proveedor = proveedor;
 		producto.marca = marca;
 		producto.categoria = categoria;
-		producto.status = false;
+		producto.status = true;
 
 		//validations
 		const ValidateOps = {
